@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Archive Scraper Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .nav {
+            background: #f8f9fa;
+            padding: 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .nav-tabs li {
+            flex: 1;
+        }
+        
+        .nav-tabs button {
+            width: 100%;
+            padding: 15px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs button:hover {
+            background: #e9ecef;
+        }
+        
+        .nav-tabs button.active {
+            background: white;
+            border-bottom: 3px solid #667eea;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .status-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+        
+        .status-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .status-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .status-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .status-card .label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .search-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-group input, .form-group select {
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .results-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .results-table th, .results-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .results-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .results-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            height: 400px;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 GitHub Archive Scraper</h1>
+            <p>Real-time monitoring and data exploration dashboard</p>
+        </div>
+        
+        <nav class="nav">
+            <ul class="nav-tabs">
+                <li><button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button></li>
+                <li><button class="tab-btn" data-tab="events">📝 Events</button></li>
+                <li><button class="tab-btn" data-tab="repositories">🏗️ Repositories</button></li>
+                <li><button class="tab-btn" data-tab="users">👥 Users</button></li>
+                <li><button class="tab-btn" data-tab="analytics">📈 Analytics</button></li>
+                <li><button class="tab-btn" data-tab="system">⚙️ System</button></li>
+            </ul>
+        </nav>
+        
+        <div class="content">
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <div class="status-grid">
+                    <div class="status-card">
+                        <h3>📊 Total Events</h3>
+                        <div class="value" id="total-events">-</div>
+                        <div class="label">GitHub events processed</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>🏗️ Repositories</h3>
+                        <div class="value" id="total-repos">-</div>
+                        <div class="label">Unique repositories</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>👥 Active Users</h3>
+                        <div class="value" id="active-users">-</div>
+                        <div class="label">Last 24 hours</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>📁 Files Processed</h3>
+                        <div class="value" id="files-processed">-</div>
+                        <div class="label">Archive files</div>
+                    </div>
+                </div>
+                
+                <div class="status-grid">
+                    <div class="status-card">
+                        <h3>🖥️ CPU Usage</h3>
+                        <div class="value" id="cpu-usage">-</div>
+                        <div class="label">Current system load</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>💾 Memory Usage</h3>
+                        <div class="value" id="memory-usage">-</div>
+                        <div class="label">RAM utilization</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>⚡ Processing Rate</h3>
+                        <div class="value" id="processing-rate">-</div>
+                        <div class="label">Events per second</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>🔄 Last Update</h3>
+                        <div class="value" id="last-update">-</div>
+                        <div class="label">System timestamp</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Events Tab -->
+            <div id="events" class="tab-content">
+                <div class="search-section">
+                    <h3>🔍 Search GitHub Events</h3>
+                    <form class="search-form" id="events-search-form">
+                        <div class="form-group">
+                            <label for="event-type">Event Type</label>
+                            <select id="event-type" name="type">
+                                <option value="">All Types</option>
+                                <option value="PushEvent">Push Event</option>
+                                <option value="PullRequestEvent">Pull Request</option>
+                                <option value="IssuesEvent">Issues</option>
+                                <option value="CreateEvent">Create</option>
+                                <option value="DeleteEvent">Delete</option>
+                                <option value="ForkEvent">Fork</option>
+                                <option value="WatchEvent">Watch</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="repo-name">Repository</label>
+                            <input type="text" id="repo-name" name="repo" placeholder="e.g., microsoft/vscode">
+                        </div>
+                        <div class="form-group">
+                            <label for="user-name">User</label>
+                            <input type="text" id="user-name" name="user" placeholder="e.g., torvalds">
+                        </div>
+                        <div class="form-group">
+                            <label for="limit">Limit</label>
+                            <select id="limit" name="limit">
+                                <option value="50">50</option>
+                                <option value="100" selected>100</option>
+                                <option value="250">250</option>
+                                <option value="500">500</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn">🔍 Search Events</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="results-section">
+                    <h3>📝 Event Results</h3>
+                    <div id="events-results">
+                        <div class="loading">Enter search criteria above to find GitHub events</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Repositories Tab -->
+            <div id="repositories" class="tab-content">
+                <div class="search-section">
+                    <h3>🔍 Search Repositories</h3>
+                    <form class="search-form" id="repos-search-form">
+                        <div class="form-group">
+                            <label for="repo-query">Repository Name</label>
+                            <input type="text" id="repo-query" name="q" placeholder="e.g., react, tensorflow">
+                        </div>
+                        <div class="form-group">
+                            <label for="repo-limit">Limit</label>
+                            <select id="repo-limit" name="limit">
+                                <option value="25">25</option>
+                                <option value="50" selected>50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn">🔍 Search Repositories</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="results-section">
+                    <h3>🏗️ Repository Results</h3>
+                    <div id="repos-results">
+                        <div class="loading">Enter search criteria above to find repositories</div>
+                    </div>
+                </div>
+                
+                <div class="results-section">
+                    <h3>🏆 Top Repositories (Last 30 Days)</h3>
+                    <div id="top-repos-results">
+                        <div class="loading">Loading top repositories...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Users Tab -->
+            <div id="users" class="tab-content">
+                <div class="results-section">
+                    <h3>👥 Most Active Users (Last 30 Days)</h3>
+                    <div id="users-results">
+                        <div class="loading">Loading user statistics...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Analytics Tab -->
+            <div id="analytics" class="tab-content">
+                <div class="results-section">
+                    <h3>📈 Event Type Distribution</h3>
+                    <div id="event-stats-results">
+                        <div class="loading">Loading analytics...</div>
+                    </div>
+                </div>
+                
+                <div class="results-section">
+                    <h3>💻 Programming Language Statistics</h3>
+                    <div id="language-stats-results">
+                        <div class="loading">Loading language statistics...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Tab -->
+            <div id="system" class="tab-content">
+                <div class="results-section">
+                    <h3>📊 System Performance Metrics</h3>
+                    <div id="metrics-results">
+                        <div class="loading">Loading system metrics...</div>
+                    </div>
+                </div>
+                
+                <div class="results-section">
+                    <h3>📁 File Processing Status</h3>
+                    <div id="files-results">
+                        <div class="loading">Loading file status...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080';
+        
+        // Tab switching functionality
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                
+                // Update active tab button
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Update active tab content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+                
+                // Load tab-specific data
+                loadTabData(tabId);
+            });
+        });
+        
+        // API helper functions
+        async function apiRequest(endpoint) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.error('API request failed:', error);
+                throw error;
+            }
+        }
+        
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toLocaleString();
+        }
+        
+        function formatDate(dateStr) {
+            return new Date(dateStr).toLocaleString();
+        }
+        
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                const [status, metrics] = await Promise.all([
+                    apiRequest('/status'),
+                    apiRequest('/metrics').catch(() => null)
+                ]);
+                
+                // Update status cards
+                document.getElementById('total-events').textContent = formatNumber(status.database.total_events || 0);
+                document.getElementById('files-processed').textContent = formatNumber(status.database.total_files_processed || 0);
+                
+                if (status.database.latest_event) {
+                    document.getElementById('last-update').textContent = formatDate(status.database.latest_event);
+                }
+                
+                // Update metrics if available
+                if (metrics && metrics.system) {
+                    const sys = metrics.system;
+                    document.getElementById('cpu-usage').textContent = `${sys.avg_cpu_percent?.toFixed(1) || 0}%`;
+                    document.getElementById('memory-usage').textContent = `${sys.avg_memory_mb?.toFixed(0) || 0}MB`;
+                }
+                
+                if (metrics && metrics.scraping) {
+                    const scrape = metrics.scraping;
+                    document.getElementById('processing-rate').textContent = `${scrape.avg_processing_rate?.toFixed(0) || 0}/s`;
+                }
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+        
+        // Load tab-specific data
+        function loadTabData(tabId) {
+            switch (tabId) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'repositories':
+                    loadTopRepositories();
+                    break;
+                case 'users':
+                    loadTopUsers();
+                    break;
+                case 'analytics':
+                    loadAnalytics();
+                    break;
+                case 'system':
+                    loadSystemData();
+                    break;
+            }
+        }
+        
+        // Search events
+        document.getElementById('events-search-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const params = new URLSearchParams();
+            
+            for (let [key, value] of formData.entries()) {
+                if (value) params.append(key, value);
+            }
+            
+            try {
+                document.getElementById('events-results').innerHTML = '<div class="loading">Searching events...</div>';
+                const data = await apiRequest(`/events?${params}`);
+                
+                let html = `<p>Found ${data.total_count} events (showing ${data.events.length})</p>`;
+                html += '<table class="results-table"><thead><tr><th>Event Type</th><th>Repository</th><th>User</th><th>Date</th></tr></thead><tbody>';
+                
+                data.events.forEach(event => {
+                    html += `<tr>
+                        <td>${event.event_type}</td>
+                        <td>${event.repo_name || 'N/A'}</td>
+                        <td>${event.actor_login || 'N/A'}</td>
+                        <td>${formatDate(event.created_at)}</td>
+                    </tr>`;
+                });
+                
+                html += '</tbody></table>';
+                document.getElementById('events-results').innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('events-results').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        });
+        
+        // Search repositories
+        document.getElementById('repos-search-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const params = new URLSearchParams();
+            
+            for (let [key, value] of formData.entries()) {
+                if (value) params.append(key, value);
+            }
+            
+            try {
+                document.getElementById('repos-results').innerHTML = '<div class="loading">Searching repositories...</div>';
+                const data = await apiRequest(`/repositories?${params}`);
+                
+                let html = `<p>Found ${data.count} repositories</p>`;
+                html += '<table class="results-table"><thead><tr><th>Repository</th><th>Events</th><th>Contributors</th><th>Last Activity</th></tr></thead><tbody>';
+                
+                data.repositories.forEach(repo => {
+                    html += `<tr>
+                        <td>${repo.repo_name}</td>
+                        <td>${formatNumber(repo.total_events)}</td>
+                        <td>${formatNumber(repo.unique_contributors)}</td>
+                        <td>${formatDate(repo.last_activity)}</td>
+                    </tr>`;
+                });
+                
+                html += '</tbody></table>';
+                document.getElementById('repos-results').innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('repos-results').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        });
+        
+        // Load top repositories
+        async function loadTopRepositories() {
+            try {
+                const data = await apiRequest('/repositories/top?limit=25');
+                
+                let html = '<table class="results-table"><thead><tr><th>Rank</th><th>Repository</th><th>Events</th><th>Contributors</th><th>Last Activity</th></tr></thead><tbody>';
+                
+                data.repositories.forEach((repo, index) => {
+                    html += `<tr>
+                        <td>${index + 1}</td>
+                        <td>${repo.repo_name}</td>
+                        <td>${formatNumber(repo.total_events)}</td>
+                        <td>${formatNumber(repo.unique_contributors)}</td>
+                        <td>${formatDate(repo.last_activity)}</td>
+                    </tr>`;
+                });
+                
+                html += '</tbody></table>';
+                document.getElementById('top-repos-results').innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('top-repos-results').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Load top users
+        async function loadTopUsers() {
+            try {
+                const data = await apiRequest('/users/top?limit=50');
+                
+                let html = '<table class="results-table"><thead><tr><th>Rank</th><th>User</th><th>Events</th><th>Repositories</th><th>Event Types</th></tr></thead><tbody>';
+                
+                data.users.forEach((user, index) => {
+                    html += `<tr>
+                        <td>${index + 1}</td>
+                        <td>${user.actor_login}</td>
+                        <td>${formatNumber(user.total_events)}</td>
+                        <td>${formatNumber(user.unique_repos)}</td>
+                        <td>${user.event_types_count}</td>
+                    </tr>`;
+                });
+                
+                html += '</tbody></table>';
+                document.getElementById('users-results').innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('users-results').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Load analytics
+        async function loadAnalytics() {
+            try {
+                const [eventStats, languageStats] = await Promise.all([
+                    apiRequest('/events/stats'),
+                    apiRequest('/languages/stats')
+                ]);
+                
+                // Event stats
+                let html = '<table class="results-table"><thead><tr><th>Event Type</th><th>Count</th><th>Unique Users</th><th>Unique Repos</th></tr></thead><tbody>';
+                
+                eventStats.event_stats.forEach(stat => {
+                    html += `<tr>
+                        <td>${stat.event_type}</td>
+                        <td>${formatNumber(stat.count)}</td>
+                        <td>${formatNumber(stat.unique_users)}</td>
+                        <td>${formatNumber(stat.unique_repos)}</td>
+                    </tr>`;
+                });
+                
+                html += '</tbody></table>';
+                document.getElementById('event-stats-results').innerHTML = html;
+                
+                // Language stats
+                let langHtml = '<table class="results-table"><thead><tr><th>Language</th><th>Events</th><th>Repositories</th><th>Users</th></tr></thead><tbody>';
+                
+                languageStats.language_stats.languages.forEach(lang => {
+                    langHtml += `<tr>
+                        <td>${lang.language}</td>
+                        <td>${formatNumber(lang.event_count)}</td>
+                        <td>${formatNumber(lang.repo_count)}</td>
+                        <td>${formatNumber(lang.user_count)}</td>
+                    </tr>`;
+                });
+                
+                langHtml += '</tbody></table>';
+                document.getElementById('language-stats-results').innerHTML = langHtml;
+                
+            } catch (error) {
+                document.getElementById('event-stats-results').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                document.getElementById('language-stats-results').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Load system data
+        async function loadSystemData() {
+            try {
+                const [metrics, files] = await Promise.all([
+                    apiRequest('/metrics').catch(() => null),
+                    apiRequest('/files/status?limit=50')
+                ]);
+                
+                // Metrics
+                let metricsHtml = '';
+                if (metrics) {
+                    metricsHtml = '<table class="results-table"><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>';
+                    
+                    if (metrics.system) {
+                        const sys = metrics.system;
+                        metricsHtml += `
+                            <tr><td>Average CPU Usage</td><td>${sys.avg_cpu_percent?.toFixed(1) || 0}%</td></tr>
+                            <tr><td>Max CPU Usage</td><td>${sys.max_cpu_percent?.toFixed(1) || 0}%</td></tr>
+                            <tr><td>Average Memory Usage</td><td>${sys.avg_memory_mb?.toFixed(0) || 0}MB</td></tr>
+                            <tr><td>Max Memory Usage</td><td>${sys.max_memory_mb?.toFixed(0) || 0}MB</td></tr>
+                            <tr><td>Total Disk Read</td><td>${sys.total_disk_read_mb?.toFixed(1) || 0}MB</td></tr>
+                            <tr><td>Total Disk Write</td><td>${sys.total_disk_write_mb?.toFixed(1) || 0}MB</td></tr>
+                        `;
+                    }
+                    
+                    metricsHtml += '</tbody></table>';
+                } else {
+                    metricsHtml = '<div class="error">Metrics not available</div>';
+                }
+                
+                document.getElementById('metrics-results').innerHTML = metricsHtml;
+                
+                // Files
+                let filesHtml = '<table class="results-table"><thead><tr><th>Filename</th><th>Size</th><th>Downloaded</th><th>Status</th></tr></thead><tbody>';
+                
+                files.files.forEach(file => {
+                    filesHtml += `<tr>
+                        <td>${file.filename}</td>
+                        <td>${file.file_size ? formatNumber(file.file_size) + ' bytes' : 'N/A'}</td>
+                        <td>${formatDate(file.download_date)}</td>
+                        <td>${file.status || 'success'}</td>
+                    </tr>`;
+                });
+                
+                filesHtml += '</tbody></table>';
+                document.getElementById('files-results').innerHTML = filesHtml;
+                
+            } catch (error) {
+                document.getElementById('metrics-results').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                document.getElementById('files-results').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Initialize dashboard
+        loadDashboard();
+        
+        // Auto-refresh dashboard every 30 seconds
+        setInterval(() => {
+            const activeTab = document.querySelector('.tab-content.active').id;
+            if (activeTab === 'dashboard') {
+                loadDashboard();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
