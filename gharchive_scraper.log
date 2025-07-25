@@ -1,0 +1,840 @@
+2025-07-23 00:48:43,128 - __main__ - INFO - GitHubArchiveScraper initialized successfully
+2025-07-23 00:48:43,296 - __main__ - INFO - Discovered 0 available archive files
+2025-07-23 00:48:43,297 - __main__ - INFO - Starting graceful shutdown...
+2025-07-23 00:48:43,297 - __main__ - INFO - Graceful shutdown completed
+2025-07-23 00:48:43,302 - __main__ - INFO - Final stats: ProcessingStats(downloaded=0, skipped=0, failed=0, events=0, bytes_downloaded=0, processing_time=0.0, memory_peak_mb=0.0)
+2025-07-23 00:48:54,494 - __main__ - INFO - GitHubArchiveScraper initialized successfully
+2025-07-23 00:48:54,496 - __main__ - INFO - Starting scrape from 2025-07-22 to 2025-07-22
+2025-07-23 00:48:54,496 - __main__ - INFO - Processing date: 2025-07-22
+2025-07-23 00:48:54,785 - __main__ - INFO - Memory usage: 55.9MB, Peak: 56.8MB
+2025-07-23 00:48:54,891 - __main__ - INFO - Memory usage: 56.0MB, Peak: 56.8MB
+2025-07-23 00:48:54,998 - __main__ - INFO - Memory usage: 55.9MB, Peak: 56.8MB
+2025-07-23 00:48:55,119 - __main__ - INFO - Memory usage: 55.9MB, Peak: 56.8MB
+2025-07-23 00:48:55,230 - __main__ - INFO - Memory usage: 55.9MB, Peak: 56.8MB
+2025-07-23 00:48:55,339 - __main__ - INFO - Memory usage: 56.0MB, Peak: 56.8MB
+2025-07-23 00:48:55,449 - __main__ - INFO - Memory usage: 56.1MB, Peak: 56.8MB
+2025-07-23 00:48:55,559 - __main__ - INFO - Memory usage: 55.2MB, Peak: 56.8MB
+2025-07-23 00:48:55,673 - __main__ - INFO - Memory usage: 56.7MB, Peak: 56.8MB
+2025-07-23 00:48:55,787 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.0MB
+2025-07-23 00:48:55,898 - __main__ - INFO - Memory usage: 56.8MB, Peak: 57.0MB
+2025-07-23 00:48:56,008 - __main__ - INFO - Memory usage: 56.2MB, Peak: 57.0MB
+2025-07-23 00:48:56,120 - __main__ - INFO - Memory usage: 56.6MB, Peak: 57.0MB
+2025-07-23 00:48:56,232 - __main__ - INFO - Memory usage: 57.1MB, Peak: 57.1MB
+2025-07-23 00:48:56,354 - __main__ - INFO - Memory usage: 57.1MB, Peak: 57.1MB
+2025-07-23 00:48:56,466 - __main__ - INFO - Memory usage: 56.9MB, Peak: 57.1MB
+2025-07-23 00:48:56,579 - __main__ - INFO - Memory usage: 56.9MB, Peak: 57.1MB
+2025-07-23 00:48:56,690 - __main__ - INFO - Memory usage: 56.4MB, Peak: 57.3MB
+2025-07-23 00:48:56,803 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.3MB
+2025-07-23 00:48:56,924 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.3MB
+2025-07-23 00:48:57,039 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.3MB
+2025-07-23 00:48:57,151 - __main__ - INFO - Memory usage: 56.6MB, Peak: 57.3MB
+2025-07-23 00:48:57,281 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.3MB
+2025-07-23 00:48:57,393 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.3MB
+2025-07-23 00:48:57,506 - __main__ - INFO - Memory usage: 57.1MB, Peak: 57.3MB
+2025-07-23 00:48:57,616 - __main__ - INFO - Memory usage: 57.1MB, Peak: 57.3MB
+2025-07-23 00:48:57,734 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.3MB
+2025-07-23 00:48:57,844 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.7MB
+2025-07-23 00:48:58,010 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:48:58,125 - __main__ - INFO - Memory usage: 57.5MB, Peak: 57.7MB
+2025-07-23 00:48:58,232 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.7MB
+2025-07-23 00:48:58,349 - __main__ - INFO - Memory usage: 56.9MB, Peak: 57.7MB
+2025-07-23 00:48:58,459 - __main__ - INFO - Memory usage: 57.4MB, Peak: 57.7MB
+2025-07-23 00:48:58,573 - __main__ - INFO - Memory usage: 57.3MB, Peak: 57.7MB
+2025-07-23 00:48:58,695 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.7MB
+2025-07-23 00:48:58,806 - __main__ - INFO - Memory usage: 57.2MB, Peak: 57.7MB
+2025-07-23 00:48:58,916 - __main__ - INFO - Memory usage: 57.2MB, Peak: 57.7MB
+2025-07-23 00:48:59,028 - __main__ - INFO - Memory usage: 56.6MB, Peak: 57.7MB
+2025-07-23 00:48:59,141 - __main__ - INFO - Memory usage: 57.2MB, Peak: 57.7MB
+2025-07-23 00:48:59,252 - __main__ - INFO - Memory usage: 57.2MB, Peak: 57.7MB
+2025-07-23 00:48:59,369 - __main__ - INFO - Memory usage: 57.2MB, Peak: 57.7MB
+2025-07-23 00:48:59,480 - __main__ - INFO - Memory usage: 57.4MB, Peak: 57.7MB
+2025-07-23 00:48:59,591 - __main__ - INFO - Memory usage: 57.4MB, Peak: 57.7MB
+2025-07-23 00:48:59,705 - __main__ - INFO - Memory usage: 57.4MB, Peak: 57.7MB
+2025-07-23 00:48:59,828 - __main__ - INFO - Memory usage: 57.4MB, Peak: 57.7MB
+2025-07-23 00:48:59,939 - __main__ - INFO - Memory usage: 57.4MB, Peak: 57.7MB
+2025-07-23 00:49:00,051 - __main__ - INFO - Memory usage: 57.4MB, Peak: 57.7MB
+2025-07-23 00:49:00,160 - __main__ - INFO - Memory usage: 57.4MB, Peak: 57.7MB
+2025-07-23 00:49:00,271 - __main__ - INFO - Memory usage: 57.4MB, Peak: 57.7MB
+2025-07-23 00:49:00,384 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:00,495 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:00,605 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:00,718 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:00,831 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:00,945 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:01,056 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:01,173 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:01,285 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:01,399 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:01,518 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:01,640 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:01,762 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:01,874 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:01,990 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:02,097 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:02,205 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:02,322 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:02,432 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:02,547 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:02,661 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:02,772 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:02,883 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:03,000 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:03,112 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:03,223 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:03,335 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:03,450 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:03,580 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:03,701 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:03,838 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:03,986 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:04,114 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:04,244 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:04,372 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:04,492 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:04,608 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:04,723 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:04,859 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:04,974 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:05,101 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:05,215 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:05,336 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:05,449 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:05,579 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:05,691 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:05,827 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:05,957 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:06,076 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:06,200 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:06,305 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:06,431 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:06,537 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:06,647 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:06,754 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:06,883 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:07,000 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:07,114 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:07,228 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:07,333 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:07,444 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:07,547 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.7MB
+2025-07-23 00:49:15,933 - __main__ - INFO - Received signal 2, initiating graceful shutdown...
+2025-07-23 00:49:16,113 - __main__ - INFO - Received signal 2, initiating graceful shutdown...
+2025-07-23 00:49:17,892 - __main__ - INFO - Received signal 2, initiating graceful shutdown...
+2025-07-23 00:49:20,694 - __main__ - INFO - Downloaded 2025-07-22-2.json.gz: 94,139,504 bytes in 26.06s (3527.6 KB/s)
+2025-07-23 00:49:31,085 - __main__ - INFO - Downloaded 2025-07-22-4.json.gz: 84,715,975 bytes in 36.43s (2271.1 KB/s)
+2025-07-23 00:49:40,907 - __main__ - INFO - Downloaded 2025-07-22-6.json.gz: 85,880,902 bytes in 46.27s (1812.5 KB/s)
+2025-07-23 00:49:45,645 - __main__ - INFO - Starting graceful shutdown...
+2025-07-23 00:49:45,645 - __main__ - INFO - Graceful shutdown completed
+2025-07-23 00:49:45,645 - __main__ - INFO - Starting graceful shutdown...
+2025-07-23 00:49:45,645 - __main__ - INFO - Graceful shutdown completed
+2025-07-23 00:49:45,645 - __main__ - INFO - Starting graceful shutdown...
+2025-07-23 00:49:45,645 - __main__ - INFO - Graceful shutdown completed
+2025-07-23 00:49:50,854 - __main__ - INFO - Downloaded 2025-07-22-1.json.gz: 88,160,251 bytes in 56.22s (1531.5 KB/s)
+2025-07-23 00:49:55,530 - __main__ - INFO - Shutdown requested, stopping processing
+2025-07-23 00:49:55,556 - __main__ - INFO - Processed 2025-07-22-1.json.gz: 0 events (0 errors, 0.0% success) in 4.70s
+2025-07-23 00:50:57,750 - __main__ - INFO - Downloaded 2025-07-22-7.json.gz: 89,339,994 bytes in 123.02s (709.2 KB/s)
+2025-07-23 00:51:08,799 - __main__ - INFO - Shutdown requested, stopping processing
+2025-07-23 00:51:09,133 - __main__ - INFO - Processed 2025-07-22-7.json.gz: 0 events (0 errors, 0.0% success) in 5.34s
+2025-07-23 01:49:28,983 - __main__ - INFO - GitHubArchiveScraper initialized successfully
+2025-07-23 01:49:28,984 - __main__ - INFO - Starting scrape from 2025-07-22 to 2025-07-22
+2025-07-23 01:49:28,984 - __main__ - INFO - Processing date: 2025-07-22
+2025-07-23 01:49:29,303 - __main__ - INFO - Memory usage: 56.3MB, Peak: 56.3MB
+2025-07-23 01:49:29,413 - __main__ - INFO - Memory usage: 57.2MB, Peak: 57.2MB
+2025-07-23 01:49:29,514 - __main__ - INFO - Memory usage: 56.3MB, Peak: 57.3MB
+2025-07-23 01:49:29,617 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.3MB
+2025-07-23 01:49:29,733 - __main__ - INFO - Memory usage: 57.1MB, Peak: 57.3MB
+2025-07-23 01:49:29,853 - __main__ - INFO - Memory usage: 55.9MB, Peak: 57.3MB
+2025-07-23 01:49:29,969 - __main__ - INFO - Memory usage: 56.9MB, Peak: 57.3MB
+2025-07-23 01:49:30,108 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.3MB
+2025-07-23 01:49:30,231 - __main__ - INFO - Memory usage: 56.5MB, Peak: 57.3MB
+2025-07-23 01:49:30,351 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.3MB
+2025-07-23 01:49:30,468 - __main__ - INFO - Memory usage: 55.8MB, Peak: 57.5MB
+2025-07-23 01:49:30,590 - __main__ - INFO - Memory usage: 56.9MB, Peak: 57.5MB
+2025-07-23 01:49:30,710 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.5MB
+2025-07-23 01:49:30,827 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.5MB
+2025-07-23 01:49:30,956 - __main__ - INFO - Memory usage: 56.1MB, Peak: 57.5MB
+2025-07-23 01:49:31,077 - __main__ - INFO - Memory usage: 56.6MB, Peak: 57.5MB
+2025-07-23 01:49:31,195 - __main__ - INFO - Memory usage: 57.4MB, Peak: 57.5MB
+2025-07-23 01:49:31,317 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.5MB
+2025-07-23 01:49:31,439 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.5MB
+2025-07-23 01:49:31,562 - __main__ - INFO - Memory usage: 57.1MB, Peak: 57.5MB
+2025-07-23 01:49:31,682 - __main__ - INFO - Memory usage: 56.6MB, Peak: 57.5MB
+2025-07-23 01:49:31,806 - __main__ - INFO - Memory usage: 57.4MB, Peak: 57.5MB
+2025-07-23 01:49:31,930 - __main__ - INFO - Memory usage: 56.8MB, Peak: 57.5MB
+2025-07-23 01:49:32,059 - __main__ - INFO - Memory usage: 55.8MB, Peak: 57.5MB
+2025-07-23 01:49:32,178 - __main__ - INFO - Memory usage: 56.9MB, Peak: 57.5MB
+2025-07-23 01:49:32,292 - __main__ - INFO - Memory usage: 55.7MB, Peak: 57.5MB
+2025-07-23 01:49:32,407 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.5MB
+2025-07-23 01:49:32,518 - __main__ - INFO - Memory usage: 56.5MB, Peak: 57.5MB
+2025-07-23 01:49:32,629 - __main__ - INFO - Memory usage: 56.8MB, Peak: 57.5MB
+2025-07-23 01:49:32,746 - __main__ - INFO - Memory usage: 57.1MB, Peak: 57.5MB
+2025-07-23 01:49:32,872 - __main__ - INFO - Memory usage: 56.6MB, Peak: 57.5MB
+2025-07-23 01:49:33,010 - __main__ - INFO - Memory usage: 56.8MB, Peak: 57.5MB
+2025-07-23 01:49:33,143 - __main__ - INFO - Memory usage: 55.2MB, Peak: 57.5MB
+2025-07-23 01:49:33,280 - __main__ - INFO - Memory usage: 56.6MB, Peak: 57.5MB
+2025-07-23 01:49:33,410 - __main__ - INFO - Memory usage: 55.9MB, Peak: 57.5MB
+2025-07-23 01:49:33,539 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.5MB
+2025-07-23 01:49:33,671 - __main__ - INFO - Memory usage: 56.9MB, Peak: 57.5MB
+2025-07-23 01:49:33,809 - __main__ - INFO - Memory usage: 56.3MB, Peak: 57.5MB
+2025-07-23 01:49:33,961 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.5MB
+2025-07-23 01:49:34,100 - __main__ - INFO - Memory usage: 56.4MB, Peak: 57.5MB
+2025-07-23 01:49:34,213 - __main__ - INFO - Memory usage: 55.7MB, Peak: 57.5MB
+2025-07-23 01:49:34,327 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.5MB
+2025-07-23 01:49:34,438 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.5MB
+2025-07-23 01:49:34,558 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.5MB
+2025-07-23 01:49:34,674 - __main__ - INFO - Memory usage: 56.6MB, Peak: 57.5MB
+2025-07-23 01:49:34,787 - __main__ - INFO - Memory usage: 57.1MB, Peak: 57.5MB
+2025-07-23 01:49:34,905 - __main__ - INFO - Memory usage: 56.9MB, Peak: 57.5MB
+2025-07-23 01:49:35,027 - __main__ - INFO - Memory usage: 56.5MB, Peak: 57.5MB
+2025-07-23 01:49:35,143 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.7MB
+2025-07-23 01:49:35,263 - __main__ - INFO - Memory usage: 55.6MB, Peak: 57.7MB
+2025-07-23 01:49:35,376 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.7MB
+2025-07-23 01:49:35,486 - __main__ - INFO - Memory usage: 55.4MB, Peak: 57.7MB
+2025-07-23 01:49:35,600 - __main__ - INFO - Memory usage: 56.4MB, Peak: 57.7MB
+2025-07-23 01:49:35,713 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.7MB
+2025-07-23 01:49:35,831 - __main__ - INFO - Memory usage: 56.9MB, Peak: 57.7MB
+2025-07-23 01:49:35,948 - __main__ - INFO - Memory usage: 56.3MB, Peak: 57.7MB
+2025-07-23 01:49:36,062 - __main__ - INFO - Memory usage: 55.6MB, Peak: 57.7MB
+2025-07-23 01:49:36,174 - __main__ - INFO - Memory usage: 56.6MB, Peak: 57.7MB
+2025-07-23 01:49:36,289 - __main__ - INFO - Memory usage: 56.4MB, Peak: 57.7MB
+2025-07-23 01:49:36,402 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.7MB
+2025-07-23 01:49:36,513 - __main__ - INFO - Memory usage: 56.1MB, Peak: 57.7MB
+2025-07-23 01:49:36,624 - __main__ - INFO - Memory usage: 56.5MB, Peak: 57.7MB
+2025-07-23 01:49:36,736 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.7MB
+2025-07-23 01:49:36,847 - __main__ - INFO - Memory usage: 56.8MB, Peak: 57.7MB
+2025-07-23 01:49:36,976 - __main__ - INFO - Memory usage: 56.4MB, Peak: 57.7MB
+2025-07-23 01:49:37,103 - __main__ - INFO - Memory usage: 56.6MB, Peak: 57.7MB
+2025-07-23 01:49:37,229 - __main__ - INFO - Memory usage: 56.6MB, Peak: 57.7MB
+2025-07-23 01:49:37,360 - __main__ - INFO - Memory usage: 56.8MB, Peak: 57.7MB
+2025-07-23 01:49:37,490 - __main__ - INFO - Memory usage: 56.6MB, Peak: 57.7MB
+2025-07-23 01:49:37,623 - __main__ - INFO - Memory usage: 56.9MB, Peak: 57.7MB
+2025-07-23 01:49:37,757 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.7MB
+2025-07-23 01:49:37,877 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.7MB
+2025-07-23 01:49:37,990 - __main__ - INFO - Memory usage: 57.2MB, Peak: 57.7MB
+2025-07-23 01:49:38,109 - __main__ - INFO - Memory usage: 57.1MB, Peak: 57.7MB
+2025-07-23 01:49:38,232 - __main__ - INFO - Memory usage: 57.1MB, Peak: 57.7MB
+2025-07-23 01:49:38,351 - __main__ - INFO - Memory usage: 56.0MB, Peak: 57.7MB
+2025-07-23 01:49:38,473 - __main__ - INFO - Memory usage: 56.6MB, Peak: 57.7MB
+2025-07-23 01:49:38,597 - __main__ - INFO - Memory usage: 57.7MB, Peak: 57.7MB
+2025-07-23 01:49:38,716 - __main__ - INFO - Memory usage: 57.5MB, Peak: 57.7MB
+2025-07-23 01:49:38,835 - __main__ - INFO - Memory usage: 57.2MB, Peak: 57.7MB
+2025-07-23 01:49:38,959 - __main__ - INFO - Memory usage: 56.1MB, Peak: 57.7MB
+2025-07-23 01:49:39,082 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.7MB
+2025-07-23 01:49:39,202 - __main__ - INFO - Memory usage: 55.8MB, Peak: 57.7MB
+2025-07-23 01:49:39,321 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.7MB
+2025-07-23 01:49:39,440 - __main__ - INFO - Memory usage: 56.4MB, Peak: 57.7MB
+2025-07-23 01:49:39,559 - __main__ - INFO - Memory usage: 57.4MB, Peak: 57.7MB
+2025-07-23 01:49:39,674 - __main__ - INFO - Memory usage: 57.8MB, Peak: 57.8MB
+2025-07-23 01:49:39,798 - __main__ - INFO - Memory usage: 57.1MB, Peak: 57.8MB
+2025-07-23 01:49:39,918 - __main__ - INFO - Memory usage: 57.3MB, Peak: 57.8MB
+2025-07-23 01:49:40,043 - __main__ - INFO - Memory usage: 57.3MB, Peak: 57.8MB
+2025-07-23 01:49:40,168 - __main__ - INFO - Memory usage: 56.1MB, Peak: 57.8MB
+2025-07-23 01:49:40,290 - __main__ - INFO - Memory usage: 56.3MB, Peak: 57.8MB
+2025-07-23 01:49:40,412 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.8MB
+2025-07-23 01:49:40,530 - __main__ - INFO - Memory usage: 57.3MB, Peak: 57.8MB
+2025-07-23 01:49:40,648 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.8MB
+2025-07-23 01:49:40,767 - __main__ - INFO - Memory usage: 57.2MB, Peak: 57.8MB
+2025-07-23 01:49:40,884 - __main__ - INFO - Memory usage: 56.4MB, Peak: 57.8MB
+2025-07-23 01:49:41,002 - __main__ - INFO - Memory usage: 56.6MB, Peak: 57.8MB
+2025-07-23 01:49:41,126 - __main__ - INFO - Memory usage: 56.0MB, Peak: 57.8MB
+2025-07-23 01:49:41,242 - __main__ - INFO - Memory usage: 57.1MB, Peak: 57.8MB
+2025-07-23 01:49:41,353 - __main__ - INFO - Memory usage: 57.1MB, Peak: 57.8MB
+2025-07-23 01:49:41,492 - __main__ - INFO - Memory usage: 57.3MB, Peak: 57.8MB
+2025-07-23 01:49:41,607 - __main__ - INFO - Memory usage: 56.2MB, Peak: 57.8MB
+2025-07-23 01:49:41,741 - __main__ - INFO - Memory usage: 56.1MB, Peak: 57.8MB
+2025-07-23 01:49:46,710 - __main__ - INFO - Downloaded 2025-07-22-4.json.gz: 84,715,975 bytes in 17.60s (4701.8 KB/s)
+2025-07-23 01:49:51,498 - __main__ - INFO - Memory usage: 3527.9MB, Peak: 3527.9MB
+2025-07-23 01:49:51,697 - __main__ - INFO - Memory usage: 3527.9MB, Peak: 3527.9MB
+2025-07-23 01:49:51,910 - __main__ - INFO - Memory usage: 3528.3MB, Peak: 3528.3MB
+2025-07-23 01:49:56,998 - __main__ - INFO - Downloaded 2025-07-22-6.json.gz: 85,880,902 bytes in 27.85s (3011.1 KB/s)
+2025-07-23 01:50:06,581 - __main__ - INFO - Downloaded 2025-07-22-5.json.gz: 86,695,031 bytes in 37.44s (2261.6 KB/s)
+2025-07-23 01:50:16,234 - __main__ - INFO - Downloaded 2025-07-22-1.json.gz: 88,160,251 bytes in 47.06s (1829.5 KB/s)
+2025-07-24 22:54:01,038 - __main__ - INFO - GitHubArchiveScraper initialized successfully
+2025-07-24 22:54:01,038 - __main__ - INFO - Starting scrape from 2025-07-23 to 2025-07-23
+2025-07-24 22:54:01,038 - __main__ - INFO - Processing date: 2025-07-23
+2025-07-24 22:54:01,356 - __main__ - INFO - Memory usage: 56.8MB, Peak: 56.9MB
+2025-07-24 22:54:01,470 - __main__ - INFO - Memory usage: 56.8MB, Peak: 56.9MB
+2025-07-24 22:54:01,590 - __main__ - INFO - Memory usage: 55.8MB, Peak: 56.9MB
+2025-07-24 22:54:01,698 - __main__ - INFO - Memory usage: 56.5MB, Peak: 56.9MB
+2025-07-24 22:54:01,805 - __main__ - INFO - Memory usage: 56.6MB, Peak: 56.9MB
+2025-07-24 22:54:01,917 - __main__ - INFO - Memory usage: 57.2MB, Peak: 57.2MB
+2025-07-24 22:54:02,034 - __main__ - INFO - Memory usage: 56.4MB, Peak: 57.2MB
+2025-07-24 22:54:02,152 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.2MB
+2025-07-24 22:54:02,268 - __main__ - INFO - Memory usage: 57.2MB, Peak: 57.2MB
+2025-07-24 22:54:02,380 - __main__ - INFO - Memory usage: 56.5MB, Peak: 57.2MB
+2025-07-24 22:54:02,496 - __main__ - INFO - Memory usage: 56.5MB, Peak: 57.5MB
+2025-07-24 22:54:02,609 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.5MB
+2025-07-24 22:54:02,721 - __main__ - INFO - Memory usage: 57.4MB, Peak: 57.5MB
+2025-07-24 22:54:02,836 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.5MB
+2025-07-24 22:54:02,952 - __main__ - INFO - Memory usage: 57.6MB, Peak: 57.6MB
+2025-07-24 22:54:03,067 - __main__ - INFO - Memory usage: 56.8MB, Peak: 57.6MB
+2025-07-24 22:54:03,182 - __main__ - INFO - Memory usage: 57.0MB, Peak: 57.6MB
+2025-07-24 22:54:03,299 - __main__ - INFO - Memory usage: 57.3MB, Peak: 57.6MB
+2025-07-24 22:54:03,412 - __main__ - INFO - Memory usage: 56.9MB, Peak: 57.6MB
+2025-07-24 22:54:03,524 - __main__ - INFO - Memory usage: 57.1MB, Peak: 57.6MB
+2025-07-24 22:54:03,637 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.6MB
+2025-07-24 22:54:03,750 - __main__ - INFO - Memory usage: 56.3MB, Peak: 57.6MB
+2025-07-24 22:54:03,868 - __main__ - INFO - Memory usage: 56.1MB, Peak: 57.6MB
+2025-07-24 22:54:03,979 - __main__ - INFO - Memory usage: 56.3MB, Peak: 57.6MB
+2025-07-24 22:54:04,094 - __main__ - INFO - Memory usage: 56.5MB, Peak: 57.6MB
+2025-07-24 22:54:04,210 - __main__ - INFO - Memory usage: 57.4MB, Peak: 57.6MB
+2025-07-24 22:54:04,331 - __main__ - INFO - Memory usage: 56.8MB, Peak: 57.6MB
+2025-07-24 22:54:04,447 - __main__ - INFO - Memory usage: 56.2MB, Peak: 57.6MB
+2025-07-24 22:54:04,560 - __main__ - INFO - Memory usage: 56.9MB, Peak: 57.6MB
+2025-07-24 22:54:04,672 - __main__ - INFO - Memory usage: 55.9MB, Peak: 57.6MB
+2025-07-24 22:54:04,785 - __main__ - INFO - Memory usage: 57.8MB, Peak: 57.8MB
+2025-07-24 22:54:04,901 - __main__ - INFO - Memory usage: 57.3MB, Peak: 57.8MB
+2025-07-24 22:54:05,014 - __main__ - INFO - Memory usage: 56.9MB, Peak: 57.8MB
+2025-07-24 22:54:05,126 - __main__ - INFO - Memory usage: 56.7MB, Peak: 57.8MB
+2025-07-24 22:54:05,242 - __main__ - INFO - Memory usage: 57.3MB, Peak: 57.8MB
+2025-07-24 22:54:05,358 - __main__ - INFO - Memory usage: 56.9MB, Peak: 57.8MB
+2025-07-24 22:54:05,473 - __main__ - INFO - Memory usage: 57.1MB, Peak: 57.8MB
+2025-07-24 22:54:05,586 - __main__ - INFO - Memory usage: 57.4MB, Peak: 57.8MB
+2025-07-24 22:54:05,703 - __main__ - INFO - Memory usage: 57.5MB, Peak: 57.8MB
+2025-07-24 22:54:05,814 - __main__ - INFO - Memory usage: 58.0MB, Peak: 58.0MB
+2025-07-24 22:54:05,926 - __main__ - INFO - Memory usage: 57.4MB, Peak: 58.0MB
+2025-07-24 22:54:06,036 - __main__ - INFO - Memory usage: 57.7MB, Peak: 58.0MB
+2025-07-24 22:54:06,151 - __main__ - INFO - Memory usage: 56.7MB, Peak: 58.0MB
+2025-07-24 22:54:06,265 - __main__ - INFO - Memory usage: 57.1MB, Peak: 58.0MB
+2025-07-24 22:54:06,382 - __main__ - INFO - Memory usage: 57.2MB, Peak: 58.0MB
+2025-07-24 22:54:06,506 - __main__ - INFO - Memory usage: 57.7MB, Peak: 58.0MB
+2025-07-24 22:54:06,626 - __main__ - INFO - Memory usage: 56.4MB, Peak: 58.0MB
+2025-07-24 22:54:06,738 - __main__ - INFO - Memory usage: 57.6MB, Peak: 58.0MB
+2025-07-24 22:54:06,848 - __main__ - INFO - Memory usage: 56.9MB, Peak: 58.0MB
+2025-07-24 22:54:06,963 - __main__ - INFO - Memory usage: 56.9MB, Peak: 58.0MB
+2025-07-24 22:54:07,078 - __main__ - INFO - Memory usage: 57.9MB, Peak: 58.0MB
+2025-07-24 22:54:07,193 - __main__ - INFO - Memory usage: 57.9MB, Peak: 58.0MB
+2025-07-24 22:54:07,303 - __main__ - INFO - Memory usage: 57.9MB, Peak: 58.0MB
+2025-07-24 22:54:07,417 - __main__ - INFO - Memory usage: 57.4MB, Peak: 58.0MB
+2025-07-24 22:54:07,530 - __main__ - INFO - Memory usage: 56.0MB, Peak: 58.0MB
+2025-07-24 22:54:07,646 - __main__ - INFO - Memory usage: 57.4MB, Peak: 58.0MB
+2025-07-24 22:54:07,755 - __main__ - INFO - Memory usage: 57.9MB, Peak: 58.0MB
+2025-07-24 22:54:07,873 - __main__ - INFO - Memory usage: 57.7MB, Peak: 58.0MB
+2025-07-24 22:54:07,988 - __main__ - INFO - Memory usage: 58.3MB, Peak: 58.3MB
+2025-07-24 22:54:08,098 - __main__ - INFO - Memory usage: 58.0MB, Peak: 58.3MB
+2025-07-24 22:54:08,221 - __main__ - INFO - Memory usage: 57.5MB, Peak: 58.3MB
+2025-07-24 22:54:08,333 - __main__ - INFO - Memory usage: 58.1MB, Peak: 58.3MB
+2025-07-24 22:54:08,448 - __main__ - INFO - Memory usage: 56.3MB, Peak: 58.3MB
+2025-07-24 22:54:08,561 - __main__ - INFO - Memory usage: 57.3MB, Peak: 58.3MB
+2025-07-24 22:54:08,703 - __main__ - INFO - Memory usage: 57.8MB, Peak: 58.3MB
+2025-07-24 22:54:08,813 - __main__ - INFO - Memory usage: 57.6MB, Peak: 58.3MB
+2025-07-24 22:54:08,936 - __main__ - INFO - Memory usage: 57.7MB, Peak: 58.3MB
+2025-07-24 22:54:09,056 - __main__ - INFO - Memory usage: 56.4MB, Peak: 58.3MB
+2025-07-24 22:54:09,174 - __main__ - INFO - Memory usage: 57.2MB, Peak: 58.3MB
+2025-07-24 22:54:09,313 - __main__ - INFO - Memory usage: 57.7MB, Peak: 58.3MB
+2025-07-24 22:54:09,422 - __main__ - INFO - Memory usage: 57.9MB, Peak: 58.3MB
+2025-07-24 22:54:09,535 - __main__ - INFO - Memory usage: 57.4MB, Peak: 58.3MB
+2025-07-24 22:54:09,652 - __main__ - INFO - Memory usage: 57.4MB, Peak: 58.3MB
+2025-07-24 22:54:09,764 - __main__ - INFO - Memory usage: 57.9MB, Peak: 58.3MB
+2025-07-24 22:54:09,881 - __main__ - INFO - Memory usage: 57.4MB, Peak: 58.3MB
+2025-07-24 22:54:09,997 - __main__ - INFO - Memory usage: 57.8MB, Peak: 58.3MB
+2025-07-24 22:54:10,116 - __main__ - INFO - Memory usage: 57.2MB, Peak: 58.3MB
+2025-07-24 22:54:10,226 - __main__ - INFO - Memory usage: 57.2MB, Peak: 58.3MB
+2025-07-24 22:54:10,337 - __main__ - INFO - Memory usage: 57.2MB, Peak: 58.3MB
+2025-07-24 22:54:10,448 - __main__ - INFO - Memory usage: 56.7MB, Peak: 58.3MB
+2025-07-24 22:54:10,560 - __main__ - INFO - Memory usage: 56.3MB, Peak: 58.3MB
+2025-07-24 22:54:10,667 - __main__ - INFO - Memory usage: 57.1MB, Peak: 58.3MB
+2025-07-24 22:54:10,777 - __main__ - INFO - Memory usage: 56.9MB, Peak: 58.3MB
+2025-07-24 22:54:10,895 - __main__ - INFO - Memory usage: 56.4MB, Peak: 58.3MB
+2025-07-24 22:54:11,023 - __main__ - INFO - Memory usage: 56.6MB, Peak: 58.3MB
+2025-07-24 22:54:11,167 - __main__ - INFO - Memory usage: 56.1MB, Peak: 58.3MB
+2025-07-24 22:54:11,287 - __main__ - INFO - Memory usage: 56.6MB, Peak: 58.3MB
+2025-07-24 22:54:11,410 - __main__ - INFO - Memory usage: 55.6MB, Peak: 58.3MB
+2025-07-24 22:54:11,549 - __main__ - INFO - Memory usage: 56.1MB, Peak: 58.3MB
+2025-07-24 22:54:15,570 - __main__ - INFO - Downloaded 2025-07-23-4.json.gz: 69,228,489 bytes in 14.38s (4700.1 KB/s)
+2025-07-24 22:54:23,371 - __main__ - INFO - Downloaded 2025-07-23-1.json.gz: 69,445,222 bytes in 22.16s (3060.4 KB/s)
+2025-07-24 22:54:31,442 - __main__ - INFO - Downloaded 2025-07-23-2.json.gz: 71,685,273 bytes in 30.26s (2313.3 KB/s)
+2025-07-24 22:54:35,548 - __main__ - WARNING - High memory usage: 8621.1MB
+2025-07-24 22:54:35,563 - __main__ - WARNING - High memory usage: 8623.1MB
+2025-07-24 22:54:35,575 - __main__ - WARNING - High memory usage: 8623.6MB
+2025-07-24 22:54:35,586 - __main__ - WARNING - High memory usage: 8623.9MB
+2025-07-24 22:54:35,596 - __main__ - WARNING - High memory usage: 8623.9MB
+2025-07-24 22:54:35,607 - __main__ - WARNING - High memory usage: 8623.9MB
+2025-07-24 22:54:35,616 - __main__ - WARNING - High memory usage: 8623.9MB
+2025-07-24 22:54:35,634 - __main__ - WARNING - High memory usage: 8624.1MB
+2025-07-24 22:54:35,661 - __main__ - WARNING - High memory usage: 8624.4MB
+2025-07-24 22:54:35,686 - __main__ - WARNING - High memory usage: 8624.4MB
+2025-07-24 22:54:35,686 - __main__ - INFO - Memory usage: 8624.4MB, Peak: 8624.4MB
+2025-07-24 22:54:35,712 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:35,735 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:35,783 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:35,794 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:35,805 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:35,819 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:35,831 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:35,845 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:35,874 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:35,913 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:35,913 - __main__ - INFO - Memory usage: 8625.1MB, Peak: 8625.1MB
+2025-07-24 22:54:35,980 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:36,019 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:36,032 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:36,044 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:36,059 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:36,092 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:36,124 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:36,159 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:36,202 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:36,236 - __main__ - WARNING - High memory usage: 8625.1MB
+2025-07-24 22:54:36,236 - __main__ - INFO - Memory usage: 8625.1MB, Peak: 8625.1MB
+2025-07-24 22:54:36,269 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,305 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,338 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,373 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,409 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,422 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,437 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,450 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,464 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,479 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,479 - __main__ - INFO - Memory usage: 8625.2MB, Peak: 8625.2MB
+2025-07-24 22:54:36,493 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,507 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,521 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,533 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,546 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,577 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,593 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,605 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,617 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,630 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,630 - __main__ - INFO - Memory usage: 8625.2MB, Peak: 8625.2MB
+2025-07-24 22:54:36,644 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,657 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,669 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,681 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,695 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,710 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,725 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,740 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,756 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,774 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,775 - __main__ - INFO - Memory usage: 8625.2MB, Peak: 8625.2MB
+2025-07-24 22:54:36,792 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,805 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,846 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,908 - __main__ - WARNING - High memory usage: 8625.2MB
+2025-07-24 22:54:36,959 - __main__ - WARNING - High memory usage: 8625.4MB
+2025-07-24 22:54:37,006 - __main__ - WARNING - High memory usage: 8625.4MB
+2025-07-24 22:54:37,038 - __main__ - WARNING - High memory usage: 8625.4MB
+2025-07-24 22:54:37,051 - __main__ - WARNING - High memory usage: 8625.4MB
+2025-07-24 22:54:41,865 - __main__ - INFO - Downloaded 2025-07-23-0.json.gz: 75,317,841 bytes in 40.65s (1809.5 KB/s)
+2025-07-24 22:54:50,367 - __main__ - INFO - Downloaded 2025-07-23-3.json.gz: 76,094,521 bytes in 49.16s (1511.7 KB/s)
+2025-07-24 22:55:04,303 - __main__ - INFO - Downloaded 2025-07-23-6.json.gz: 80,897,595 bytes in 62.96s (1254.7 KB/s)
+2025-07-25 00:01:04,886 - __main__ - INFO - GitHubArchiveScraper initialized successfully
+2025-07-25 00:01:04,887 - __main__ - INFO - Starting scrape from 2025-07-24 to 2025-07-24
+2025-07-25 00:01:04,887 - __main__ - INFO - Processing date: 2025-07-24
+2025-07-25 00:01:05,037 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-1.json.gz
+2025-07-25 00:01:05,107 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-3.json.gz
+2025-07-25 00:01:05,151 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-2.json.gz
+2025-07-25 00:01:05,168 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-5.json.gz
+2025-07-25 00:01:05,213 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-6.json.gz
+2025-07-25 00:01:05,227 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-0.json.gz
+2025-07-25 00:01:05,253 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-4.json.gz
+2025-07-25 00:01:05,346 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-9.json.gz
+2025-07-25 00:01:05,363 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-7.json.gz
+2025-07-25 00:01:05,395 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-8.json.gz
+2025-07-25 00:01:05,464 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-11.json.gz
+2025-07-25 00:01:05,504 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-12.json.gz
+2025-07-25 00:01:08,158 - __main__ - WARNING - Download attempt 1 failed for https://data.gharchive.org/2025-07-24-10.json.gz: [Errno 2] No such file or directory: '/tmp/tmpr45xaj0w.json.gz'
+2025-07-25 00:01:09,212 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-10.json.gz
+2025-07-25 00:01:09,351 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-13.json.gz
+2025-07-25 00:01:09,493 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-14.json.gz
+2025-07-25 00:01:09,645 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-15.json.gz
+2025-07-25 00:01:17,468 - __main__ - INFO - Downloaded 2025-07-24-16.json.gz: 85,786,319 bytes in 7.73s (10841.7 KB/s) - Memory: 2490.4MB
+2025-07-25 00:01:22,232 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-20.json.gz
+2025-07-25 00:01:22,316 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-18.json.gz
+2025-07-25 00:01:22,346 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-21.json.gz
+2025-07-25 00:01:22,445 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-17.json.gz
+2025-07-25 00:01:22,623 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-19.json.gz
+2025-07-25 00:01:22,714 - __main__ - WARNING - File not found: https://data.gharchive.org/2025-07-24-23.json.gz (status: 404)
+2025-07-25 00:01:23,175 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 500: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:23,679 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 501: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:24,131 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 502: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:24,631 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 503: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:25,123 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 504: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:25,603 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 505: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:26,096 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 506: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:26,549 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 507: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:27,019 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 508: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:27,510 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 509: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:28,059 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 510: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:28,521 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 511: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:28,942 - __main__ - WARNING - Download attempt 1 failed for https://data.gharchive.org/2025-07-24-22.json.gz: [Errno 2] No such file or directory: '/tmp/tmpk7nwxq39.json.gz'
+2025-07-25 00:01:29,014 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 512: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:29,376 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 513: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:29,739 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 514: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:29,748 - gharchive_scraper - INFO - GitHubArchiveScraper initialized successfully
+2025-07-25 00:01:29,748 - gharchive_scraper - INFO - Starting graceful shutdown...
+2025-07-25 00:01:29,748 - gharchive_scraper - INFO - Graceful shutdown completed
+2025-07-25 00:01:29,753 - gharchive_scraper - INFO - Final stats: ProcessingStats(downloaded=0, skipped=0, failed=0, events=0, bytes_downloaded=0, processing_time=0.0, memory_peak_mb=0.0)
+2025-07-25 00:01:30,015 - __main__ - WARNING - Pausing download due to resource pressure: 2025-07-24-22.json.gz
+2025-07-25 00:01:30,142 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 515: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:30,575 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 516: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:30,949 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 517: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:31,327 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 518: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:31,677 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 519: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:32,044 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 520: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:32,415 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 521: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:32,775 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 522: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:33,163 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 523: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:33,515 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 524: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:33,865 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 525: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:34,224 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 526: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:34,582 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 527: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:34,936 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 528: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:35,350 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 529: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:35,717 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 530: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:36,071 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 531: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:36,431 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 532: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:36,786 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 533: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:37,141 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 534: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:37,501 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 535: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:37,859 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 536: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:38,222 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 537: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:38,580 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 538: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:38,939 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 539: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:39,294 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 540: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:39,650 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 541: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:40,018 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 542: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:40,385 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 543: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:40,757 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 544: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:41,124 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 545: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:41,486 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 546: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:41,856 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 547: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:42,220 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 548: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:42,587 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 549: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:42,956 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 550: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:43,366 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 551: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:43,730 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 552: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:44,092 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 553: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:44,458 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 554: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:44,826 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 555: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:45,192 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 556: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:45,566 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 557: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:45,932 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 558: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:46,300 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 559: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:46,668 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 560: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:47,040 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 561: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:47,450 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 562: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:47,817 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 563: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:48,200 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 564: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:48,571 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 565: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:48,942 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 566: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:49,313 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 567: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:49,683 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 568: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:50,057 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 569: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:50,443 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 570: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:50,815 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 571: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:51,195 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 572: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:51,577 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 573: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:51,962 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 574: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:52,345 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 575: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:52,726 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 576: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:53,107 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 577: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:53,496 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 578: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:53,871 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 579: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:54,257 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 580: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:54,640 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 581: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:55,027 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 582: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:55,419 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 583: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:55,808 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 584: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:56,211 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 585: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:56,604 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 586: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:57,000 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 587: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:57,390 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 588: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:57,776 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 589: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:58,181 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 590: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:58,573 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 591: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:58,961 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 592: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:59,435 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 593: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:01:59,828 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 594: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:00,219 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 595: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:00,622 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 596: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:01,023 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 597: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:01,422 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 598: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:01,861 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 599: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:02,263 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 600: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:02,676 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 601: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:03,087 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 602: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:03,489 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 603: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:03,897 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 604: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:04,308 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 605: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:04,713 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 606: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:05,121 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 607: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:05,532 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 608: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:05,947 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 609: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:06,354 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 610: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:06,769 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 611: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:07,181 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 612: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:07,591 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 613: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:08,016 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 614: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:08,434 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 615: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:08,849 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 616: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:09,264 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 617: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:09,679 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 618: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:10,100 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 619: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:10,532 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 620: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:10,955 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 621: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:11,373 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 622: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:11,794 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 623: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:12,217 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 624: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:12,635 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 625: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:13,066 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 626: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:13,491 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 627: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:13,911 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 628: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:14,340 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 629: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:14,766 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 630: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:15,195 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 631: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:15,631 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 632: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:16,066 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 633: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:16,500 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 634: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:16,940 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 635: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:17,368 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 636: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:17,806 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 637: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:18,270 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 638: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:18,718 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 639: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:19,150 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 640: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:19,584 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 641: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:20,025 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 642: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:20,502 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 643: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:20,942 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 644: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:21,374 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 645: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:21,821 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 646: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:22,285 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 647: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:22,772 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 648: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:23,216 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 649: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:23,647 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 650: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:24,092 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 651: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:24,567 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 652: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:25,012 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 653: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:25,458 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 654: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:25,907 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 655: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:26,365 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 656: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:26,831 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 657: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:27,276 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 658: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:27,720 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 659: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:28,162 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 660: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:28,606 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 661: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:29,051 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 662: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:29,498 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 663: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:29,950 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 664: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:30,409 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 665: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:30,856 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 666: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:31,306 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 667: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:31,748 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 668: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:32,211 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 669: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:32,657 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 670: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:33,113 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 671: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:33,555 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 672: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:34,001 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 673: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:34,460 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 674: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:34,910 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 675: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:35,355 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 676: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:35,803 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 677: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:36,254 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 678: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:36,708 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 679: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:37,160 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 680: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:37,621 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 681: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:38,084 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 682: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:38,540 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 683: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:39,023 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 684: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:39,483 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 685: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:39,943 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 686: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:40,420 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 687: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:40,881 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 688: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:41,350 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 689: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:41,802 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 690: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:42,259 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 691: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:42,716 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 692: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:43,180 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 693: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:43,671 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 694: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:44,173 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 695: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:44,640 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 696: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:45,101 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 697: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:45,590 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 698: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:46,060 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 699: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:46,529 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 700: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:47,001 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 701: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:47,482 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 702: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:47,953 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 703: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:48,438 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 704: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:48,902 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 705: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:49,368 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 706: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:49,840 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 707: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:50,320 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 708: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:50,826 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 709: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:51,366 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 710: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:51,840 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 711: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:52,305 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 712: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:52,774 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 713: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:53,251 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 714: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:53,730 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 715: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:54,208 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 716: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:54,689 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 717: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:55,164 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 718: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:55,649 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 719: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:56,156 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 720: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:56,633 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 721: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:57,106 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 722: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:57,615 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 723: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:58,105 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 724: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:58,587 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 725: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:59,076 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 726: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:02:59,572 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 727: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:00,070 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 728: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:00,577 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 729: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:01,069 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 730: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:01,568 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 731: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:02,064 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 732: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:02,554 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 733: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:03,057 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 734: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:03,553 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 735: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:04,038 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 736: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:04,528 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 737: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:05,024 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 738: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:05,531 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 739: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:06,025 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 740: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:06,528 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 741: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:07,027 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 742: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:07,545 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 743: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:08,059 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 744: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:08,555 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 745: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:09,064 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 746: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:09,568 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 747: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:10,067 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 748: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:10,576 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 749: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:11,076 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 750: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:11,585 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 751: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:12,097 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 752: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:12,605 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 753: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:13,117 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 754: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:13,640 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 755: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:14,151 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 756: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:14,674 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 757: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:15,192 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 758: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:15,716 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 759: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:16,258 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 760: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:16,785 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 761: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:17,305 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 762: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:17,832 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 763: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:18,353 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 764: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:18,863 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 765: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:19,381 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 766: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:19,941 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 767: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:20,475 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 768: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:20,998 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 769: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:21,523 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 770: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:22,037 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 771: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:22,558 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 772: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:23,077 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 773: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:23,591 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 774: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:24,110 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 775: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:24,628 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 776: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:25,153 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 777: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:25,682 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 778: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:26,218 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 779: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:26,734 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 780: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:27,249 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 781: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:27,766 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 782: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:28,286 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 783: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:28,801 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 784: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:29,326 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 785: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:29,844 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 786: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:30,373 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 787: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:30,919 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 788: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:31,434 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 789: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:31,954 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 790: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:32,470 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 791: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:32,991 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 792: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:33,513 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 793: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:34,048 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 794: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:34,605 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 795: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:35,128 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 796: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:35,654 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 797: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:36,179 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 798: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:36,716 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 799: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:37,239 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 800: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:37,788 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 801: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:38,313 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 802: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:38,836 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 803: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:39,365 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 804: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:39,888 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 805: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:40,427 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 806: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:40,950 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 807: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:41,498 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 808: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:42,062 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 809: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:42,667 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 810: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:43,238 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 811: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:43,800 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 812: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:44,435 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 813: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:44,978 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 814: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:45,540 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 815: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:46,091 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 816: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:46,656 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 817: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:47,236 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 818: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:47,790 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 819: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:48,354 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 820: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:48,915 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 821: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:49,486 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 822: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:50,031 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 823: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:50,575 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 824: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:51,126 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 825: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:51,693 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 826: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:52,254 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 827: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:52,804 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 828: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:53,383 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 829: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:53,950 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 830: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:54,504 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 831: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:55,063 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 832: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:55,652 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 833: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:56,203 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 834: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:56,979 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 835: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:57,664 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 836: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:58,370 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 837: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:59,198 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 838: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:03:59,947 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 839: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:00,795 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 840: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:01,477 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 841: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:02,195 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 842: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:02,859 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 843: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:03,445 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 844: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:04,005 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 845: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:04,570 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 846: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:05,148 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 847: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:05,730 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 848: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:06,307 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 849: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:06,880 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 850: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:07,478 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 851: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:08,059 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 852: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:08,630 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 853: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:09,208 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 854: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:09,790 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 855: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:10,367 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 856: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:10,935 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 857: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:11,518 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 858: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:12,096 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 859: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:12,686 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 860: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:13,266 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 861: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:13,866 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 862: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:14,450 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 863: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:15,039 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 864: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:15,626 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 865: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:16,225 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 866: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:16,866 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 867: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:17,455 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 868: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:18,030 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 869: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:18,639 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 870: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:19,237 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 871: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:19,835 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 872: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:20,421 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 873: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:20,994 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 874: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:21,588 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 875: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:22,176 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 876: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:22,761 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 877: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:23,389 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 878: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:23,994 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 879: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:24,622 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 880: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:25,233 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 881: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:25,824 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 882: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)
+2025-07-25 00:04:26,421 - __main__ - ERROR - Error processing event in 2025-07-24-16.json.gz at line 883: invalid input for query argument $2: '52506039292' ('str' object cannot be interpreted as an integer)

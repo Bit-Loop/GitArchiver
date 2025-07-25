@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""
-Configuration file for GitHub Archive Scraper
-"""
 
 import os
 from datetime import datetime
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 class Config:
-    """Configuration settings for the GitHub Archive Scraper"""
+    """Configuration settings with enhanced options"""
     
     # Database settings
     DB_HOST = os.getenv('DB_HOST', 'localhost')
@@ -17,15 +18,42 @@ class Config:
     DB_USER = os.getenv('DB_USER', 'gharchive')
     DB_PASSWORD = os.getenv('DB_PASSWORD', 'gharchive_password')
     
-    # Download settings
+    # Connection pool settings
+    DB_MIN_CONNECTIONS = int(os.getenv('DB_MIN_CONNECTIONS', '5'))
+    DB_MAX_CONNECTIONS = int(os.getenv('DB_MAX_CONNECTIONS', '20'))
+    
+    # Download settings - Oracle Cloud optimized
     BASE_URL = 'https://data.gharchive.org/'
     S3_LIST_URL = 'https://data.gharchive.org/?list-type=2'
     DOWNLOAD_DIR = Path(os.getenv('DOWNLOAD_DIR', './gharchive_data'))
-    MAX_CONCURRENT_DOWNLOADS = int(os.getenv('MAX_CONCURRENT', '10'))
-    CHUNK_SIZE = int(os.getenv('CHUNK_SIZE', '8192'))
+    MAX_CONCURRENT_DOWNLOADS = int(os.getenv('MAX_CONCURRENT', '6'))  # Reduced for safety
+    CHUNK_SIZE = int(os.getenv('CHUNK_SIZE', '4096'))  # Smaller chunks
     
-    # Processing settings
-    BATCH_SIZE = int(os.getenv('BATCH_SIZE', '1000'))
+    # HTTP client settings - Conservative timeouts
+    REQUEST_TIMEOUT = int(os.getenv('REQUEST_TIMEOUT', '180'))  # Reduced timeout
+    MAX_RETRIES = int(os.getenv('MAX_RETRIES', '3'))
+    RETRY_DELAY = float(os.getenv('RETRY_DELAY', '2.0'))  # Longer delay
+    
+    # Processing settings - Smaller batches
+    BATCH_SIZE = int(os.getenv('BATCH_SIZE', '500'))  # Reduced batch size
+    
+    # Memory management - Oracle Cloud safe limits
+    MAX_MEMORY_MB = int(os.getenv('MAX_MEMORY_MB', '18000'))  # 18GB max for 24GB system
+    MEMORY_WARNING_MB = int(os.getenv('MEMORY_WARNING_MB', '16000'))  # Warning at 16GB
+    MEMORY_CHECK_INTERVAL = int(os.getenv('MEMORY_CHECK_INTERVAL', '50'))  # Check more frequently
+    
+    # Disk management - Oracle Cloud safe limits
+    MAX_DISK_USAGE_GB = int(os.getenv('MAX_DISK_USAGE_GB', '40'))  # 40GB max disk usage
+    DISK_WARNING_GB = int(os.getenv('DISK_WARNING_GB', '35'))  # Warning at 35GB
+    TEMP_FILE_CLEANUP_INTERVAL = int(os.getenv('TEMP_CLEANUP_INTERVAL', '300'))  # 5 minutes
+    
+    # Resource monitoring
+    RESOURCE_CHECK_INTERVAL = int(os.getenv('RESOURCE_CHECK_INTERVAL', '30'))  # 30 seconds
+    CPU_LIMIT_PERCENT = int(os.getenv('CPU_LIMIT_PERCENT', '80'))  # Max 80% CPU
+    
+    # Safety limits
+    MAX_FILE_SIZE_MB = int(os.getenv('MAX_FILE_SIZE_MB', '500'))  # 500MB per file
+    EMERGENCY_CLEANUP_THRESHOLD = float(os.getenv('EMERGENCY_CLEANUP_THRESHOLD', '0.9'))  # 90% memory
     
     # Date range settings (focus on 2015 onward as requested)
     MIN_DATE = datetime(2015, 1, 1)
@@ -37,39 +65,13 @@ class Config:
     LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
     LOG_FILE = os.getenv('LOG_FILE', 'gharchive_scraper.log')
     
-    # Cron job settings
-    ENABLE_CRON_MODE = os.getenv('ENABLE_CRON_MODE', 'false').lower() == 'true'
-    CRON_LOCK_FILE = os.getenv('CRON_LOCK_FILE', '/tmp/gharchive_scraper.lock')
-
-# Example environment file content (.env)
-ENV_EXAMPLE = """
-# Database Configuration
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=gharchive
-DB_USER=gharchive
-DB_PASSWORD=your_secure_password_here
-
-# GitHub API Token (optional, but recommended for rate limiting)
-GITHUB_TOKEN=your_github_token_here
-
-# Performance Tuning
-MAX_CONCURRENT=10
-BATCH_SIZE=1000
-CHUNK_SIZE=8192
-
-# Logging
-LOG_LEVEL=INFO
-LOG_FILE=gharchive_scraper.log
-
-# Cron Mode
-ENABLE_CRON_MODE=true
-CRON_LOCK_FILE=/tmp/gharchive_scraper.lock
-"""
-
-if __name__ == '__main__':
-    print("GitHub Archive Scraper Configuration")
-    print("====================================")
-    print()
-    print("Create a .env file with the following content:")
-    print(ENV_EXAMPLE)
+    # Performance monitoring
+    ENABLE_METRICS = os.getenv('ENABLE_METRICS', 'true').lower() == 'true'
+    METRICS_INTERVAL = int(os.getenv('METRICS_INTERVAL', '60'))
+    
+    # Graceful shutdown
+    SHUTDOWN_TIMEOUT = int(os.getenv('SHUTDOWN_TIMEOUT', '30'))
+    
+    # Web API settings
+    WEB_HOST = os.getenv('WEB_HOST', '0.0.0.0')
+    WEB_PORT = int(os.getenv('WEB_PORT', '8080'))

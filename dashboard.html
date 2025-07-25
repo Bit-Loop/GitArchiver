@@ -3,463 +3,910 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Archive Scraper Dashboard</title>
+    <title>GitHub Archive Scraper - Professional Dashboard</title>
     <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #06b6d4;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #333;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
         }
-        
+
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            padding: 2rem;
         }
-        
+
+        /* Header */
         .header {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            padding: 30px;
             text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+            border-radius: 1rem;
+            color: white;
+            box-shadow: var(--shadow-lg);
         }
-        
+
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
         }
-        
+
         .header p {
-            font-size: 1.1em;
+            font-size: 1.1rem;
             opacity: 0.9;
         }
-        
-        .nav {
-            background: #f8f9fa;
-            padding: 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .nav-tabs {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .nav-tabs li {
-            flex: 1;
-        }
-        
-        .nav-tabs button {
-            width: 100%;
-            padding: 15px 20px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            font-size: 1em;
-            transition: all 0.3s ease;
-        }
-        
-        .nav-tabs button:hover {
-            background: #e9ecef;
-        }
-        
-        .nav-tabs button.active {
-            background: white;
-            border-bottom: 3px solid #667eea;
-            color: #667eea;
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
             font-weight: 600;
+            margin: 0.5rem;
+            transition: all 0.2s;
         }
-        
-        .content {
-            padding: 30px;
+
+        .status-badge.online {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+            border: 2px solid var(--success-color);
         }
-        
-        .tab-content {
-            display: none;
+
+        .status-badge.offline {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger-color);
+            border: 2px solid var(--danger-color);
         }
-        
-        .tab-content.active {
-            display: block;
+
+        .status-badge.warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning-color);
+            border: 2px solid var(--warning-color);
         }
-        
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+
+        /* Controls */
+        .controls {
+            background: var(--card-background);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
         }
-        
-        .status-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border-left: 4px solid #667eea;
-            transition: transform 0.3s ease;
+
+        .controls h2 {
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            font-size: 1.5rem;
         }
-        
-        .status-card:hover {
-            transform: translateY(-2px);
-        }
-        
-        .status-card h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-        
-        .status-card .value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 5px;
-        }
-        
-        .status-card .label {
-            color: #666;
-            font-size: 0.9em;
-        }
-        
-        .search-section {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .search-form {
+
+        .button-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
-        
+
+        .btn {
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: white;
+            min-height: 48px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-primary { background: var(--primary-color); }
+        .btn-success { background: var(--success-color); }
+        .btn-warning { background: var(--warning-color); }
+        .btn-danger { background: var(--danger-color); }
+        .btn-info { background: var(--info-color); }
+        .btn-secondary { background: var(--secondary-color); }
+
+        .auto-refresh-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f1f5f9;
+            border-radius: 0.5rem;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card-background);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Metrics */
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .metric:hover {
+            background: #f1f5f9;
+        }
+
+        .metric-label {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .metric-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary-color);
+        }
+
+        .metric-value.good {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+
+        .metric-value.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+
+        .metric-value.danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+        }
+
+        /* Progress Bars */
+        .progress-container {
+            margin: 1rem 0;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-label {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .progress-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 6px;
+            background: linear-gradient(90deg, var(--primary-color), var(--info-color));
+        }
+
+        .progress-fill.good {
+            background: linear-gradient(90deg, var(--success-color), #34d399);
+        }
+
+        .progress-fill.warning {
+            background: linear-gradient(90deg, var(--warning-color), #fbbf24);
+        }
+
+        .progress-fill.danger {
+            background: linear-gradient(90deg, var(--danger-color), #f87171);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .stat-item:hover {
+            background: #f1f5f9;
+            transform: translateY(-2px);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Recommendations */
+        .recommendations {
+            background: linear-gradient(135deg, #dbeafe, #eff6ff);
+            border: 1px solid #bfdbfe;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .recommendations h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .recommendations ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recommendations li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-primary);
+        }
+
+        .recommendations li::before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+        }
+
+        /* Logs */
+        .logs-section {
+            grid-column: 1 / -1;
+        }
+
+        .logs-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .log-container {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #334155;
+        }
+
+        .log-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .log-container::-webkit-scrollbar-track {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        .log-container::-webkit-scrollbar-thumb {
+            background: #64748b;
+            border-radius: 4px;
+        }
+
+        .log-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Search Section */
+        .search-section {
+            grid-column: 1 / -1;
+        }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: end;
+        }
+
         .form-group {
             display: flex;
             flex-direction: column;
+            gap: 0.5rem;
         }
-        
+
         .form-group label {
-            margin-bottom: 5px;
             font-weight: 500;
-            color: #555;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
         }
-        
-        .form-group input, .form-group select {
-            padding: 10px;
-            border: 2px solid #e9ecef;
-            border-radius: 5px;
-            font-size: 1em;
-            transition: border-color 0.3s ease;
+
+        .form-group input,
+        .form-group select {
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            background: white;
         }
-        
-        .form-group input:focus, .form-group select:focus {
+
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
-        
-        .btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+
+        .search-results {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background: white;
+        }
+
+        .search-result-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .search-result-item:hover {
+            background: #f8fafc;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-type {
+            background: var(--primary-color);
             color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: transform 0.3s ease;
-        }
-        
-        .btn:hover {
-            transform: translateY(-1px);
-        }
-        
-        .results-section {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .results-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        
-        .results-table th, .results-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .results-table th {
-            background: #f8f9fa;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            color: #555;
         }
-        
-        .results-table tr:hover {
-            background: #f8f9fa;
+
+        .result-date {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
         }
-        
+
+        .result-details {
+            color: var(--text-primary);
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .alert-info {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--info-color);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        /* Loading States */
         .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: var(--text-secondary);
         }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 10px 0;
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
         }
-        
-        .success {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 10px 0;
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        
-        .chart-container {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            height: 400px;
-        }
-        
-        @media (max-width: 768px) {
-            .nav-tabs {
-                flex-direction: column;
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             }
             
             .search-form {
                 grid-template-columns: 1fr;
             }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
             
-            .status-grid {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .button-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .progress-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Utilities */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .font-bold { font-weight: 700; }
+        .font-semibold { font-weight: 600; }
+        .text-sm { font-size: 0.875rem; }
+        .text-xs { font-size: 0.75rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <!-- Header -->
+        <div class="header fade-in">
             <h1>🚀 GitHub Archive Scraper</h1>
-            <p>Real-time monitoring and data exploration dashboard</p>
+            <p>Professional Resource Management Dashboard</p>
+            <div class="mt-4">
+                <span class="status-badge online" id="apiStatus">API Online</span>
+                <span class="status-badge offline" id="dbStatus">Database Checking...</span>
+                <span class="status-badge offline" id="scraperStatus">Scraper Checking...</span>
+            </div>
+            <div class="mt-4">
+                <span class="status-badge" id="lastUpdate">Last update: Never</span>
+            </div>
         </div>
-        
-        <nav class="nav">
-            <ul class="nav-tabs">
-                <li><button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button></li>
-                <li><button class="tab-btn" data-tab="events">📝 Events</button></li>
-                <li><button class="tab-btn" data-tab="repositories">🏗️ Repositories</button></li>
-                <li><button class="tab-btn" data-tab="users">👥 Users</button></li>
-                <li><button class="tab-btn" data-tab="analytics">📈 Analytics</button></li>
-                <li><button class="tab-btn" data-tab="system">⚙️ System</button></li>
-            </ul>
-        </nav>
-        
-        <div class="content">
-            <!-- Dashboard Tab -->
-            <div id="dashboard" class="tab-content active">
-                <div class="status-grid">
-                    <div class="status-card">
-                        <h3>📊 Total Events</h3>
-                        <div class="value" id="total-events">-</div>
-                        <div class="label">GitHub events processed</div>
+
+        <!-- Controls -->
+        <div class="controls fade-in">
+            <h2>🎛️ Scraper Management</h2>
+            <div class="button-grid">
+                <button class="btn btn-success" onclick="startScraper()" id="startBtn">
+                    ▶️ Start Scraper
+                </button>
+                <button class="btn btn-warning" onclick="stopScraper()" id="stopBtn">
+                    ⏹️ Stop Scraper
+                </button>
+                <button class="btn btn-primary" onclick="restartScraper()" id="restartBtn">
+                    🔄 Restart Scraper
+                </button>
+                <button class="btn btn-danger" onclick="shutdownServer()" id="shutdownBtn">
+                    🛑 Shutdown Server
+                </button>
+                <button class="btn btn-info" onclick="emergencyCleanup()" id="cleanupBtn">
+                    🧹 Emergency Cleanup
+                </button>
+                <button class="btn btn-secondary" onclick="refreshData()" id="refreshBtn">
+                    📊 Refresh Data
+                </button>
+            </div>
+            
+            <div class="auto-refresh-controls">
+                <label class="switch">
+                    <input type="checkbox" id="autoRefresh" checked>
+                    <span class="slider"></span>
+                </label>
+                <span>Auto-refresh every 10 seconds</span>
+                <select id="refreshInterval" class="form-control">
+                    <option value="5">5 seconds</option>
+                    <option value="10" selected>10 seconds</option>
+                    <option value="30">30 seconds</option>
+                    <option value="60">1 minute</option>
+                </select>
+            </div>
+            
+            <div id="operationStatus"></div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- System Status -->
+            <div class="card fade-in">
+                <h3><span class="card-icon">🔌</span> System Status</h3>
+                <div class="metric">
+                    <span class="metric-label">API Server</span>
+                    <span class="metric-value good" id="apiStatusDetail">Online</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Database</span>
+                    <span class="metric-value" id="dbStatusDetail">Checking...</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Scraper Process</span>
+                    <span class="metric-value" id="scraperStatusDetail">Checking...</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">System Health</span>
+                    <span class="metric-value" id="systemHealth">Evaluating...</span>
+                </div>
+            </div>
+
+            <!-- Resource Monitoring -->
+            <div class="card fade-in">
+                <h3><span class="card-icon">💻</span> Resource Usage</h3>
+                
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span class="progress-label">Process Memory</span>
+                        <span class="progress-value" id="processMemoryText">Loading...</span>
                     </div>
-                    <div class="status-card">
-                        <h3>🏗️ Repositories</h3>
-                        <div class="value" id="total-repos">-</div>
-                        <div class="label">Unique repositories</div>
-                    </div>
-                    <div class="status-card">
-                        <h3>👥 Active Users</h3>
-                        <div class="value" id="active-users">-</div>
-                        <div class="label">Last 24 hours</div>
-                    </div>
-                    <div class="status-card">
-                        <h3>📁 Files Processed</h3>
-                        <div class="value" id="files-processed">-</div>
-                        <div class="label">Archive files</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="processMemoryBar"></div>
                     </div>
                 </div>
-                
-                <div class="status-grid">
-                    <div class="status-card">
-                        <h3>🖥️ CPU Usage</h3>
-                        <div class="value" id="cpu-usage">-</div>
-                        <div class="label">Current system load</div>
+
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span class="progress-label">System Memory</span>
+                        <span class="progress-value" id="systemMemoryText">Loading...</span>
                     </div>
-                    <div class="status-card">
-                        <h3>💾 Memory Usage</h3>
-                        <div class="value" id="memory-usage">-</div>
-                        <div class="label">RAM utilization</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="systemMemoryBar"></div>
                     </div>
-                    <div class="status-card">
-                        <h3>⚡ Processing Rate</h3>
-                        <div class="value" id="processing-rate">-</div>
-                        <div class="label">Events per second</div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span class="progress-label">Disk Usage</span>
+                        <span class="progress-value" id="diskUsageText">Loading...</span>
                     </div>
-                    <div class="status-card">
-                        <h3>🔄 Last Update</h3>
-                        <div class="value" id="last-update">-</div>
-                        <div class="label">System timestamp</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="diskUsageBar"></div>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span class="progress-label">CPU Usage</span>
+                        <span class="progress-value" id="cpuUsageText">Loading...</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="cpuUsageBar"></div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Events Tab -->
-            <div id="events" class="tab-content">
-                <div class="search-section">
-                    <h3>🔍 Search GitHub Events</h3>
-                    <form class="search-form" id="events-search-form">
-                        <div class="form-group">
-                            <label for="event-type">Event Type</label>
-                            <select id="event-type" name="type">
-                                <option value="">All Types</option>
-                                <option value="PushEvent">Push Event</option>
-                                <option value="PullRequestEvent">Pull Request</option>
-                                <option value="IssuesEvent">Issues</option>
-                                <option value="CreateEvent">Create</option>
-                                <option value="DeleteEvent">Delete</option>
-                                <option value="ForkEvent">Fork</option>
-                                <option value="WatchEvent">Watch</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="repo-name">Repository</label>
-                            <input type="text" id="repo-name" name="repo" placeholder="e.g., microsoft/vscode">
-                        </div>
-                        <div class="form-group">
-                            <label for="user-name">User</label>
-                            <input type="text" id="user-name" name="user" placeholder="e.g., torvalds">
-                        </div>
-                        <div class="form-group">
-                            <label for="limit">Limit</label>
-                            <select id="limit" name="limit">
-                                <option value="50">50</option>
-                                <option value="100" selected>100</option>
-                                <option value="250">250</option>
-                                <option value="500">500</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>&nbsp;</label>
-                            <button type="submit" class="btn">🔍 Search Events</button>
-                        </div>
-                    </form>
+
+            <!-- Safety Status -->
+            <div class="card fade-in">
+                <h3><span class="card-icon">🛡️</span> Oracle Cloud Safety</h3>
+                <div class="metric">
+                    <span class="metric-label">Overall Safety</span>
+                    <span class="metric-value" id="overallSafety">Checking...</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Emergency Mode</span>
+                    <span class="metric-value good" id="emergencyMode">Normal</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Temp Files</span>
+                    <span class="metric-value" id="tempFiles">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Uptime</span>
+                    <span class="metric-value" id="uptime">0s</span>
                 </div>
                 
-                <div class="results-section">
-                    <h3>📝 Event Results</h3>
-                    <div id="events-results">
-                        <div class="loading">Enter search criteria above to find GitHub events</div>
+                <div class="recommendations hidden" id="recommendations">
+                    <h4>💡 Recommendations</h4>
+                    <ul id="recommendationsList"></ul>
+                </div>
+            </div>
+
+            <!-- Database Statistics -->
+            <div class="card fade-in">
+                <h3><span class="card-icon">📊</span> Database Statistics</h3>
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalEvents">-</div>
+                        <div class="stat-label">Total Events</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalRepos">-</div>
+                        <div class="stat-label">Repositories</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="processedFiles">-</div>
+                        <div class="stat-label">Files Processed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="latestEvent">-</div>
+                        <div class="stat-label">Latest Event</div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Repositories Tab -->
-            <div id="repositories" class="tab-content">
-                <div class="search-section">
-                    <h3>🔍 Search Repositories</h3>
-                    <form class="search-form" id="repos-search-form">
-                        <div class="form-group">
-                            <label for="repo-query">Repository Name</label>
-                            <input type="text" id="repo-query" name="q" placeholder="e.g., react, tensorflow">
-                        </div>
-                        <div class="form-group">
-                            <label for="repo-limit">Limit</label>
-                            <select id="repo-limit" name="limit">
-                                <option value="25">25</option>
-                                <option value="50" selected>50</option>
-                                <option value="100">100</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>&nbsp;</label>
-                            <button type="submit" class="btn">🔍 Search Repositories</button>
-                        </div>
-                    </form>
-                </div>
-                
-                <div class="results-section">
-                    <h3>🏗️ Repository Results</h3>
-                    <div id="repos-results">
-                        <div class="loading">Enter search criteria above to find repositories</div>
-                    </div>
-                </div>
-                
-                <div class="results-section">
-                    <h3>🏆 Top Repositories (Last 30 Days)</h3>
-                    <div id="top-repos-results">
-                        <div class="loading">Loading top repositories...</div>
+
+            <!-- Recent Activity -->
+            <div class="card fade-in">
+                <h3><span class="card-icon">🏃</span> Recent Activity</h3>
+                <div id="recentActivity">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading recent activity...
                     </div>
                 </div>
             </div>
-            
-            <!-- Users Tab -->
-            <div id="users" class="tab-content">
-                <div class="results-section">
-                    <h3>👥 Most Active Users (Last 30 Days)</h3>
-                    <div id="users-results">
-                        <div class="loading">Loading user statistics...</div>
+
+            <!-- Event Distribution -->
+            <div class="card fade-in">
+                <h3><span class="card-icon">📈</span> Event Types</h3>
+                <div id="eventTypes">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading event types...
                     </div>
                 </div>
             </div>
-            
-            <!-- Analytics Tab -->
-            <div id="analytics" class="tab-content">
-                <div class="results-section">
-                    <h3>📈 Event Type Distribution</h3>
-                    <div id="event-stats-results">
-                        <div class="loading">Loading analytics...</div>
+
+            <!-- Search Section -->
+            <div class="card search-section fade-in">
+                <h3><span class="card-icon">🔍</span> Event Search</h3>
+                <div class="search-form">
+                    <div class="form-group">
+                        <label for="searchQuery">Search Query</label>
+                        <input type="text" id="searchQuery" placeholder="Repository name or actor login...">
                     </div>
-                </div>
-                
-                <div class="results-section">
-                    <h3>💻 Programming Language Statistics</h3>
-                    <div id="language-stats-results">
-                        <div class="loading">Loading language statistics...</div>
+                    <div class="form-group">
+                        <label for="searchType">Event Type</label>
+                        <select id="searchType">
+                            <option value="">All Types</option>
+                            <option value="PushEvent">Push Events</option>
+                            <option value="CreateEvent">Create Events</option>
+                            <option value="IssuesEvent">Issues Events</option>
+                            <option value="PullRequestEvent">Pull Request Events</option>
+                            <option value="WatchEvent">Watch Events</option>
+                            <option value="ForkEvent">Fork Events</option>
+                        </select>
                     </div>
+                    <button class="btn btn-primary" onclick="searchEvents()">
+                        🔍 Search
+                    </button>
                 </div>
+                <div id="searchResults" class="search-results hidden"></div>
             </div>
-            
-            <!-- System Tab -->
-            <div id="system" class="tab-content">
-                <div class="results-section">
-                    <h3>📊 System Performance Metrics</h3>
-                    <div id="metrics-results">
-                        <div class="loading">Loading system metrics...</div>
-                    </div>
+
+            <!-- Logs Section -->
+            <div class="card logs-section fade-in">
+                <h3><span class="card-icon">📋</span> System Logs</h3>
+                <div class="logs-controls">
+                    <button class="btn btn-secondary" onclick="refreshLogs()">
+                        📄 Refresh Logs
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearLogs()">
+                        🗑️ Clear Display
+                    </button>
+                    <button class="btn btn-secondary" onclick="downloadLogs()">
+                        💾 Download Logs
+                    </button>
                 </div>
-                
-                <div class="results-section">
-                    <h3>📁 File Processing Status</h3>
-                    <div id="files-results">
-                        <div class="loading">Loading file status...</div>
+                <div class="log-container" id="logs">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Click "Refresh Logs" to load recent log entries...
                     </div>
                 </div>
             </div>
@@ -467,329 +914,517 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8080';
-        
-        // Tab switching functionality
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const tabId = btn.dataset.tab;
-                
-                // Update active tab button
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                // Update active tab content
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.classList.remove('active');
-                });
-                document.getElementById(tabId).classList.add('active');
-                
-                // Load tab-specific data
-                loadTabData(tabId);
-            });
+        // Global state
+        let autoRefreshEnabled = true;
+        let refreshInterval;
+        let currentRefreshRate = 10000; // 10 seconds default
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
         });
-        
-        // API helper functions
-        async function apiRequest(endpoint) {
+
+        function initializeDashboard() {
+            setupEventListeners();
+            refreshAllData();
+            startAutoRefresh();
+        }
+
+        function setupEventListeners() {
+            // Auto-refresh toggle
+            document.getElementById('autoRefresh').addEventListener('change', function(e) {
+                autoRefreshEnabled = e.target.checked;
+                if (autoRefreshEnabled) {
+                    startAutoRefresh();
+                } else {
+                    stopAutoRefresh();
+                }
+            });
+
+            // Refresh interval selector
+            document.getElementById('refreshInterval').addEventListener('change', function(e) {
+                currentRefreshRate = parseInt(e.target.value) * 1000;
+                if (autoRefreshEnabled) {
+                    startAutoRefresh();
+                }
+            });
+
+            // Search on Enter key
+            document.getElementById('searchQuery').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchEvents();
+                }
+            });
+        }
+
+        function startAutoRefresh() {
+            stopAutoRefresh();
+            refreshInterval = setInterval(refreshAllData, currentRefreshRate);
+        }
+
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        }
+
+        // API call helper
+        async function apiCall(endpoint, options = {}) {
             try {
-                const response = await fetch(`${API_BASE}${endpoint}`);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const response = await fetch(`/api/${endpoint}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
                 return await response.json();
             } catch (error) {
-                console.error('API request failed:', error);
+                console.error(`API call failed: ${endpoint}`, error);
                 throw error;
             }
         }
-        
+
+        // Main refresh function
+        async function refreshAllData() {
+            try {
+                await Promise.all([
+                    updateStatus(),
+                    updateResourceMonitoring(),
+                    updateDatabaseStats(),
+                    updateRecentActivity(),
+                    updateEventTypes()
+                ]);
+                
+                updateLastRefreshTime();
+            } catch (error) {
+                console.error('Failed to refresh data:', error);
+                showAlert('Failed to refresh dashboard data', 'danger');
+            }
+        }
+
+        // Status updates
+        async function updateStatus() {
+            try {
+                const status = await apiCall('status');
+                
+                // Update header badges
+                updateStatusBadge('apiStatus', true, 'API Online');
+                updateStatusBadge('dbStatus', status.database_connected, 
+                    status.database_connected ? 'Database Connected' : 'Database Disconnected');
+                updateStatusBadge('scraperStatus', status.scraper_running,
+                    status.scraper_running ? 'Scraper Running' : 'Scraper Stopped');
+
+                // Update detailed status
+                updateElement('apiStatusDetail', 'Online', 'good');
+                updateElement('dbStatusDetail', 
+                    status.database_connected ? 'Connected' : 'Disconnected',
+                    status.database_connected ? 'good' : 'danger');
+                updateElement('scraperStatusDetail',
+                    status.scraper_running ? 'Running' : 'Stopped',
+                    status.scraper_running ? 'good' : 'warning');
+
+                // Update button states
+                document.getElementById('startBtn').disabled = status.scraper_running;
+                document.getElementById('stopBtn').disabled = !status.scraper_running;
+
+                // Overall system health
+                const isHealthy = status.database_connected && true; // API is always online if we get response
+                updateElement('systemHealth', isHealthy ? 'Healthy' : 'Issues Detected', 
+                    isHealthy ? 'good' : 'warning');
+
+            } catch (error) {
+                updateStatusBadge('apiStatus', false, 'API Offline');
+                updateElement('apiStatusDetail', 'Offline', 'danger');
+                updateElement('systemHealth', 'System Unreachable', 'danger');
+            }
+        }
+
+        async function updateResourceMonitoring() {
+            try {
+                const monitor = await apiCall('monitor');
+                
+                // Process Memory
+                updateProgressBar('processMemoryBar', monitor.process_memory_usage_percent, 70, 90);
+                updateElement('processMemoryText', 
+                    `${monitor.process_memory_mb}MB / ${monitor.process_memory_limit_mb}MB (${monitor.process_memory_usage_percent}%)`);
+
+                // System Memory  
+                updateProgressBar('systemMemoryBar', monitor.system_memory_percent, 70, 90);
+                updateElement('systemMemoryText',
+                    `${monitor.system_memory_gb}GB / ${monitor.system_memory_total_gb}GB (${monitor.system_memory_percent}%)`);
+
+                // Disk Usage
+                updateProgressBar('diskUsageBar', monitor.disk_usage_percent, 70, 90);
+                updateElement('diskUsageText',
+                    `${monitor.disk_used_gb}GB / ${monitor.disk_limit_gb}GB (${monitor.disk_usage_percent}%)`);
+
+                // CPU Usage
+                updateProgressBar('cpuUsageBar', monitor.cpu_percent, 70, 85);
+                updateElement('cpuUsageText', `${monitor.cpu_percent}%`);
+
+                // Safety status
+                updateElement('overallSafety', monitor.is_safe ? 'Safe' : 'Warning', 
+                    monitor.is_safe ? 'good' : 'danger');
+                updateElement('emergencyMode', monitor.emergency_mode ? 'Active' : 'Normal',
+                    monitor.emergency_mode ? 'danger' : 'good');
+                updateElement('tempFiles', monitor.temp_files_count, 
+                    monitor.temp_files_count > 20 ? 'warning' : 'good');
+                updateElement('uptime', monitor.uptime_formatted || formatUptime(monitor.uptime_seconds));
+
+                // Recommendations
+                if (monitor.recommendations && monitor.recommendations.length > 0) {
+                    const recDiv = document.getElementById('recommendations');
+                    const recList = document.getElementById('recommendationsList');
+                    recDiv.classList.remove('hidden');
+                    recList.innerHTML = monitor.recommendations.map(r => `<li>${r}</li>`).join('');
+                } else {
+                    document.getElementById('recommendations').classList.add('hidden');
+                }
+
+            } catch (error) {
+                console.error('Failed to update resource monitoring:', error);
+            }
+        }
+
+        async function updateDatabaseStats() {
+            try {
+                const stats = await apiCall('stats');
+                
+                updateElement('totalEvents', formatNumber(stats.total_events || 0));
+                updateElement('totalRepos', formatNumber(stats.total_repositories || 0));
+                updateElement('processedFiles', formatNumber(stats.processed_files || 0));
+                updateElement('latestEvent', stats.latest_event_date ? 
+                    new Date(stats.latest_event_date).toLocaleDateString() : 'None');
+
+            } catch (error) {
+                updateElement('totalEvents', 'Error');
+                updateElement('totalRepos', 'Error');
+                updateElement('processedFiles', 'Error');
+                updateElement('latestEvent', 'Error');
+            }
+        }
+
+        async function updateRecentActivity() {
+            try {
+                const events = await apiCall('events?limit=10');
+                const container = document.getElementById('recentActivity');
+                
+                if (!events.events || events.events.length === 0) {
+                    container.innerHTML = '<div class="loading">No recent activity</div>';
+                    return;
+                }
+                
+                container.innerHTML = events.events.slice(0, 5).map(event => `
+                    <div class="search-result-item">
+                        <div class="result-header">
+                            <span class="result-type">${event.type}</span>
+                            <span class="result-date">${new Date(event.created_at).toLocaleString()}</span>
+                        </div>
+                        <div class="result-details">
+                            <strong>${event.actor_login || 'Unknown'}</strong> in ${event.repo_name || 'Unknown repo'}
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                document.getElementById('recentActivity').innerHTML = 
+                    '<div class="alert alert-danger">Failed to load recent activity</div>';
+            }
+        }
+
+        async function updateEventTypes() {
+            try {
+                const stats = await apiCall('stats');
+                const container = document.getElementById('eventTypes');
+                
+                if (!stats.event_types || stats.event_types.length === 0) {
+                    container.innerHTML = '<div class="loading">No event data available</div>';
+                    return;
+                }
+                
+                container.innerHTML = stats.event_types.slice(0, 8).map(eventType => `
+                    <div class="metric">
+                        <span class="metric-label">${eventType.type}</span>
+                        <span class="metric-value">${formatNumber(eventType.count)}</span>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                document.getElementById('eventTypes').innerHTML = 
+                    '<div class="alert alert-danger">Failed to load event types</div>';
+            }
+        }
+
+        // Helper functions
+        function updateStatusBadge(elementId, isGood, text) {
+            const element = document.getElementById(elementId);
+            element.textContent = text;
+            element.className = `status-badge ${isGood ? 'online' : 'offline'}`;
+        }
+
+        function updateElement(elementId, value, statusClass = '') {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value;
+                if (statusClass) {
+                    element.className = `metric-value ${statusClass}`;
+                }
+            }
+        }
+
+        function updateProgressBar(elementId, percent, warningThreshold = 70, dangerThreshold = 90) {
+            const bar = document.getElementById(elementId);
+            if (!bar) return;
+            
+            bar.style.width = percent + '%';
+            bar.className = 'progress-fill ';
+            
+            if (percent >= dangerThreshold) {
+                bar.className += 'danger';
+            } else if (percent >= warningThreshold) {
+                bar.className += 'warning';
+            } else {
+                bar.className += 'good';
+            }
+        }
+
         function formatNumber(num) {
-            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
             return num.toLocaleString();
         }
-        
-        function formatDate(dateStr) {
-            return new Date(dateStr).toLocaleString();
-        }
-        
-        // Load dashboard data
-        async function loadDashboard() {
-            try {
-                const [status, metrics] = await Promise.all([
-                    apiRequest('/status'),
-                    apiRequest('/metrics').catch(() => null)
-                ]);
-                
-                // Update status cards
-                document.getElementById('total-events').textContent = formatNumber(status.database.total_events || 0);
-                document.getElementById('files-processed').textContent = formatNumber(status.database.total_files_processed || 0);
-                
-                if (status.database.latest_event) {
-                    document.getElementById('last-update').textContent = formatDate(status.database.latest_event);
-                }
-                
-                // Update metrics if available
-                if (metrics && metrics.system) {
-                    const sys = metrics.system;
-                    document.getElementById('cpu-usage').textContent = `${sys.avg_cpu_percent?.toFixed(1) || 0}%`;
-                    document.getElementById('memory-usage').textContent = `${sys.avg_memory_mb?.toFixed(0) || 0}MB`;
-                }
-                
-                if (metrics && metrics.scraping) {
-                    const scrape = metrics.scraping;
-                    document.getElementById('processing-rate').textContent = `${scrape.avg_processing_rate?.toFixed(0) || 0}/s`;
-                }
-                
-            } catch (error) {
-                console.error('Error loading dashboard:', error);
-            }
-        }
-        
-        // Load tab-specific data
-        function loadTabData(tabId) {
-            switch (tabId) {
-                case 'dashboard':
-                    loadDashboard();
-                    break;
-                case 'repositories':
-                    loadTopRepositories();
-                    break;
-                case 'users':
-                    loadTopUsers();
-                    break;
-                case 'analytics':
-                    loadAnalytics();
-                    break;
-                case 'system':
-                    loadSystemData();
-                    break;
-            }
-        }
-        
-        // Search events
-        document.getElementById('events-search-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const params = new URLSearchParams();
+
+        function formatUptime(seconds) {
+            const days = Math.floor(seconds / 86400);
+            const hours = Math.floor((seconds % 86400) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
             
-            for (let [key, value] of formData.entries()) {
-                if (value) params.append(key, value);
-            }
-            
-            try {
-                document.getElementById('events-results').innerHTML = '<div class="loading">Searching events...</div>';
-                const data = await apiRequest(`/events?${params}`);
-                
-                let html = `<p>Found ${data.total_count} events (showing ${data.events.length})</p>`;
-                html += '<table class="results-table"><thead><tr><th>Event Type</th><th>Repository</th><th>User</th><th>Date</th></tr></thead><tbody>';
-                
-                data.events.forEach(event => {
-                    html += `<tr>
-                        <td>${event.event_type}</td>
-                        <td>${event.repo_name || 'N/A'}</td>
-                        <td>${event.actor_login || 'N/A'}</td>
-                        <td>${formatDate(event.created_at)}</td>
-                    </tr>`;
-                });
-                
-                html += '</tbody></table>';
-                document.getElementById('events-results').innerHTML = html;
-                
-            } catch (error) {
-                document.getElementById('events-results').innerHTML = `<div class="error">Error: ${error.message}</div>`;
-            }
-        });
-        
-        // Search repositories
-        document.getElementById('repos-search-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const params = new URLSearchParams();
-            
-            for (let [key, value] of formData.entries()) {
-                if (value) params.append(key, value);
-            }
-            
-            try {
-                document.getElementById('repos-results').innerHTML = '<div class="loading">Searching repositories...</div>';
-                const data = await apiRequest(`/repositories?${params}`);
-                
-                let html = `<p>Found ${data.count} repositories</p>`;
-                html += '<table class="results-table"><thead><tr><th>Repository</th><th>Events</th><th>Contributors</th><th>Last Activity</th></tr></thead><tbody>';
-                
-                data.repositories.forEach(repo => {
-                    html += `<tr>
-                        <td>${repo.repo_name}</td>
-                        <td>${formatNumber(repo.total_events)}</td>
-                        <td>${formatNumber(repo.unique_contributors)}</td>
-                        <td>${formatDate(repo.last_activity)}</td>
-                    </tr>`;
-                });
-                
-                html += '</tbody></table>';
-                document.getElementById('repos-results').innerHTML = html;
-                
-            } catch (error) {
-                document.getElementById('repos-results').innerHTML = `<div class="error">Error: ${error.message}</div>`;
-            }
-        });
-        
-        // Load top repositories
-        async function loadTopRepositories() {
-            try {
-                const data = await apiRequest('/repositories/top?limit=25');
-                
-                let html = '<table class="results-table"><thead><tr><th>Rank</th><th>Repository</th><th>Events</th><th>Contributors</th><th>Last Activity</th></tr></thead><tbody>';
-                
-                data.repositories.forEach((repo, index) => {
-                    html += `<tr>
-                        <td>${index + 1}</td>
-                        <td>${repo.repo_name}</td>
-                        <td>${formatNumber(repo.total_events)}</td>
-                        <td>${formatNumber(repo.unique_contributors)}</td>
-                        <td>${formatDate(repo.last_activity)}</td>
-                    </tr>`;
-                });
-                
-                html += '</tbody></table>';
-                document.getElementById('top-repos-results').innerHTML = html;
-                
-            } catch (error) {
-                document.getElementById('top-repos-results').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            if (days > 0) {
+                return `${days}d ${hours}h ${minutes}m`;
+            } else if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+            } else {
+                return `${minutes}m`;
             }
         }
-        
-        // Load top users
-        async function loadTopUsers() {
-            try {
-                const data = await apiRequest('/users/top?limit=50');
-                
-                let html = '<table class="results-table"><thead><tr><th>Rank</th><th>User</th><th>Events</th><th>Repositories</th><th>Event Types</th></tr></thead><tbody>';
-                
-                data.users.forEach((user, index) => {
-                    html += `<tr>
-                        <td>${index + 1}</td>
-                        <td>${user.actor_login}</td>
-                        <td>${formatNumber(user.total_events)}</td>
-                        <td>${formatNumber(user.unique_repos)}</td>
-                        <td>${user.event_types_count}</td>
-                    </tr>`;
-                });
-                
-                html += '</tbody></table>';
-                document.getElementById('users-results').innerHTML = html;
-                
-            } catch (error) {
-                document.getElementById('users-results').innerHTML = `<div class="error">Error: ${error.message}</div>`;
-            }
+
+        function updateLastRefreshTime() {
+            document.getElementById('lastUpdate').textContent = 
+                `Last update: ${new Date().toLocaleTimeString()}`;
         }
-        
-        // Load analytics
-        async function loadAnalytics() {
-            try {
-                const [eventStats, languageStats] = await Promise.all([
-                    apiRequest('/events/stats'),
-                    apiRequest('/languages/stats')
-                ]);
-                
-                // Event stats
-                let html = '<table class="results-table"><thead><tr><th>Event Type</th><th>Count</th><th>Unique Users</th><th>Unique Repos</th></tr></thead><tbody>';
-                
-                eventStats.event_stats.forEach(stat => {
-                    html += `<tr>
-                        <td>${stat.event_type}</td>
-                        <td>${formatNumber(stat.count)}</td>
-                        <td>${formatNumber(stat.unique_users)}</td>
-                        <td>${formatNumber(stat.unique_repos)}</td>
-                    </tr>`;
-                });
-                
-                html += '</tbody></table>';
-                document.getElementById('event-stats-results').innerHTML = html;
-                
-                // Language stats
-                let langHtml = '<table class="results-table"><thead><tr><th>Language</th><th>Events</th><th>Repositories</th><th>Users</th></tr></thead><tbody>';
-                
-                languageStats.language_stats.languages.forEach(lang => {
-                    langHtml += `<tr>
-                        <td>${lang.language}</td>
-                        <td>${formatNumber(lang.event_count)}</td>
-                        <td>${formatNumber(lang.repo_count)}</td>
-                        <td>${formatNumber(lang.user_count)}</td>
-                    </tr>`;
-                });
-                
-                langHtml += '</tbody></table>';
-                document.getElementById('language-stats-results').innerHTML = langHtml;
-                
-            } catch (error) {
-                document.getElementById('event-stats-results').innerHTML = `<div class="error">Error: ${error.message}</div>`;
-                document.getElementById('language-stats-results').innerHTML = `<div class="error">Error: ${error.message}</div>`;
-            }
-        }
-        
-        // Load system data
-        async function loadSystemData() {
-            try {
-                const [metrics, files] = await Promise.all([
-                    apiRequest('/metrics').catch(() => null),
-                    apiRequest('/files/status?limit=50')
-                ]);
-                
-                // Metrics
-                let metricsHtml = '';
-                if (metrics) {
-                    metricsHtml = '<table class="results-table"><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>';
-                    
-                    if (metrics.system) {
-                        const sys = metrics.system;
-                        metricsHtml += `
-                            <tr><td>Average CPU Usage</td><td>${sys.avg_cpu_percent?.toFixed(1) || 0}%</td></tr>
-                            <tr><td>Max CPU Usage</td><td>${sys.max_cpu_percent?.toFixed(1) || 0}%</td></tr>
-                            <tr><td>Average Memory Usage</td><td>${sys.avg_memory_mb?.toFixed(0) || 0}MB</td></tr>
-                            <tr><td>Max Memory Usage</td><td>${sys.max_memory_mb?.toFixed(0) || 0}MB</td></tr>
-                            <tr><td>Total Disk Read</td><td>${sys.total_disk_read_mb?.toFixed(1) || 0}MB</td></tr>
-                            <tr><td>Total Disk Write</td><td>${sys.total_disk_write_mb?.toFixed(1) || 0}MB</td></tr>
-                        `;
+
+        function showAlert(message, type = 'info', duration = 5000) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} fade-in`;
+            alertDiv.innerHTML = `
+                <span>${getAlertIcon(type)}</span>
+                <span>${message}</span>
+            `;
+            
+            const statusDiv = document.getElementById('operationStatus');
+            statusDiv.innerHTML = '';
+            statusDiv.appendChild(alertDiv);
+            
+            if (duration > 0) {
+                setTimeout(() => {
+                    if (statusDiv.contains(alertDiv)) {
+                        statusDiv.removeChild(alertDiv);
                     }
-                    
-                    metricsHtml += '</tbody></table>';
-                } else {
-                    metricsHtml = '<div class="error">Metrics not available</div>';
-                }
-                
-                document.getElementById('metrics-results').innerHTML = metricsHtml;
-                
-                // Files
-                let filesHtml = '<table class="results-table"><thead><tr><th>Filename</th><th>Size</th><th>Downloaded</th><th>Status</th></tr></thead><tbody>';
-                
-                files.files.forEach(file => {
-                    filesHtml += `<tr>
-                        <td>${file.filename}</td>
-                        <td>${file.file_size ? formatNumber(file.file_size) + ' bytes' : 'N/A'}</td>
-                        <td>${formatDate(file.download_date)}</td>
-                        <td>${file.status || 'success'}</td>
-                    </tr>`;
-                });
-                
-                filesHtml += '</tbody></table>';
-                document.getElementById('files-results').innerHTML = filesHtml;
-                
-            } catch (error) {
-                document.getElementById('metrics-results').innerHTML = `<div class="error">Error: ${error.message}</div>`;
-                document.getElementById('files-results').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                }, duration);
             }
         }
-        
-        // Initialize dashboard
-        loadDashboard();
-        
-        // Auto-refresh dashboard every 30 seconds
-        setInterval(() => {
-            const activeTab = document.querySelector('.tab-content.active').id;
-            if (activeTab === 'dashboard') {
-                loadDashboard();
+
+        function getAlertIcon(type) {
+            const icons = {
+                'success': '✅',
+                'warning': '⚠️',
+                'danger': '❌',
+                'info': 'ℹ️'
+            };
+            return icons[type] || 'ℹ️';
+        }
+
+        // Control functions
+        async function startScraper() {
+            try {
+                showAlert('Starting scraper...', 'info', 0);
+                await apiCall('start-scraper', { method: 'POST' });
+                showAlert('Scraper started successfully', 'success');
+                setTimeout(updateStatus, 2000);
+            } catch (error) {
+                showAlert('Failed to start scraper: ' + error.message, 'danger');
             }
-        }, 30000);
+        }
+
+        async function stopScraper() {
+            try {
+                showAlert('Stopping scraper...', 'info', 0);
+                await apiCall('stop-scraper', { method: 'POST' });
+                showAlert('Scraper stopped successfully', 'success');
+                setTimeout(updateStatus, 2000);
+            } catch (error) {
+                showAlert('Failed to stop scraper: ' + error.message, 'danger');
+            }
+        }
+
+        async function restartScraper() {
+            try {
+                showAlert('Restarting scraper...', 'info', 0);
+                await apiCall('restart-scraper', { method: 'POST' });
+                showAlert('Scraper restarted successfully', 'success');
+                setTimeout(updateStatus, 3000);
+            } catch (error) {
+                showAlert('Failed to restart scraper: ' + error.message, 'danger');
+            }
+        }
+
+        async function emergencyCleanup() {
+            if (!confirm('Perform emergency cleanup? This will free memory and temporary files.')) {
+                return;
+            }
+            
+            try {
+                showAlert('Performing emergency cleanup...', 'info', 0);
+                const result = await apiCall('emergency-cleanup', { method: 'POST' });
+                showAlert(`Cleanup completed: ${result.objects_collected || 0} objects collected`, 'success');
+                setTimeout(updateResourceMonitoring, 2000);
+            } catch (error) {
+                showAlert('Failed to perform cleanup: ' + error.message, 'danger');
+            }
+        }
+
+        async function shutdownServer() {
+            if (!confirm('Shutdown the entire server? This will stop both the API and scraper.')) {
+                return;
+            }
+            
+            try {
+                showAlert('Shutting down server...', 'warning', 0);
+                await apiCall('shutdown', { method: 'POST' });
+                showAlert('Server shutdown initiated', 'warning');
+                stopAutoRefresh();
+                setTimeout(() => {
+                    document.body.innerHTML = `
+                        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; text-align: center;">
+                            <h1 style="color: var(--danger-color); margin-bottom: 1rem;">🛑 Server Shutdown</h1>
+                            <p style="color: var(--text-secondary);">The server has been shut down gracefully.</p>
+                        </div>
+                    `;
+                }, 3000);
+            } catch (error) {
+                showAlert('Server may have shut down.', 'warning');
+            }
+        }
+
+        function refreshData() {
+            showAlert('Refreshing all data...', 'info', 2000);
+            refreshAllData();
+        }
+
+        // Search functionality
+        async function searchEvents() {
+            const query = document.getElementById('searchQuery').value.trim();
+            const type = document.getElementById('searchType').value;
+            
+            if (!query) {
+                showAlert('Please enter a search query', 'warning');
+                return;
+            }
+            
+            try {
+                const resultsContainer = document.getElementById('searchResults');
+                resultsContainer.innerHTML = '<div class="loading"><div class="spinner"></div>Searching...</div>';
+                resultsContainer.classList.remove('hidden');
+                
+                const searchData = {
+                    query: query,
+                    limit: 50
+                };
+                
+                const results = await apiCall('search', { 
+                    method: 'POST',
+                    body: JSON.stringify(searchData)
+                });
+                
+                if (!results.events || results.events.length === 0) {
+                    resultsContainer.innerHTML = '<div class="loading">No results found</div>';
+                    return;
+                }
+                
+                resultsContainer.innerHTML = results.events.map(event => `
+                    <div class="search-result-item">
+                        <div class="result-header">
+                            <span class="result-type">${event.type}</span>
+                            <span class="result-date">${new Date(event.created_at).toLocaleString()}</span>
+                        </div>
+                        <div class="result-details">
+                            <strong>${event.actor_login || 'Unknown'}</strong> in 
+                            <strong>${event.repo_name || 'Unknown repo'}</strong>
+                        </div>
+                    </div>
+                `).join('');
+                
+                showAlert(`Found ${results.events.length} results`, 'success');
+                
+            } catch (error) {
+                document.getElementById('searchResults').innerHTML = 
+                    '<div class="alert alert-danger">Search failed: ' + error.message + '</div>';
+            }
+        }
+
+        // Log functions
+        async function refreshLogs() {
+            try {
+                const logsContainer = document.getElementById('logs');
+                logsContainer.innerHTML = '<div class="loading"><div class="spinner"></div>Loading logs...</div>';
+                
+                const result = await apiCall('scraper-logs');
+                logsContainer.textContent = result.logs || 'No logs available';
+                
+                // Auto-scroll to bottom
+                logsContainer.scrollTop = logsContainer.scrollHeight;
+                
+            } catch (error) {
+                document.getElementById('logs').innerHTML = 
+                    '<div class="alert alert-danger">Failed to load logs: ' + error.message + '</div>';
+            }
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = 
+                '<div class="loading">Logs cleared. Click "Refresh Logs" to reload.</div>';
+        }
+
+        function downloadLogs() {
+            // Create download link for logs
+            const logs = document.getElementById('logs').textContent;
+            const blob = new Blob([logs], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `scraper-logs-${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showAlert('Logs downloaded successfully', 'success');
+        }
+
+        // Initial load with slight delay for better UX
+        setTimeout(() => {
+            refreshAllData();
+            refreshLogs();
+        }, 500);
     </script>
 </body>
 </html>

@@ -69,6 +69,132 @@ class ProcessingStats:
         self.memory_peak_mb = max(self.memory_peak_mb, other.memory_peak_mb)
 
 
+class ResourceMonitor:
+    """Monitor system resources and enforce limits for Oracle Cloud safety"""
+    
+    def __init__(self, config):
+        self.config = config
+        self.process = psutil.Process()
+        self.start_time = time.time()
+        self.temp_files = set()
+        self.emergency_mode = False
+        
+    def get_memory_usage(self) -> float:
+        """Get current memory usage in MB"""
+        return self.process.memory_info().rss / 1024 / 1024
+    
+    def get_disk_usage(self, path: str = '.') -> Tuple[float, float]:
+        """Get disk usage in GB (used, total)"""
+        usage = psutil.disk_usage(path)
+        return usage.used / (1024**3), usage.total / (1024**3)
+    
+    def get_cpu_usage(self) -> float:
+        """Get CPU usage percentage"""
+        return self.process.cpu_percent()
+    
+    def check_memory_limit(self) -> bool:
+        """Check if memory usage is within safe limits"""
+        memory_mb = self.get_memory_usage()
+        
+        if memory_mb > self.config.MAX_MEMORY_MB:
+            logging.error(f"Memory usage {memory_mb:.1f}MB exceeds limit {self.config.MAX_MEMORY_MB}MB")
+            return False
+        elif memory_mb > self.config.MEMORY_WARNING_MB:
+            logging.warning(f"Memory usage {memory_mb:.1f}MB approaching limit {self.config.MAX_MEMORY_MB}MB")
+            
+        return True
+    
+    def check_disk_limit(self) -> bool:
+        """Check if disk usage is within safe limits"""
+        used_gb, total_gb = self.get_disk_usage()
+        
+        if used_gb > self.config.MAX_DISK_USAGE_GB:
+            logging.error(f"Disk usage {used_gb:.1f}GB exceeds limit {self.config.MAX_DISK_USAGE_GB}GB")
+            return False
+        elif used_gb > self.config.DISK_WARNING_GB:
+            logging.warning(f"Disk usage {used_gb:.1f}GB approaching limit {self.config.MAX_DISK_USAGE_GB}GB")
+            
+        return True
+    
+    def emergency_cleanup(self):
+        """Perform emergency cleanup to free resources"""
+        if self.emergency_mode:
+            return
+            
+        self.emergency_mode = True
+        logging.warning("Performing emergency cleanup due to resource pressure")
+        
+        # Force garbage collection
+        import gc
+        gc.collect()
+        
+        # Clean up temp files
+        self.cleanup_temp_files()
+        
+        # Log current resource usage
+        memory_mb = self.get_memory_usage()
+        used_gb, total_gb = self.get_disk_usage()
+        cpu_percent = self.get_cpu_usage()
+        
+        logging.info(f"Post-cleanup: Memory: {memory_mb:.1f}MB, Disk: {used_gb:.1f}GB, CPU: {cpu_percent:.1f}%")
+        
+        self.emergency_mode = False
+    
+    def cleanup_temp_files(self):
+        """Clean up temporary files"""
+        for temp_file in list(self.temp_files):
+            try:
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
+                    logging.debug(f"Cleaned up temp file: {temp_file}")
+                self.temp_files.discard(temp_file)
+            except Exception as e:
+                logging.warning(f"Failed to clean up temp file {temp_file}: {e}")
+    
+    def register_temp_file(self, filepath: str):
+        """Register a temporary file for cleanup"""
+        self.temp_files.add(filepath)
+    
+    def should_pause_processing(self) -> bool:
+        """Check if processing should be paused due to resource pressure"""
+        memory_mb = self.get_memory_usage()
+        used_gb, _ = self.get_disk_usage()
+        cpu_percent = self.get_cpu_usage()
+        
+        memory_ratio = memory_mb / self.config.MAX_MEMORY_MB
+        disk_ratio = used_gb / self.config.MAX_DISK_USAGE_GB
+        
+        if (memory_ratio > self.config.EMERGENCY_CLEANUP_THRESHOLD or 
+            disk_ratio > self.config.EMERGENCY_CLEANUP_THRESHOLD or
+            cpu_percent > self.config.CPU_LIMIT_PERCENT):
+            
+            self.emergency_cleanup()
+            return True
+            
+        return False
+    
+    def get_status(self) -> Dict:
+        """Get current resource status"""
+        memory_mb = self.get_memory_usage()
+        used_gb, total_gb = self.get_disk_usage()
+        cpu_percent = self.get_cpu_usage()
+        uptime = time.time() - self.start_time
+        
+        return {
+            'memory_mb': round(memory_mb, 1),
+            'memory_limit_mb': self.config.MAX_MEMORY_MB,
+            'memory_usage_percent': round((memory_mb / self.config.MAX_MEMORY_MB) * 100, 1),
+            'disk_used_gb': round(used_gb, 1),
+            'disk_limit_gb': self.config.MAX_DISK_USAGE_GB,
+            'disk_usage_percent': round((used_gb / self.config.MAX_DISK_USAGE_GB) * 100, 1),
+            'cpu_percent': round(cpu_percent, 1),
+            'cpu_limit_percent': self.config.CPU_LIMIT_PERCENT,
+            'uptime_seconds': round(uptime, 1),
+            'temp_files_count': len(self.temp_files),
+            'emergency_mode': self.emergency_mode
+        }
+
+
 class Config:
     """Configuration settings with enhanced options"""
     
@@ -98,9 +224,23 @@ class Config:
     # Processing settings
     BATCH_SIZE = int(os.getenv('BATCH_SIZE', '1000'))
     
-    # Memory management
-    MAX_MEMORY_MB = int(os.getenv('MAX_MEMORY_MB', '4096'))
-    MEMORY_CHECK_INTERVAL = int(os.getenv('MEMORY_CHECK_INTERVAL', '100'))
+    # Memory management - Oracle Cloud safe limits
+    MAX_MEMORY_MB = int(os.getenv('MAX_MEMORY_MB', '18000'))  # 18GB max for 24GB system
+    MEMORY_WARNING_MB = int(os.getenv('MEMORY_WARNING_MB', '16000'))  # Warning at 16GB
+    MEMORY_CHECK_INTERVAL = int(os.getenv('MEMORY_CHECK_INTERVAL', '50'))  # Check more frequently
+    
+    # Disk management - Oracle Cloud safe limits
+    MAX_DISK_USAGE_GB = int(os.getenv('MAX_DISK_USAGE_GB', '40'))  # 40GB max disk usage
+    DISK_WARNING_GB = int(os.getenv('DISK_WARNING_GB', '35'))  # Warning at 35GB
+    TEMP_FILE_CLEANUP_INTERVAL = int(os.getenv('TEMP_CLEANUP_INTERVAL', '300'))  # 5 minutes
+    
+    # Resource monitoring
+    RESOURCE_CHECK_INTERVAL = int(os.getenv('RESOURCE_CHECK_INTERVAL', '30'))  # 30 seconds
+    CPU_LIMIT_PERCENT = int(os.getenv('CPU_LIMIT_PERCENT', '80'))  # Max 80% CPU
+    
+    # Safety limits
+    MAX_FILE_SIZE_MB = int(os.getenv('MAX_FILE_SIZE_MB', '500'))  # 500MB per file
+    EMERGENCY_CLEANUP_THRESHOLD = float(os.getenv('EMERGENCY_CLEANUP_THRESHOLD', '0.9'))  # 90% memory
     
     # Date range settings (focus on 2015 onward as requested)
     MIN_DATE = datetime(2015, 1, 1)
@@ -495,6 +635,10 @@ class GitHubArchiveScraper:
         self._running_tasks: Set[asyncio.Task] = set()
         self._stats = ProcessingStats()
         
+        # Initialize resource monitoring
+        self.resource_monitor = ResourceMonitor(config)
+        self._last_resource_check = 0
+        
         # Setup enhanced logging
         log_formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -554,19 +698,34 @@ class GitHubArchiveScraper:
                 
         self.logger.info("Graceful shutdown completed")
     
-    def _check_memory_usage(self):
-        """Monitor memory usage and warn if excessive"""
-        self._memory_checks += 1
-        if self._memory_checks % self.config.MEMORY_CHECK_INTERVAL == 0:
-            process = psutil.Process()
-            memory_mb = process.memory_info().rss / 1024 / 1024
-            self._stats.memory_peak_mb = max(self._stats.memory_peak_mb, memory_mb)
+    async def _check_resource_usage(self):
+        """Monitor resource usage and enforce limits"""
+        current_time = time.time()
+        
+        # Check resources periodically
+        if current_time - self._last_resource_check >= self.config.RESOURCE_CHECK_INTERVAL:
+            self._last_resource_check = current_time
             
-            if memory_mb > self.config.MAX_MEMORY_MB:
-                self.logger.warning(f"High memory usage: {memory_mb:.1f}MB")
+            # Get resource status
+            status = self.resource_monitor.get_status()
+            
+            # Log resource usage periodically
+            self.logger.info(
+                f"Resource usage - Memory: {status['memory_mb']:.1f}MB "
+                f"({status['memory_usage_percent']:.1f}%), "
+                f"Disk: {status['disk_used_gb']:.1f}GB "
+                f"({status['disk_usage_percent']:.1f}%), "
+                f"CPU: {status['cpu_percent']:.1f}%"
+            )
+            
+            # Check for emergency conditions
+            if not self.resource_monitor.check_memory_limit() or not self.resource_monitor.check_disk_limit():
+                self.logger.error("Resource limits exceeded, pausing processing")
+                await asyncio.sleep(30)  # Pause for 30 seconds
                 
-            if self._memory_checks % 1000 == 0:
-                self.logger.info(f"Memory usage: {memory_mb:.1f}MB, Peak: {self._stats.memory_peak_mb:.1f}MB")
+            # Clean up temp files periodically
+            if len(self.resource_monitor.temp_files) > 10:
+                self.resource_monitor.cleanup_temp_files()
     
     @asynccontextmanager
     async def _track_task(self, coro):
@@ -788,6 +947,12 @@ class GitHubArchiveScraper:
         filename = url.split('/')[-1]
         temp_path = None
         
+        # Check resource limits before starting download
+        if self.resource_monitor.should_pause_processing():
+            self.logger.warning(f"Pausing download due to resource pressure: {filename}")
+            await asyncio.sleep(10)  # Wait before retrying
+            return None
+        
         for attempt in range(self.config.MAX_RETRIES):
             try:
                 # Check for shutdown signal
@@ -795,9 +960,10 @@ class GitHubArchiveScraper:
                     self.logger.info("Shutdown requested, cancelling download")
                     return None
                 
-                # Create temporary file
+                # Create temporary file and register for cleanup
                 with tempfile.NamedTemporaryFile(delete=False, suffix='.json.gz') as tmp:
                     temp_path = tmp.name
+                    self.resource_monitor.register_temp_file(temp_path)
                 
                 start_time = time.time()
                 bytes_downloaded = 0
@@ -813,6 +979,11 @@ class GitHubArchiveScraper:
                     # Get content length for progress tracking
                     content_length = int(response.headers.get('Content-Length', 0))
                     
+                    # Check if file size exceeds limits
+                    if content_length > self.config.MAX_FILE_SIZE_MB * 1024 * 1024:
+                        self.logger.warning(f"File too large ({content_length/1024/1024:.1f}MB): {filename}")
+                        return None
+                    
                     # Write to temporary file with progress tracking
                     async with aiofiles.open(temp_path, 'wb') as f:
                         async for chunk in response.content.iter_chunked(self.config.CHUNK_SIZE):
@@ -822,8 +993,11 @@ class GitHubArchiveScraper:
                             await f.write(chunk)
                             bytes_downloaded += len(chunk)
                             
-                            # Memory usage check
-                            self._check_memory_usage()
+                            # Resource usage check every 100 chunks
+                            if bytes_downloaded % (self.config.CHUNK_SIZE * 100) == 0:
+                                if self.resource_monitor.should_pause_processing():
+                                    self.logger.warning(f"Pausing download due to resource pressure: {filename}")
+                                    return None
                 
                 # Verify download completed
                 if content_length > 0 and bytes_downloaded != content_length:
@@ -838,9 +1012,13 @@ class GitHubArchiveScraper:
                 self._stats.bytes_downloaded += bytes_downloaded
                 self._stats.processing_time += download_time
                 
+                # Update memory peak
+                current_memory = self.resource_monitor.get_memory_usage()
+                self._stats.memory_peak_mb = max(self._stats.memory_peak_mb, current_memory)
+                
                 self.logger.info(
                     f"Downloaded {filename}: {bytes_downloaded:,} bytes in {download_time:.2f}s "
-                    f"({bytes_downloaded/download_time/1024:.1f} KB/s)"
+                    f"({bytes_downloaded/download_time/1024:.1f} KB/s) - Memory: {current_memory:.1f}MB"
                 )
                 return content
                 
@@ -852,9 +1030,15 @@ class GitHubArchiveScraper:
                     self.logger.error(f"Failed to download {url} after {self.config.MAX_RETRIES} attempts")
                     return None
             finally:
-                # Clean up temporary file
-                if temp_path and os.path.exists(temp_path):
-                    os.unlink(temp_path)
+                # Clean up temporary file using resource monitor
+                if temp_path:
+                    try:
+                        if os.path.exists(temp_path):
+                            os.unlink(temp_path)
+                        # Remove from resource monitor tracking
+                        self.resource_monitor.temp_files.discard(temp_path)
+                    except Exception as e:
+                        self.logger.warning(f"Failed to cleanup temp file {temp_path}: {e}")
         
         return None
                 
@@ -930,8 +1114,8 @@ class GitHubArchiveScraper:
                         repositories = {}
                         repository_changes = []
                         
-                        # Memory usage check
-                        self._check_memory_usage()
+                        # Resource usage check
+                        await self._check_resource_usage()
                         
                 except json.JSONDecodeError as e:
                     error_count += 1
