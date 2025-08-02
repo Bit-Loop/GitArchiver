@@ -211,6 +211,275 @@
             margin-bottom: 2rem;
         }
 
+        /* Database Management Styles */
+        .db-management-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .db-section {
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .db-section h3 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.625rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        .archive-results,
+        .repo-results,
+        .disk-results,
+        .sql-results,
+        .schema-results,
+        .health-results,
+        .maintenance-results {
+            margin-top: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background: white;
+        }
+
+        /* SQL Query Results */
+        .sql-results {
+            max-height: 400px;
+        }
+
+        .query-results-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .query-results-table th,
+        .query-results-table td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .query-results-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .query-results-table tr:hover {
+            background: #f8fafc;
+        }
+
+        /* Schema Display */
+        .schema-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .schema-table th,
+        .schema-table td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .schema-table th {
+            background: #f1f5f9;
+            font-weight: 600;
+        }
+
+        .table-header {
+            background: #e2e8f0;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        /* Query Templates */
+        .query-templates {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .template-item {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .template-item:hover {
+            background: #e2e8f0;
+            border-color: var(--primary-color);
+        }
+
+        .template-item h4 {
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+        }
+
+        .template-item p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .template-query {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            white-space: pre-wrap;
+        }
+
+        /* Health Metrics */
+        .health-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            background: #f8fafc;
+            border-radius: 0.25rem;
+        }
+
+        .health-metric.critical {
+            background: #fef2f2;
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .health-metric.warning {
+            background: #fffbeb;
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .health-metric.good {
+            background: #f0fdf4;
+            border-left: 4px solid var(--success-color);
+        }
+
+        /* Export Progress */
+        .export-progress {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .archive-item,
+        .repo-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .archive-item:last-child,
+        .repo-item:last-child {
+            border-bottom: none;
+        }
+
+        .archive-item:hover,
+        .repo-item:hover {
+            background: #f1f5f9;
+        }
+
+        .archive-item.selected,
+        .repo-item.selected {
+            background: #dbeafe;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .item-details {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            border-radius: 0.25rem;
+        }
+
+        .disk-usage-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .disk-usage-table th,
+        .disk-usage-table td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .disk-usage-table th {
+            background: #f1f5f9;
+            font-weight: 600;
+        }
+
         .card {
             background: var(--card-background);
             border-radius: 1rem;
@@ -721,6 +990,135 @@
             </div>
             
             <div id="operationStatus"></div>
+        </div>
+
+        <!-- Database Management -->
+        <div class="controls fade-in">
+            <h2>🗃️ Database Management</h2>
+            <div class="db-management-grid">
+                <div class="db-section">
+                    <h3>🔍 Archive Search & Download</h3>
+                    <div class="form-group">
+                        <label for="dateFrom">From Date:</label>
+                        <input type="date" id="dateFrom" class="form-control" value="2024-01-01">
+                    </div>
+                    <div class="form-group">
+                        <label for="dateTo">To Date:</label>
+                        <input type="date" id="dateTo" class="form-control" value="2024-01-02">
+                    </div>
+                    <div class="form-group">
+                        <label for="archiveLimit">Limit:</label>
+                        <select id="archiveLimit" class="form-control">
+                            <option value="24">24 files (1 day)</option>
+                            <option value="48">48 files (2 days)</option>
+                            <option value="100" selected>100 files</option>
+                            <option value="200">200 files</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="searchArchives()">🔍 Search Available Archives</button>
+                    <div id="archiveResults" class="archive-results"></div>
+                </div>
+
+                <div class="db-section">
+                    <h3>🏷️ Keyword-Based Download</h3>
+                    <div class="form-group">
+                        <label for="keywords">Keywords (comma-separated):</label>
+                        <input type="text" id="keywords" class="form-control" placeholder="python, javascript, machine-learning">
+                    </div>
+                    <div class="form-group">
+                        <label for="keywordDateFrom">From Date:</label>
+                        <input type="date" id="keywordDateFrom" class="form-control" value="2024-01-01">
+                    </div>
+                    <div class="form-group">
+                        <label for="keywordDateTo">To Date:</label>
+                        <input type="date" id="keywordDateTo" class="form-control" value="2024-01-02">
+                    </div>
+                    <button class="btn btn-success" onclick="downloadByKeywords()">📥 Download by Keywords</button>
+                </div>
+
+                <div class="db-section">
+                    <h3>🗂️ Repository Management</h3>
+                    <div class="form-group">
+                        <label for="repoSearch">Search Repositories:</label>
+                        <input type="text" id="repoSearch" class="form-control" placeholder="Search by name or ID">
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-info" onclick="searchRepositories()">🔍 Search</button>
+                        <button class="btn btn-warning" onclick="removeSelectedRepos()">🗑️ Remove Selected</button>
+                    </div>
+                    <div id="repoResults" class="repo-results"></div>
+                </div>
+
+                <div class="db-section">
+                    <h3>💿 Disk Management</h3>
+                    <button class="btn btn-info" onclick="showDiskUsage()">📊 Show Disk Usage</button>
+                    <button class="btn btn-warning" onclick="pruneUnusedData()">🧹 Prune Unused Data</button>
+                    <div id="diskUsageResults" class="disk-results"></div>
+                </div>
+
+                <div class="db-section">
+                    <h3>🔍 SQL Query Interface</h3>
+                    <div class="form-group">
+                        <label for="sqlQuery">SQL Query:</label>
+                        <textarea id="sqlQuery" class="form-control" rows="4" placeholder="SELECT * FROM github_events LIMIT 10;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" onclick="executeSQLQuery()">▶️ Execute Query</button>
+                        <button class="btn btn-info" onclick="showQueryTemplates()">📋 Templates</button>
+                        <button class="btn btn-success" onclick="exportQueryResults()">📤 Export Results</button>
+                    </div>
+                    <div id="sqlResults" class="sql-results"></div>
+                </div>
+
+                <div class="db-section">
+                    <h3>🗂️ Database Schema</h3>
+                    <button class="btn btn-info" onclick="showDatabaseSchema()">🔍 View Schema</button>
+                    <button class="btn btn-primary" onclick="showTableStatistics()">📊 Table Statistics</button>
+                    <button class="btn btn-secondary" onclick="showIndexes()">⚡ View Indexes</button>
+                    <div id="schemaResults" class="schema-results"></div>
+                </div>
+
+                <div class="db-section">
+                    <h3>📈 Database Health</h3>
+                    <button class="btn btn-info" onclick="showDatabaseHealth()">💗 Health Check</button>
+                    <button class="btn btn-primary" onclick="showActiveConnections()">🔗 Active Connections</button>
+                    <button class="btn btn-warning" onclick="showSlowQueries()">🐌 Slow Queries</button>
+                    <div id="healthResults" class="health-results"></div>
+                </div>
+
+                <div class="db-section">
+                    <h3>📤 Data Export</h3>
+                    <div class="form-group">
+                        <label for="exportTable">Table:</label>
+                        <select id="exportTable" class="form-control">
+                            <option value="github_events">GitHub Events</option>
+                            <option value="repositories">Repositories</option>
+                            <option value="processed_files">Processed Files</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="exportFormat">Format:</label>
+                        <select id="exportFormat" class="form-control">
+                            <option value="json">JSON</option>
+                            <option value="csv">CSV</option>
+                            <option value="sql">SQL Dump</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="exportLimit">Limit:</label>
+                        <input type="number" id="exportLimit" class="form-control" value="1000" min="1" max="100000">
+                    </div>
+                    <button class="btn btn-success" onclick="exportTableData()">📤 Export Data</button>
+                </div>
+
+                <div class="db-section">
+                    <h3>🔧 Database Maintenance</h3>
+                    <button class="btn btn-info" onclick="analyzeTables()">🔍 Analyze Tables</button>
+                    <button class="btn btn-warning" onclick="vacuumDatabase()">🧹 Vacuum Database</button>
+                    <button class="btn btn-primary" onclick="rebuildIndexes()">⚡ Rebuild Indexes</button>
+                    <div id="maintenanceResults" class="maintenance-results"></div>
+                </div>
+            </div>
         </div>
 
         <!-- Dashboard Grid -->
@@ -1418,6 +1816,911 @@
             URL.revokeObjectURL(url);
             
             showAlert('Logs downloaded successfully', 'success');
+        }
+
+        // Database Management Functions
+        async function searchArchives() {
+            try {
+                const dateFrom = document.getElementById('dateFrom').value;
+                const dateTo = document.getElementById('dateTo').value;
+                const limit = document.getElementById('archiveLimit').value;
+                
+                const response = await fetch(`/api/search-archives?from=${dateFrom}&to=${dateTo}&limit=${limit}`);
+                const results = await response.json();
+                
+                if (results.error) {
+                    throw new Error(results.error);
+                }
+                
+                const resultsContainer = document.getElementById('archiveResults');
+                resultsContainer.innerHTML = `
+                    <h4>Found ${results.total} archives:</h4>
+                    <div class="archive-list">
+                        ${results.archives.map(archive => `
+                            <div class="archive-item" onclick="toggleArchiveSelection(this, '${archive.filename}')">
+                                <div class="item-info">
+                                    <div class="item-name">${archive.filename}</div>
+                                    <div class="item-details">${archive.date} Hour ${archive.hour} • ${archive.estimated_size}</div>
+                                </div>
+                                <div class="item-actions">
+                                    <input type="checkbox" class="archive-checkbox" value="${archive.filename}">
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-primary btn-small" onclick="selectAllArchives()">Select All</button>
+                        <button class="btn btn-secondary btn-small" onclick="clearArchiveSelection()">Clear All</button>
+                        <button class="btn btn-success" onclick="downloadSelectedArchives()">Download Selected</button>
+                    </div>
+                `;
+                
+            } catch (error) {
+                showStatus('Archive search failed: ' + error.message, 'error');
+            }
+        }
+        
+        function toggleArchiveSelection(element, filename) {
+            const checkbox = element.querySelector('.archive-checkbox');
+            checkbox.checked = !checkbox.checked;
+            element.classList.toggle('selected', checkbox.checked);
+        }
+        
+        function selectAllArchives() {
+            const checkboxes = document.querySelectorAll('.archive-checkbox');
+            const items = document.querySelectorAll('.archive-item');
+            checkboxes.forEach((checkbox, index) => {
+                checkbox.checked = true;
+                items[index].classList.add('selected');
+            });
+        }
+        
+        function clearArchiveSelection() {
+            const checkboxes = document.querySelectorAll('.archive-checkbox');
+            const items = document.querySelectorAll('.archive-item');
+            checkboxes.forEach((checkbox, index) => {
+                checkbox.checked = false;
+                items[index].classList.remove('selected');
+            });
+        }
+        
+        async function downloadSelectedArchives() {
+            try {
+                const selectedFiles = Array.from(document.querySelectorAll('.archive-checkbox:checked'))
+                    .map(checkbox => checkbox.value);
+                
+                if (selectedFiles.length === 0) {
+                    showStatus('No archives selected', 'warning');
+                    return;
+                }
+                
+                const response = await fetch('/api/download-archives', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ files: selectedFiles })
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                showStatus(`Started downloading ${selectedFiles.length} archives`, 'success');
+                
+            } catch (error) {
+                showStatus('Download failed: ' + error.message, 'error');
+            }
+        }
+        
+        async function downloadByKeywords() {
+            try {
+                const keywords = document.getElementById('keywords').value
+                    .split(',')
+                    .map(k => k.trim())
+                    .filter(k => k.length > 0);
+                
+                if (keywords.length === 0) {
+                    showStatus('Please enter at least one keyword', 'warning');
+                    return;
+                }
+                
+                const dateFrom = document.getElementById('keywordDateFrom').value;
+                const dateTo = document.getElementById('keywordDateTo').value;
+                
+                const response = await fetch('/api/download-keywords', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        keywords: keywords,
+                        date_range: { from: dateFrom, to: dateTo }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                showStatus(`Started keyword-based download for: ${keywords.join(', ')}`, 'success');
+                
+            } catch (error) {
+                showStatus('Keyword download failed: ' + error.message, 'error');
+            }
+        }
+        
+        async function searchRepositories() {
+            try {
+                const query = document.getElementById('repoSearch').value.trim();
+                
+                if (query.length === 0) {
+                    showStatus('Please enter a search term', 'warning');
+                    return;
+                }
+                
+                const response = await fetch(`/api/search-repositories?q=${encodeURIComponent(query)}`);
+                const results = await response.json();
+                
+                if (results.error) {
+                    throw new Error(results.error);
+                }
+                
+                const resultsContainer = document.getElementById('repoResults');
+                resultsContainer.innerHTML = `
+                    <h4>Found ${results.total} repositories:</h4>
+                    <div class="repo-list">
+                        ${results.repositories.map(repo => `
+                            <div class="repo-item" onclick="toggleRepoSelection(this, ${repo.id})">
+                                <div class="item-info">
+                                    <div class="item-name">${repo.name}</div>
+                                    <div class="item-details">ID: ${repo.id} • Owner: ${repo.owner} • Stars: ${repo.stargazers_count || 0}</div>
+                                </div>
+                                <div class="item-actions">
+                                    <input type="checkbox" class="repo-checkbox" value="${repo.id}">
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-primary btn-small" onclick="selectAllRepos()">Select All</button>
+                        <button class="btn btn-secondary btn-small" onclick="clearRepoSelection()">Clear All</button>
+                    </div>
+                `;
+                
+            } catch (error) {
+                showStatus('Repository search failed: ' + error.message, 'error');
+            }
+        }
+        
+        function toggleRepoSelection(element, repoId) {
+            const checkbox = element.querySelector('.repo-checkbox');
+            checkbox.checked = !checkbox.checked;
+            element.classList.toggle('selected', checkbox.checked);
+        }
+        
+        function selectAllRepos() {
+            const checkboxes = document.querySelectorAll('.repo-checkbox');
+            const items = document.querySelectorAll('.repo-item');
+            checkboxes.forEach((checkbox, index) => {
+                checkbox.checked = true;
+                items[index].classList.add('selected');
+            });
+        }
+        
+        function clearRepoSelection() {
+            const checkboxes = document.querySelectorAll('.repo-checkbox');
+            const items = document.querySelectorAll('.repo-item');
+            checkboxes.forEach((checkbox, index) => {
+                checkbox.checked = false;
+                items[index].classList.remove('selected');
+            });
+        }
+        
+        async function removeSelectedRepos() {
+            try {
+                const selectedRepos = Array.from(document.querySelectorAll('.repo-checkbox:checked'))
+                    .map(checkbox => parseInt(checkbox.value));
+                
+                if (selectedRepos.length === 0) {
+                    showStatus('No repositories selected', 'warning');
+                    return;
+                }
+                
+                const password = prompt('This will permanently delete repositories and their events. Enter admin password to confirm:');
+                if (!password) return;
+                
+                const validationResponse = await fetch('/api/validate-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+                
+                const validation = await validationResponse.json();
+                if (!validation.valid) {
+                    showStatus('Invalid password', 'error');
+                    return;
+                }
+                
+                const response = await fetch('/api/remove-repositories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ repository_ids: selectedRepos })
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                showStatus(`Removed ${result.removed_count} repositories`, 'success');
+                clearRepoSelection();
+                searchRepositories(); // Refresh the list
+                
+            } catch (error) {
+                showStatus('Repository removal failed: ' + error.message, 'error');
+            }
+        }
+        
+        async function showDiskUsage() {
+            try {
+                const response = await fetch('/api/disk-usage');
+                const results = await response.json();
+                
+                if (results.error) {
+                    throw new Error(results.error);
+                }
+                
+                const resultsContainer = document.getElementById('diskUsageResults');
+                resultsContainer.innerHTML = `
+                    <h4>Disk Usage Details:</h4>
+                    
+                    <h5>Database Tables:</h5>
+                    <table class="disk-usage-table">
+                        <thead>
+                            <tr>
+                                <th>Table</th>
+                                <th>Size</th>
+                                <th>Size (bytes)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${results.database_tables.map(table => `
+                                <tr>
+                                    <td>${table.tablename}</td>
+                                    <td>${table.size}</td>
+                                    <td>${table.size_bytes.toLocaleString()}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    
+                    <h5>Filesystem:</h5>
+                    <div class="disk-info">
+                        <div>Total: ${results.filesystem.total_gb.toFixed(1)} GB</div>
+                        <div>Used: ${results.filesystem.used_gb.toFixed(1)} GB (${results.filesystem.usage_percent.toFixed(1)}%)</div>
+                        <div>Free: ${results.filesystem.free_gb.toFixed(1)} GB</div>
+                    </div>
+                    
+                    <h5>Temporary Files:</h5>
+                    <div class="temp-info">
+                        <div>GitHub Archive temp files: ${results.temp_files.gharchive_temp}</div>
+                        <div>Log files: ${results.temp_files.log_files}</div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                showStatus('Disk usage query failed: ' + error.message, 'error');
+            }
+        }
+        
+        async function pruneUnusedData() {
+            try {
+                const password = prompt('This will permanently delete temporary files and old logs. Enter admin password to confirm:');
+                if (!password) return;
+                
+                const validationResponse = await fetch('/api/validate-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+                
+                const validation = await validationResponse.json();
+                if (!validation.valid) {
+                    showStatus('Invalid password', 'error');
+                    return;
+                }
+                
+                const response = await fetch('/api/prune-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        options: {
+                            temp_files: true,
+                            old_logs: true,
+                            orphaned_events: false
+                        }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                showStatus(`Pruning complete: Freed ${result.summary.space_freed_mb.toFixed(1)} MB`, 'success');
+                showDiskUsage(); // Refresh disk usage
+                
+            } catch (error) {
+                showStatus('Data pruning failed: ' + error.message, 'error');
+            }
+        }
+
+        // Advanced Database Management Functions
+
+        async function executeSQLQuery() {
+            try {
+                const query = document.getElementById('sqlQuery').value.trim();
+                
+                if (!query) {
+                    showStatus('Please enter a SQL query', 'warning');
+                    return;
+                }
+                
+                const response = await fetch('/api/execute-sql', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query })
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                const resultsContainer = document.getElementById('sqlResults');
+                
+                if (result.rows && result.rows.length > 0) {
+                    const columns = Object.keys(result.rows[0]);
+                    resultsContainer.innerHTML = `
+                        <div style="padding: 1rem;">
+                            <h4>Query Results (${result.rows.length} rows, ${result.execution_time}ms)</h4>
+                            <table class="query-results-table">
+                                <thead>
+                                    <tr>
+                                        ${columns.map(col => `<th>${col}</th>`).join('')}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${result.rows.map(row => `
+                                        <tr>
+                                            ${columns.map(col => `<td>${row[col] !== null ? row[col] : '<em>NULL</em>'}</td>`).join('')}
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                } else {
+                    resultsContainer.innerHTML = `
+                        <div style="padding: 1rem;">
+                            <h4>Query executed successfully</h4>
+                            <p>Affected rows: ${result.affected_rows || 0}</p>
+                            <p>Execution time: ${result.execution_time}ms</p>
+                        </div>
+                    `;
+                }
+                
+                showStatus('Query executed successfully', 'success');
+                
+            } catch (error) {
+                showStatus('Query execution failed: ' + error.message, 'error');
+                document.getElementById('sqlResults').innerHTML = `
+                    <div style="padding: 1rem; color: var(--danger-color);">
+                        <h4>Query Error</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function showQueryTemplates() {
+            const templatesHTML = `
+                <div class="query-templates">
+                    <div class="template-item" onclick="useTemplate('SELECT * FROM github_events ORDER BY created_at DESC LIMIT 10;')">
+                        <h4>Recent Events</h4>
+                        <p>Get the 10 most recent GitHub events</p>
+                        <div class="template-query">SELECT * FROM github_events ORDER BY created_at DESC LIMIT 10;</div>
+                    </div>
+                    <div class="template-item" onclick="useTemplate('SELECT type, COUNT(*) as count FROM github_events GROUP BY type ORDER BY count DESC;')">
+                        <h4>Event Types</h4>
+                        <p>Count of events by type</p>
+                        <div class="template-query">SELECT type, COUNT(*) as count FROM github_events GROUP BY type ORDER BY count DESC;</div>
+                    </div>
+                    <div class="template-item" onclick="useTemplate('SELECT r.name, r.stargazers_count, COUNT(e.id) as events FROM repositories r LEFT JOIN github_events e ON r.id = e.repo_id GROUP BY r.id ORDER BY events DESC LIMIT 10;')">
+                        <h4>Top Repositories</h4>
+                        <p>Most active repositories by event count</p>
+                        <div class="template-query">SELECT r.name, r.stargazers_count, COUNT(e.id) as events FROM repositories r LEFT JOIN github_events e ON r.id = e.repo_id GROUP BY r.id ORDER BY events DESC LIMIT 10;</div>
+                    </div>
+                    <div class="template-item" onclick="useTemplate('SELECT actor_login, COUNT(*) as event_count FROM github_events GROUP BY actor_login ORDER BY event_count DESC LIMIT 10;')">
+                        <h4>Top Contributors</h4>
+                        <p>Most active users by event count</p>
+                        <div class="template-query">SELECT actor_login, COUNT(*) as event_count FROM github_events GROUP BY actor_login ORDER BY event_count DESC LIMIT 10;</div>
+                    </div>
+                    <div class="template-item" onclick="useTemplate('SELECT DATE(created_at) as date, COUNT(*) as events FROM github_events GROUP BY DATE(created_at) ORDER BY date DESC LIMIT 7;')">
+                        <h4>Daily Activity</h4>
+                        <p>Events per day for the last week</p>
+                        <div class="template-query">SELECT DATE(created_at) as date, COUNT(*) as events FROM github_events GROUP BY DATE(created_at) ORDER BY date DESC LIMIT 7;</div>
+                    </div>
+                    <div class="template-item" onclick="useTemplate('SELECT r.language, COUNT(e.id) as events FROM repositories r JOIN github_events e ON r.id = e.repo_id WHERE r.language IS NOT NULL GROUP BY r.language ORDER BY events DESC LIMIT 10;')">
+                        <h4>Language Activity</h4>
+                        <p>Most active programming languages</p>
+                        <div class="template-query">SELECT r.language, COUNT(e.id) as events FROM repositories r JOIN github_events e ON r.id = e.repo_id WHERE r.language IS NOT NULL GROUP BY r.language ORDER BY events DESC LIMIT 10;</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('sqlResults').innerHTML = templatesHTML;
+        }
+
+        function useTemplate(query) {
+            document.getElementById('sqlQuery').value = query;
+        }
+
+        async function exportQueryResults() {
+            try {
+                const query = document.getElementById('sqlQuery').value.trim();
+                
+                if (!query) {
+                    showStatus('Please enter a SQL query first', 'warning');
+                    return;
+                }
+                
+                const response = await fetch('/api/export-query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        query: query,
+                        format: 'csv'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Export failed');
+                }
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `query_results_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+                showStatus('Query results exported successfully', 'success');
+                
+            } catch (error) {
+                showStatus('Export failed: ' + error.message, 'error');
+            }
+        }
+
+        async function showDatabaseSchema() {
+            try {
+                const response = await fetch('/api/database-schema');
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                const resultsContainer = document.getElementById('schemaResults');
+                let schemaHTML = '<h4>Database Schema</h4>';
+                
+                result.tables.forEach(table => {
+                    schemaHTML += `
+                        <h5 class="table-header">${table.table_name}</h5>
+                        <table class="schema-table">
+                            <thead>
+                                <tr>
+                                    <th>Column</th>
+                                    <th>Type</th>
+                                    <th>Nullable</th>
+                                    <th>Default</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${table.columns.map(col => `
+                                    <tr>
+                                        <td><strong>${col.column_name}</strong></td>
+                                        <td>${col.data_type}</td>
+                                        <td>${col.is_nullable}</td>
+                                        <td>${col.column_default || '<em>NULL</em>'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                });
+                
+                resultsContainer.innerHTML = schemaHTML;
+                
+            } catch (error) {
+                showStatus('Schema fetch failed: ' + error.message, 'error');
+            }
+        }
+
+        async function showTableStatistics() {
+            try {
+                const response = await fetch('/api/table-statistics');
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                const resultsContainer = document.getElementById('schemaResults');
+                resultsContainer.innerHTML = `
+                    <h4>Table Statistics</h4>
+                    <table class="schema-table">
+                        <thead>
+                            <tr>
+                                <th>Table</th>
+                                <th>Rows</th>
+                                <th>Size</th>
+                                <th>Size (bytes)</th>
+                                <th>Last Analyzed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.statistics.map(stat => `
+                                <tr>
+                                    <td><strong>${stat.table_name}</strong></td>
+                                    <td>${stat.n_tup.toLocaleString()}</td>
+                                    <td>${stat.size}</td>
+                                    <td>${stat.size_bytes.toLocaleString()}</td>
+                                    <td>${stat.last_analyzed || 'Never'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+            } catch (error) {
+                showStatus('Table statistics fetch failed: ' + error.message, 'error');
+            }
+        }
+
+        async function showIndexes() {
+            try {
+                const response = await fetch('/api/database-indexes');
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                const resultsContainer = document.getElementById('schemaResults');
+                resultsContainer.innerHTML = `
+                    <h4>Database Indexes</h4>
+                    <table class="schema-table">
+                        <thead>
+                            <tr>
+                                <th>Index Name</th>
+                                <th>Table</th>
+                                <th>Columns</th>
+                                <th>Type</th>
+                                <th>Size</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.indexes.map(idx => `
+                                <tr>
+                                    <td><strong>${idx.index_name}</strong></td>
+                                    <td>${idx.table_name}</td>
+                                    <td>${idx.columns}</td>
+                                    <td>${idx.index_type}</td>
+                                    <td>${idx.size}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+            } catch (error) {
+                showStatus('Indexes fetch failed: ' + error.message, 'error');
+            }
+        }
+
+        async function showDatabaseHealth() {
+            try {
+                const response = await fetch('/api/database-health');
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                const resultsContainer = document.getElementById('healthResults');
+                resultsContainer.innerHTML = `
+                    <h4>Database Health Check</h4>
+                    <div class="health-metric ${result.overall_status}">
+                        <span>Overall Status</span>
+                        <span><strong>${result.overall_status.toUpperCase()}</strong></span>
+                    </div>
+                    <div class="health-metric">
+                        <span>Database Size</span>
+                        <span>${result.database_size}</span>
+                    </div>
+                    <div class="health-metric">
+                        <span>Active Connections</span>
+                        <span>${result.active_connections}</span>
+                    </div>
+                    <div class="health-metric">
+                        <span>Long Running Queries</span>
+                        <span>${result.long_running_queries}</span>
+                    </div>
+                    <div class="health-metric">
+                        <span>Locks</span>
+                        <span>${result.locks}</span>
+                    </div>
+                    <div class="health-metric">
+                        <span>Cache Hit Ratio</span>
+                        <span>${result.cache_hit_ratio}%</span>
+                    </div>
+                `;
+                
+            } catch (error) {
+                showStatus('Health check failed: ' + error.message, 'error');
+            }
+        }
+
+        async function showActiveConnections() {
+            try {
+                const response = await fetch('/api/active-connections');
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                const resultsContainer = document.getElementById('healthResults');
+                resultsContainer.innerHTML = `
+                    <h4>Active Database Connections</h4>
+                    <table class="schema-table">
+                        <thead>
+                            <tr>
+                                <th>PID</th>
+                                <th>User</th>
+                                <th>Database</th>
+                                <th>State</th>
+                                <th>Query Start</th>
+                                <th>Current Query</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.connections.map(conn => `
+                                <tr>
+                                    <td>${conn.pid}</td>
+                                    <td>${conn.usename}</td>
+                                    <td>${conn.datname}</td>
+                                    <td>${conn.state}</td>
+                                    <td>${conn.query_start}</td>
+                                    <td title="${conn.query}">${conn.query.substring(0, 50)}${conn.query.length > 50 ? '...' : ''}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+            } catch (error) {
+                showStatus('Active connections fetch failed: ' + error.message, 'error');
+            }
+        }
+
+        async function showSlowQueries() {
+            try {
+                const response = await fetch('/api/slow-queries');
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                const resultsContainer = document.getElementById('healthResults');
+                resultsContainer.innerHTML = `
+                    <h4>Slow Queries (${result.queries.length} found)</h4>
+                    <table class="schema-table">
+                        <thead>
+                            <tr>
+                                <th>Calls</th>
+                                <th>Total Time (ms)</th>
+                                <th>Mean Time (ms)</th>
+                                <th>Query</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.queries.map(query => `
+                                <tr>
+                                    <td>${query.calls}</td>
+                                    <td>${query.total_time.toFixed(2)}</td>
+                                    <td>${query.mean_time.toFixed(2)}</td>
+                                    <td title="${query.query}">${query.query.substring(0, 80)}${query.query.length > 80 ? '...' : ''}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+            } catch (error) {
+                showStatus('Slow queries fetch failed: ' + error.message, 'error');
+            }
+        }
+
+        async function exportTableData() {
+            try {
+                const table = document.getElementById('exportTable').value;
+                const format = document.getElementById('exportFormat').value;
+                const limit = document.getElementById('exportLimit').value;
+                
+                const progressDiv = document.createElement('div');
+                progressDiv.className = 'export-progress';
+                progressDiv.innerHTML = `
+                    <div class="progress-text">Preparing export...</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill progress-ok" style="width: 0%"></div>
+                    </div>
+                `;
+                
+                document.getElementById('diskUsageResults').appendChild(progressDiv);
+                
+                const response = await fetch('/api/export-table', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        table: table,
+                        format: format,
+                        limit: parseInt(limit)
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Export failed');
+                }
+                
+                progressDiv.querySelector('.progress-text').textContent = 'Downloading...';
+                progressDiv.querySelector('.progress-fill').style.width = '50%';
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${table}_export_${new Date().toISOString().split('T')[0]}.${format}`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+                progressDiv.querySelector('.progress-text').textContent = 'Export completed!';
+                progressDiv.querySelector('.progress-fill').style.width = '100%';
+                
+                setTimeout(() => {
+                    progressDiv.remove();
+                }, 3000);
+                
+                showStatus(`${table} data exported successfully as ${format.toUpperCase()}`, 'success');
+                
+            } catch (error) {
+                showStatus('Export failed: ' + error.message, 'error');
+            }
+        }
+
+        async function analyzeTables() {
+            try {
+                const response = await fetch('/api/analyze-tables', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                const resultsContainer = document.getElementById('maintenanceResults');
+                resultsContainer.innerHTML = `
+                    <h4>Table Analysis Complete</h4>
+                    <p>Analyzed ${result.tables_analyzed} tables</p>
+                    <p>Execution time: ${result.execution_time}ms</p>
+                `;
+                
+                showStatus('Table analysis completed successfully', 'success');
+                
+            } catch (error) {
+                showStatus('Table analysis failed: ' + error.message, 'error');
+            }
+        }
+
+        async function vacuumDatabase() {
+            try {
+                const password = prompt('This operation may take several minutes. Enter admin password to confirm:');
+                if (!password) return;
+                
+                const validationResponse = await fetch('/api/validate-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+                
+                const validation = await validationResponse.json();
+                if (!validation.valid) {
+                    showStatus('Invalid password', 'error');
+                    return;
+                }
+                
+                const response = await fetch('/api/vacuum-database', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                const resultsContainer = document.getElementById('maintenanceResults');
+                resultsContainer.innerHTML = `
+                    <h4>Database Vacuum Complete</h4>
+                    <p>Space reclaimed: ${result.space_reclaimed}</p>
+                    <p>Execution time: ${result.execution_time}ms</p>
+                `;
+                
+                showStatus('Database vacuum completed successfully', 'success');
+                
+            } catch (error) {
+                showStatus('Database vacuum failed: ' + error.message, 'error');
+            }
+        }
+
+        async function rebuildIndexes() {
+            try {
+                const password = prompt('This operation may take several minutes. Enter admin password to confirm:');
+                if (!password) return;
+                
+                const validationResponse = await fetch('/api/validate-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: password })
+                });
+                
+                const validation = await validationResponse.json();
+                if (!validation.valid) {
+                    showStatus('Invalid password', 'error');
+                    return;
+                }
+                
+                const response = await fetch('/api/rebuild-indexes', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                const resultsContainer = document.getElementById('maintenanceResults');
+                resultsContainer.innerHTML = `
+                    <h4>Index Rebuild Complete</h4>
+                    <p>Indexes rebuilt: ${result.indexes_rebuilt}</p>
+                    <p>Execution time: ${result.execution_time}ms</p>
+                `;
+                
+                showStatus('Index rebuild completed successfully', 'success');
+                
+            } catch (error) {
+                showStatus('Index rebuild failed: ' + error.message, 'error');
+            }
         }
 
         // Initial load with slight delay for better UX

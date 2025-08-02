@@ -18,6 +18,17 @@ class Config:
     DB_USER = os.getenv('DB_USER', 'gharchive')
     DB_PASSWORD = os.getenv('DB_PASSWORD', 'gharchive_password')
     
+    # GitHub API settings
+    GITHUB_TOKEN = os.getenv('GITHUB_TOKEN', '')  # For higher rate limits
+    GITHUB_USERNAME = os.getenv('GITHUB_USERNAME', '')
+    GITHUB_API_BASE = 'https://api.github.com'
+    
+    # Rate limiting settings
+    UNAUTHENTICATED_RATE_LIMIT = 60  # GitHub's limit per hour
+    AUTHENTICATED_RATE_LIMIT = 5000  # GitHub's limit per hour
+    RATE_LIMIT_BUFFER = 5  # Keep 5 requests as buffer
+    RATE_LIMIT_RESET_BUFFER = 300  # 5 minutes buffer before reset
+    
     # Connection pool settings
     DB_MIN_CONNECTIONS = int(os.getenv('DB_MIN_CONNECTIONS', '5'))
     DB_MAX_CONNECTIONS = int(os.getenv('DB_MAX_CONNECTIONS', '20'))

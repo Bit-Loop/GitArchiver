@@ -28,6 +28,7 @@ import sys
 import tempfile
 import time
 import signal
+from config import Config
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Set, AsyncGenerator
@@ -195,71 +196,6 @@ class ResourceMonitor:
         }
 
 
-class Config:
-    """Configuration settings with enhanced options"""
-    
-    # Database settings
-    DB_HOST = os.getenv('DB_HOST', 'localhost')
-    DB_PORT = int(os.getenv('DB_PORT', '5432'))
-    DB_NAME = os.getenv('DB_NAME', 'gharchive')
-    DB_USER = os.getenv('DB_USER', 'gharchive')
-    DB_PASSWORD = os.getenv('DB_PASSWORD', 'gharchive')
-    
-    # Connection pool settings
-    DB_MIN_CONNECTIONS = int(os.getenv('DB_MIN_CONNECTIONS', '5'))
-    DB_MAX_CONNECTIONS = int(os.getenv('DB_MAX_CONNECTIONS', '20'))
-    
-    # Download settings
-    BASE_URL = 'https://data.gharchive.org/'
-    S3_LIST_URL = 'https://data.gharchive.org/?list-type=2'
-    DOWNLOAD_DIR = Path(os.getenv('DOWNLOAD_DIR', './gharchive_data'))
-    MAX_CONCURRENT_DOWNLOADS = int(os.getenv('MAX_CONCURRENT', '10'))
-    CHUNK_SIZE = int(os.getenv('CHUNK_SIZE', '8192'))
-    
-    # HTTP client settings
-    REQUEST_TIMEOUT = int(os.getenv('REQUEST_TIMEOUT', '300'))
-    MAX_RETRIES = int(os.getenv('MAX_RETRIES', '3'))
-    RETRY_DELAY = float(os.getenv('RETRY_DELAY', '1.0'))
-    
-    # Processing settings
-    BATCH_SIZE = int(os.getenv('BATCH_SIZE', '1000'))
-    
-    # Memory management - Oracle Cloud safe limits
-    MAX_MEMORY_MB = int(os.getenv('MAX_MEMORY_MB', '18000'))  # 18GB max for 24GB system
-    MEMORY_WARNING_MB = int(os.getenv('MEMORY_WARNING_MB', '16000'))  # Warning at 16GB
-    MEMORY_CHECK_INTERVAL = int(os.getenv('MEMORY_CHECK_INTERVAL', '50'))  # Check more frequently
-    
-    # Disk management - Oracle Cloud safe limits
-    MAX_DISK_USAGE_GB = int(os.getenv('MAX_DISK_USAGE_GB', '40'))  # 40GB max disk usage
-    DISK_WARNING_GB = int(os.getenv('DISK_WARNING_GB', '35'))  # Warning at 35GB
-    TEMP_FILE_CLEANUP_INTERVAL = int(os.getenv('TEMP_CLEANUP_INTERVAL', '300'))  # 5 minutes
-    
-    # Resource monitoring
-    RESOURCE_CHECK_INTERVAL = int(os.getenv('RESOURCE_CHECK_INTERVAL', '30'))  # 30 seconds
-    CPU_LIMIT_PERCENT = int(os.getenv('CPU_LIMIT_PERCENT', '80'))  # Max 80% CPU
-    
-    # Safety limits
-    MAX_FILE_SIZE_MB = int(os.getenv('MAX_FILE_SIZE_MB', '500'))  # 500MB per file
-    EMERGENCY_CLEANUP_THRESHOLD = float(os.getenv('EMERGENCY_CLEANUP_THRESHOLD', '0.9'))  # 90% memory
-    
-    # Date range settings (focus on 2015 onward as requested)
-    MIN_DATE = datetime(2015, 1, 1)
-    
-    # GitHub API settings for repo changes
-    GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')  # Optional but recommended
-    
-    # Logging
-    LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
-    LOG_FILE = os.getenv('LOG_FILE', 'gharchive_scraper.log')
-    
-    # Performance monitoring
-    ENABLE_METRICS = os.getenv('ENABLE_METRICS', 'true').lower() == 'true'
-    METRICS_INTERVAL = int(os.getenv('METRICS_INTERVAL', '60'))
-    
-    # Graceful shutdown
-    SHUTDOWN_TIMEOUT = int(os.getenv('SHUTDOWN_TIMEOUT', '30'))
-
-
 class DatabaseManager:
     """Handles PostgreSQL database operations with enhanced connection management"""
     
@@ -312,39 +248,158 @@ class DatabaseManager:
         CREATE EXTENSION IF NOT EXISTS "btree_gin";
         CREATE EXTENSION IF NOT EXISTS "pg_trgm";  -- For fuzzy text search
         
-        -- Main events table (Ruby script equivalent functionality)
+        -- Enhanced events table to capture EVERYTHING from GitHub API
         CREATE TABLE IF NOT EXISTS github_events (
             id BIGINT PRIMARY KEY,
             type VARCHAR(50) NOT NULL,
             created_at TIMESTAMP WITH TIME ZONE NOT NULL,
             public BOOLEAN NOT NULL DEFAULT true,
             
-            -- Actor information
+            -- Complete Actor information (expanded)
             actor_id BIGINT,
             actor_login VARCHAR(255),
             actor_display_login VARCHAR(255),
             actor_gravatar_id VARCHAR(255),
             actor_url TEXT,
             actor_avatar_url TEXT,
+            actor_node_id VARCHAR(255),
+            actor_html_url TEXT,
+            actor_followers_url TEXT,
+            actor_following_url TEXT,
+            actor_gists_url TEXT,
+            actor_starred_url TEXT,
+            actor_subscriptions_url TEXT,
+            actor_organizations_url TEXT,
+            actor_repos_url TEXT,
+            actor_events_url TEXT,
+            actor_received_events_url TEXT,
+            actor_type VARCHAR(50),
+            actor_user_view_type VARCHAR(50),
+            actor_site_admin BOOLEAN,
             
-            -- Repository information
+            -- Complete Repository information (expanded)
             repo_id BIGINT,
             repo_name VARCHAR(255),
             repo_url TEXT,
+            repo_full_name VARCHAR(255),
+            repo_owner_login VARCHAR(255),
+            repo_owner_id BIGINT,
+            repo_owner_node_id VARCHAR(255),
+            repo_owner_avatar_url TEXT,
+            repo_owner_gravatar_id VARCHAR(255),
+            repo_owner_url TEXT,
+            repo_owner_html_url TEXT,
+            repo_owner_type VARCHAR(50),
+            repo_owner_site_admin BOOLEAN,
+            repo_node_id VARCHAR(255),
+            repo_html_url TEXT,
+            repo_description TEXT,
+            repo_fork BOOLEAN,
+            repo_keys_url TEXT,
+            repo_collaborators_url TEXT,
+            repo_teams_url TEXT,
+            repo_hooks_url TEXT,
+            repo_issue_events_url TEXT,
+            repo_events_url TEXT,
+            repo_assignees_url TEXT,
+            repo_branches_url TEXT,
+            repo_tags_url TEXT,
+            repo_blobs_url TEXT,
+            repo_git_tags_url TEXT,
+            repo_git_refs_url TEXT,
+            repo_trees_url TEXT,
+            repo_statuses_url TEXT,
+            repo_languages_url TEXT,
+            repo_stargazers_url TEXT,
+            repo_contributors_url TEXT,
+            repo_subscribers_url TEXT,
+            repo_subscription_url TEXT,
+            repo_commits_url TEXT,
+            repo_git_commits_url TEXT,
+            repo_comments_url TEXT,
+            repo_issue_comment_url TEXT,
+            repo_contents_url TEXT,
+            repo_compare_url TEXT,
+            repo_merges_url TEXT,
+            repo_archive_url TEXT,
+            repo_downloads_url TEXT,
+            repo_issues_url TEXT,
+            repo_pulls_url TEXT,
+            repo_milestones_url TEXT,
+            repo_notifications_url TEXT,
+            repo_labels_url TEXT,
+            repo_releases_url TEXT,
+            repo_deployments_url TEXT,
+            repo_git_url TEXT,
+            repo_ssh_url TEXT,
+            repo_clone_url TEXT,
+            repo_svn_url TEXT,
+            repo_homepage TEXT,
+            repo_size BIGINT,
+            repo_stargazers_count BIGINT,
+            repo_watchers_count BIGINT,
+            repo_language VARCHAR(100),
+            repo_has_issues BOOLEAN,
+            repo_has_projects BOOLEAN,
+            repo_has_downloads BOOLEAN,
+            repo_has_wiki BOOLEAN,
+            repo_has_pages BOOLEAN,
+            repo_has_discussions BOOLEAN,
+            repo_forks_count BIGINT,
+            repo_mirror_url TEXT,
+            repo_archived BOOLEAN,
+            repo_disabled BOOLEAN,
+            repo_open_issues_count BIGINT,
+            repo_license_key VARCHAR(50),
+            repo_license_name VARCHAR(255),
+            repo_license_spdx_id VARCHAR(50),
+            repo_license_url TEXT,
+            repo_license_node_id VARCHAR(255),
+            repo_allow_forking BOOLEAN,
+            repo_is_template BOOLEAN,
+            repo_web_commit_signoff_required BOOLEAN,
+            repo_topics TEXT[], -- Array of topics
+            repo_visibility VARCHAR(50),
+            repo_forks BIGINT,
+            repo_open_issues BIGINT,
+            repo_watchers BIGINT,
+            repo_default_branch VARCHAR(100),
+            repo_created_at TIMESTAMP WITH TIME ZONE,
+            repo_updated_at TIMESTAMP WITH TIME ZONE,
+            repo_pushed_at TIMESTAMP WITH TIME ZONE,
             
-            -- Organization information (optional)
+            -- Complete Organization information (expanded, optional)
             org_id BIGINT,
             org_login VARCHAR(255),
+            org_node_id VARCHAR(255),
             org_gravatar_id VARCHAR(255),
             org_url TEXT,
             org_avatar_url TEXT,
+            org_html_url TEXT,
+            org_followers_url TEXT,
+            org_following_url TEXT,
+            org_gists_url TEXT,
+            org_starred_url TEXT,
+            org_subscriptions_url TEXT,
+            org_organizations_url TEXT,
+            org_repos_url TEXT,
+            org_events_url TEXT,
+            org_received_events_url TEXT,
+            org_type VARCHAR(50),
+            org_user_view_type VARCHAR(50),
+            org_site_admin BOOLEAN,
             
-            -- Payload as JSONB for flexible querying
+            -- Complete Payload as JSONB for ultra-flexible querying and complex nested data
             payload JSONB,
             
-            -- Metadata
+            -- Raw event data for complete preservation
+            raw_event JSONB,
+            
+            -- Enhanced metadata
             processed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-            file_source VARCHAR(255)
+            file_source VARCHAR(255),
+            api_source VARCHAR(255),
+            data_version VARCHAR(10) DEFAULT '3.0'
         );
         
         -- Repository tracking table for change monitoring
@@ -555,73 +610,532 @@ class DatabaseManager:
                     processed_at = NOW()
             """, filename, etag, size, event_count)
             
+    def validate_and_convert_event(self, event: Dict) -> Optional[Dict]:
+        """
+        Enhanced validation to extract EVERYTHING from GitHub API events
+        Returns None if event is invalid, otherwise returns fully enriched event
+        """
+        try:
+            # Required fields check
+            if not all(field in event for field in ['id', 'type', 'created_at']):
+                return None
+                
+            # Validate and convert ID
+            try:
+                event_id = int(event['id'])
+            except (ValueError, TypeError):
+                logging.warning(f"Invalid event ID: {event.get('id')}")
+                return None
+                
+            # Validate event type - must be string and not numeric
+            event_type = event.get('type')
+            if not isinstance(event_type, str) or not event_type or event_type.isdigit():
+                logging.warning(f"Invalid event type '{event_type}' for event {event_id}")
+                return None
+                
+            # Validate timestamp
+            try:
+                created_at = parse_date(event['created_at'])
+            except:
+                logging.warning(f"Invalid timestamp for event {event_id}")
+                return None
+                
+            # Helper function for safe integer conversion
+            def safe_int(value):
+                if value is None or value == '':
+                    return None
+                try:
+                    return int(value)
+                except (ValueError, TypeError):
+                    return None
+            
+            # Helper function for safe boolean conversion
+            def safe_bool(value):
+                if value is None:
+                    return None
+                if isinstance(value, bool):
+                    return value
+                if isinstance(value, str):
+                    return value.lower() in ('true', '1', 'yes', 'on')
+                return bool(value)
+            
+            # Helper function for safe string conversion
+            def safe_str(value, max_length=None):
+                if value is None:
+                    return None
+                str_value = str(value)
+                if max_length and len(str_value) > max_length:
+                    return str_value[:max_length]
+                return str_value
+            
+            # Helper function for safe array conversion
+            def safe_array(value):
+                if value is None:
+                    return []
+                if isinstance(value, list):
+                    return value
+                return [value]
+                
+            # Extract COMPLETE actor data
+            actor = event.get('actor', {})
+            actor_data = {
+                # Basic actor info
+                'id': safe_int(actor.get('id')),
+                'login': safe_str(actor.get('login'), 255),
+                'display_login': safe_str(actor.get('display_login'), 255),
+                'gravatar_id': safe_str(actor.get('gravatar_id'), 255),
+                'url': safe_str(actor.get('url')),
+                'avatar_url': safe_str(actor.get('avatar_url')),
+                
+                # Extended actor info
+                'node_id': safe_str(actor.get('node_id'), 255),
+                'html_url': safe_str(actor.get('html_url')),
+                'followers_url': safe_str(actor.get('followers_url')),
+                'following_url': safe_str(actor.get('following_url')),
+                'gists_url': safe_str(actor.get('gists_url')),
+                'starred_url': safe_str(actor.get('starred_url')),
+                'subscriptions_url': safe_str(actor.get('subscriptions_url')),
+                'organizations_url': safe_str(actor.get('organizations_url')),
+                'repos_url': safe_str(actor.get('repos_url')),
+                'events_url': safe_str(actor.get('events_url')),
+                'received_events_url': safe_str(actor.get('received_events_url')),
+                'type': safe_str(actor.get('type'), 50),
+                'user_view_type': safe_str(actor.get('user_view_type'), 50),
+                'site_admin': safe_bool(actor.get('site_admin'))
+            }
+            
+            # Extract COMPLETE repo data
+            repo = event.get('repo', {})
+            repo_owner = repo.get('owner', {})
+            repo_license = repo.get('license', {})
+            
+            repo_data = {
+                # Basic repo info
+                'id': safe_int(repo.get('id')),
+                'name': safe_str(repo.get('name'), 255),
+                'url': safe_str(repo.get('url')),
+                'full_name': safe_str(repo.get('full_name'), 255),
+                
+                # Repo owner info
+                'owner_login': safe_str(repo_owner.get('login'), 255),
+                'owner_id': safe_int(repo_owner.get('id')),
+                'owner_node_id': safe_str(repo_owner.get('node_id'), 255),
+                'owner_avatar_url': safe_str(repo_owner.get('avatar_url')),
+                'owner_gravatar_id': safe_str(repo_owner.get('gravatar_id'), 255),
+                'owner_url': safe_str(repo_owner.get('url')),
+                'owner_html_url': safe_str(repo_owner.get('html_url')),
+                'owner_type': safe_str(repo_owner.get('type'), 50),
+                'owner_site_admin': safe_bool(repo_owner.get('site_admin')),
+                
+                # Extended repo metadata
+                'node_id': safe_str(repo.get('node_id'), 255),
+                'html_url': safe_str(repo.get('html_url')),
+                'description': safe_str(repo.get('description')),
+                'fork': safe_bool(repo.get('fork')),
+                'keys_url': safe_str(repo.get('keys_url')),
+                'collaborators_url': safe_str(repo.get('collaborators_url')),
+                'teams_url': safe_str(repo.get('teams_url')),
+                'hooks_url': safe_str(repo.get('hooks_url')),
+                'issue_events_url': safe_str(repo.get('issue_events_url')),
+                'events_url': safe_str(repo.get('events_url')),
+                'assignees_url': safe_str(repo.get('assignees_url')),
+                'branches_url': safe_str(repo.get('branches_url')),
+                'tags_url': safe_str(repo.get('tags_url')),
+                'blobs_url': safe_str(repo.get('blobs_url')),
+                'git_tags_url': safe_str(repo.get('git_tags_url')),
+                'git_refs_url': safe_str(repo.get('git_refs_url')),
+                'trees_url': safe_str(repo.get('trees_url')),
+                'statuses_url': safe_str(repo.get('statuses_url')),
+                'languages_url': safe_str(repo.get('languages_url')),
+                'stargazers_url': safe_str(repo.get('stargazers_url')),
+                'contributors_url': safe_str(repo.get('contributors_url')),
+                'subscribers_url': safe_str(repo.get('subscribers_url')),
+                'subscription_url': safe_str(repo.get('subscription_url')),
+                'commits_url': safe_str(repo.get('commits_url')),
+                'git_commits_url': safe_str(repo.get('git_commits_url')),
+                'comments_url': safe_str(repo.get('comments_url')),
+                'issue_comment_url': safe_str(repo.get('issue_comment_url')),
+                'contents_url': safe_str(repo.get('contents_url')),
+                'compare_url': safe_str(repo.get('compare_url')),
+                'merges_url': safe_str(repo.get('merges_url')),
+                'archive_url': safe_str(repo.get('archive_url')),
+                'downloads_url': safe_str(repo.get('downloads_url')),
+                'issues_url': safe_str(repo.get('issues_url')),
+                'pulls_url': safe_str(repo.get('pulls_url')),
+                'milestones_url': safe_str(repo.get('milestones_url')),
+                'notifications_url': safe_str(repo.get('notifications_url')),
+                'labels_url': safe_str(repo.get('labels_url')),
+                'releases_url': safe_str(repo.get('releases_url')),
+                'deployments_url': safe_str(repo.get('deployments_url')),
+                'git_url': safe_str(repo.get('git_url')),
+                'ssh_url': safe_str(repo.get('ssh_url')),
+                'clone_url': safe_str(repo.get('clone_url')),
+                'svn_url': safe_str(repo.get('svn_url')),
+                'homepage': safe_str(repo.get('homepage')),
+                'size': safe_int(repo.get('size')),
+                'stargazers_count': safe_int(repo.get('stargazers_count')),
+                'watchers_count': safe_int(repo.get('watchers_count')),
+                'language': safe_str(repo.get('language'), 100),
+                'has_issues': safe_bool(repo.get('has_issues')),
+                'has_projects': safe_bool(repo.get('has_projects')),
+                'has_downloads': safe_bool(repo.get('has_downloads')),
+                'has_wiki': safe_bool(repo.get('has_wiki')),
+                'has_pages': safe_bool(repo.get('has_pages')),
+                'has_discussions': safe_bool(repo.get('has_discussions')),
+                'forks_count': safe_int(repo.get('forks_count')),
+                'mirror_url': safe_str(repo.get('mirror_url')),
+                'archived': safe_bool(repo.get('archived')),
+                'disabled': safe_bool(repo.get('disabled')),
+                'open_issues_count': safe_int(repo.get('open_issues_count')),
+                'license_key': safe_str(repo_license.get('key'), 50),
+                'license_name': safe_str(repo_license.get('name'), 255),
+                'license_spdx_id': safe_str(repo_license.get('spdx_id'), 50),
+                'license_url': safe_str(repo_license.get('url')),
+                'license_node_id': safe_str(repo_license.get('node_id'), 255),
+                'allow_forking': safe_bool(repo.get('allow_forking')),
+                'is_template': safe_bool(repo.get('is_template')),
+                'web_commit_signoff_required': safe_bool(repo.get('web_commit_signoff_required')),
+                'topics': safe_array(repo.get('topics')),
+                'visibility': safe_str(repo.get('visibility'), 50),
+                'forks': safe_int(repo.get('forks')),
+                'open_issues': safe_int(repo.get('open_issues')),
+                'watchers': safe_int(repo.get('watchers')),
+                'default_branch': safe_str(repo.get('default_branch'), 100),
+                'created_at': parse_date(repo['created_at']) if repo.get('created_at') else None,
+                'updated_at': parse_date(repo['updated_at']) if repo.get('updated_at') else None,
+                'pushed_at': parse_date(repo['pushed_at']) if repo.get('pushed_at') else None
+            }
+            
+            # Extract COMPLETE org data (optional)
+            org = event.get('org', {})
+            org_data = {
+                'id': safe_int(org.get('id')) if org else None,
+                'login': safe_str(org.get('login'), 255) if org else None,
+                'node_id': safe_str(org.get('node_id'), 255) if org else None,
+                'gravatar_id': safe_str(org.get('gravatar_id'), 255) if org else None,
+                'url': safe_str(org.get('url')) if org else None,
+                'avatar_url': safe_str(org.get('avatar_url')) if org else None,
+                'html_url': safe_str(org.get('html_url')) if org else None,
+                'followers_url': safe_str(org.get('followers_url')) if org else None,
+                'following_url': safe_str(org.get('following_url')) if org else None,
+                'gists_url': safe_str(org.get('gists_url')) if org else None,
+                'starred_url': safe_str(org.get('starred_url')) if org else None,
+                'subscriptions_url': safe_str(org.get('subscriptions_url')) if org else None,
+                'organizations_url': safe_str(org.get('organizations_url')) if org else None,
+                'repos_url': safe_str(org.get('repos_url')) if org else None,
+                'events_url': safe_str(org.get('events_url')) if org else None,
+                'received_events_url': safe_str(org.get('received_events_url')) if org else None,
+                'type': safe_str(org.get('type'), 50) if org else None,
+                'user_view_type': safe_str(org.get('user_view_type'), 50) if org else None,
+                'site_admin': safe_bool(org.get('site_admin')) if org else None
+            }
+            
+            return {
+                'id': event_id,
+                'type': event_type,
+                'created_at': created_at,
+                'public': event.get('public', True),
+                'actor': actor_data,
+                'repo': repo_data,
+                'org': org_data,
+                'payload': event.get('payload', {}),
+                'raw_event': event,  # Store complete raw event for preservation
+                'api_source': 'github_archive'
+            }
+            
+        except Exception as e:
+            logging.error(f"Error validating event: {e}")
+            return None
+
     async def insert_events_batch(self, events: List[Dict], filename: str) -> int:
-        """Insert a batch of events into the database"""
+        """Insert pre-validated events into database with enhanced error handling"""
         if not events:
             return 0
             
+        # Pre-validate and convert all events
+        validated_events = []
+        invalid_count = 0
+        
+        for event in events:
+            validated_event = self.validate_and_convert_event(event)
+            if validated_event:
+                validated_events.append(validated_event)
+            else:
+                invalid_count += 1
+        
+        if invalid_count > 0:
+            logging.warning(f"Filtered out {invalid_count} invalid events from {filename}")
+            
+        if not validated_events:
+            return 0
+            
+        # Enhanced comprehensive INSERT statement for ALL GitHub API data
         insert_sql = """
         INSERT INTO github_events (
-            id, type, created_at, public,
+            -- Core event fields
+            event_id, event_type, event_created_at, event_public,
+            
+            -- Complete Actor fields
             actor_id, actor_login, actor_display_login, actor_gravatar_id, actor_url, actor_avatar_url,
-            repo_id, repo_name, repo_url,
-            org_id, org_login, org_gravatar_id, org_url, org_avatar_url,
-            payload, file_source
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
-        ON CONFLICT (id) DO NOTHING
+            actor_node_id, actor_html_url, actor_followers_url, actor_following_url, actor_gists_url,
+            actor_starred_url, actor_subscriptions_url, actor_organizations_url, actor_repos_url,
+            actor_events_url, actor_received_events_url, actor_type, actor_user_view_type, actor_site_admin,
+            
+            -- Complete Repository fields
+            repo_id, repo_name, repo_url, repo_full_name, repo_owner_login, repo_owner_id,
+            repo_owner_node_id, repo_owner_avatar_url, repo_owner_gravatar_id, repo_owner_url,
+            repo_owner_html_url, repo_owner_type, repo_owner_site_admin, repo_node_id, repo_html_url,
+            repo_description, repo_fork, repo_keys_url, repo_collaborators_url, repo_teams_url,
+            repo_hooks_url, repo_issue_events_url, repo_events_url, repo_assignees_url, repo_branches_url,
+            repo_tags_url, repo_blobs_url, repo_git_tags_url, repo_git_refs_url, repo_trees_url,
+            repo_statuses_url, repo_languages_url, repo_stargazers_url, repo_contributors_url,
+            repo_subscribers_url, repo_subscription_url, repo_commits_url, repo_git_commits_url,
+            repo_comments_url, repo_issue_comment_url, repo_contents_url, repo_compare_url,
+            repo_merges_url, repo_archive_url, repo_downloads_url, repo_issues_url, repo_pulls_url,
+            repo_milestones_url, repo_notifications_url, repo_labels_url, repo_releases_url,
+            repo_deployments_url, repo_git_url, repo_ssh_url, repo_clone_url, repo_svn_url,
+            repo_homepage, repo_size, repo_stargazers_count, repo_watchers_count, repo_language,
+            repo_has_issues, repo_has_projects, repo_has_downloads, repo_has_wiki, repo_has_pages,
+            repo_has_discussions, repo_forks_count, repo_mirror_url, repo_archived, repo_disabled,
+            repo_open_issues_count, repo_license_key, repo_license_name, repo_license_spdx_id,
+            repo_license_url, repo_license_node_id, repo_allow_forking, repo_is_template,
+            repo_web_commit_signoff_required, repo_topics, repo_visibility, repo_forks,
+            repo_open_issues, repo_watchers, repo_default_branch, repo_created_at, repo_updated_at, repo_pushed_at,
+            
+            -- Complete Organization fields
+            org_id, org_login, org_node_id, org_gravatar_id, org_url, org_avatar_url, org_html_url,
+            org_followers_url, org_following_url, org_gists_url, org_starred_url, org_subscriptions_url,
+            org_organizations_url, org_repos_url, org_events_url, org_received_events_url,
+            org_type, org_user_view_type, org_site_admin,
+            
+            -- Data storage fields
+            payload, raw_event, file_source, api_source, data_version
+        ) VALUES (
+            -- Core event values (4 params)
+            $1, $2, $3, $4,
+            
+            -- Actor values (19 params)
+            $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23,
+            
+            -- Repository values (70 params)
+            $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41,
+            $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59,
+            $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77,
+            $78, $79, $80, $81, $82, $83, $84, $85, $86, $87, $88, $89, $90, $91, $92, $93,
+            
+            -- Organization values (19 params)
+            $94, $95, $96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110, $111, $112,
+            
+            -- Data storage values (5 params)
+            $113, $114, $115, $116, $117
+        )
+        ON CONFLICT (event_id) DO UPDATE SET
+            -- Update with newer data if we get a duplicate (which shouldn't happen, but just in case)
+            payload = EXCLUDED.payload,
+            raw_event = EXCLUDED.raw_event,
+            processed_at = NOW()
         """
         
         async with self.pool.acquire() as conn:
             async with conn.transaction():
                 rows_affected = 0
-                for event in events:
+                
+                for event in validated_events:
                     try:
-                        # Parse created_at timestamp
-                        created_at = parse_date(event['created_at'])
-                        
-                        # Extract actor info
-                        actor = event.get('actor', {})
-                        actor_id = actor.get('id')
-                        actor_login = actor.get('login')
-                        actor_display_login = actor.get('display_login')
-                        actor_gravatar_id = actor.get('gravatar_id')
-                        actor_url = actor.get('url')
-                        actor_avatar_url = actor.get('avatar_url')
-                        
-                        # Extract repo info
-                        repo = event.get('repo', {})
-                        repo_id = repo.get('id')
-                        repo_name = repo.get('name')
-                        repo_url = repo.get('url')
-                        
-                        # Extract org info
-                        org = event.get('org', {})
-                        org_id = org.get('id') if org else None
-                        org_login = org.get('login') if org else None
-                        org_gravatar_id = org.get('gravatar_id') if org else None
-                        org_url = org.get('url') if org else None
-                        org_avatar_url = org.get('avatar_url') if org else None
-                        
-                        # Store payload as JSONB
-                        payload = event.get('payload', {})
+                        # Extract data for comprehensive insertion
+                        actor = event['actor']
+                        repo = event['repo']
+                        org = event['org']
                         
                         result = await conn.execute(
                             insert_sql,
-                            int(event['id']), event['type'], created_at, event.get('public', True),
-                            actor_id, actor_login, actor_display_login, actor_gravatar_id, actor_url, actor_avatar_url,
-                            repo_id, repo_name, repo_url,
-                            org_id, org_login, org_gravatar_id, org_url, org_avatar_url,
-                            json.dumps(payload), filename
+                            # Core event fields (4 params)
+                            event['id'], event['type'], event['created_at'], event['public'],
+                            
+                            # Complete Actor fields (19 params)
+                            actor['id'], actor['login'], actor['display_login'], actor['gravatar_id'],
+                            actor['url'], actor['avatar_url'], actor['node_id'], actor['html_url'],
+                            actor['followers_url'], actor['following_url'], actor['gists_url'],
+                            actor['starred_url'], actor['subscriptions_url'], actor['organizations_url'],
+                            actor['repos_url'], actor['events_url'], actor['received_events_url'],
+                            actor['type'], actor['user_view_type'], actor['site_admin'],
+                            
+                            # Complete Repository fields (70 params)
+                            repo['id'], repo['name'], repo['url'], repo['full_name'], repo['owner_login'],
+                            repo['owner_id'], repo['owner_node_id'], repo['owner_avatar_url'],
+                            repo['owner_gravatar_id'], repo['owner_url'], repo['owner_html_url'],
+                            repo['owner_type'], repo['owner_site_admin'], repo['node_id'], repo['html_url'],
+                            repo['description'], repo['fork'], repo['keys_url'], repo['collaborators_url'],
+                            repo['teams_url'], repo['hooks_url'], repo['issue_events_url'], repo['events_url'],
+                            repo['assignees_url'], repo['branches_url'], repo['tags_url'], repo['blobs_url'],
+                            repo['git_tags_url'], repo['git_refs_url'], repo['trees_url'], repo['statuses_url'],
+                            repo['languages_url'], repo['stargazers_url'], repo['contributors_url'],
+                            repo['subscribers_url'], repo['subscription_url'], repo['commits_url'],
+                            repo['git_commits_url'], repo['comments_url'], repo['issue_comment_url'],
+                            repo['contents_url'], repo['compare_url'], repo['merges_url'], repo['archive_url'],
+                            repo['downloads_url'], repo['issues_url'], repo['pulls_url'], repo['milestones_url'],
+                            repo['notifications_url'], repo['labels_url'], repo['releases_url'],
+                            repo['deployments_url'], repo['git_url'], repo['ssh_url'], repo['clone_url'],
+                            repo['svn_url'], repo['homepage'], repo['size'], repo['stargazers_count'],
+                            repo['watchers_count'], repo['language'], repo['has_issues'], repo['has_projects'],
+                            repo['has_downloads'], repo['has_wiki'], repo['has_pages'], repo['has_discussions'],
+                            repo['forks_count'], repo['mirror_url'], repo['archived'], repo['disabled'],
+                            repo['open_issues_count'], repo['license_key'], repo['license_name'],
+                            repo['license_spdx_id'], repo['license_url'], repo['license_node_id'],
+                            repo['allow_forking'], repo['is_template'], repo['web_commit_signoff_required'],
+                            repo['topics'], repo['visibility'], repo['forks'], repo['open_issues'],
+                            repo['watchers'], repo['default_branch'], repo['created_at'], repo['updated_at'], repo['pushed_at'],
+                            
+                            # Complete Organization fields (19 params)
+                            org['id'], org['login'], org['node_id'], org['gravatar_id'], org['url'],
+                            org['avatar_url'], org['html_url'], org['followers_url'], org['following_url'],
+                            org['gists_url'], org['starred_url'], org['subscriptions_url'],
+                            org['organizations_url'], org['repos_url'], org['events_url'],
+                            org['received_events_url'], org['type'], org['user_view_type'], org['site_admin'],
+                            
+                            # Data storage fields (5 params)
+                            json.dumps(event['payload']), json.dumps(event['raw_event']), 
+                            filename, event['api_source'], '3.0'
                         )
                         
-                        if result == "INSERT 0 1":
+                        if "INSERT" in result or "UPDATE" in result:
                             rows_affected += 1
                             
                     except Exception as e:
-                        logging.error(f"Error inserting event {event.get('id', 'unknown')}: {e}")
+                        logging.error(f"Database error inserting comprehensive event {event['id']}: {e}")
                         continue
                         
                 return rows_affected
+
+    async def get_data_quality_metrics(self) -> Dict:
+        """Get comprehensive data quality metrics for monitoring"""
+        async with self.pool.acquire() as conn:
+            metrics = {}
+            
+            # Basic event statistics
+            event_stats = await conn.fetchrow("""
+                SELECT 
+                    COUNT(*) as total_events,
+                    COUNT(DISTINCT type) as event_types,
+                    COUNT(DISTINCT actor_id) as unique_actors,
+                    COUNT(DISTINCT repo_id) as unique_repos,
+                    COUNT(CASE WHEN actor_id IS NULL THEN 1 END) as null_actor_ids,
+                    COUNT(CASE WHEN repo_id IS NULL THEN 1 END) as null_repo_ids,
+                    MIN(created_at) as earliest_event,
+                    MAX(created_at) as latest_event
+                FROM github_events
+            """)
+            
+            # Event type distribution
+            event_types = await conn.fetch("""
+                SELECT type, COUNT(*) as count 
+                FROM github_events 
+                GROUP BY type 
+                ORDER BY count DESC 
+                LIMIT 20
+            """)
+            
+            # Data integrity checks
+            integrity_issues = await conn.fetchrow("""
+                SELECT 
+                    COUNT(CASE WHEN id IS NULL THEN 1 END) as null_ids,
+                    COUNT(CASE WHEN type IS NULL OR type = '' THEN 1 END) as invalid_types,
+                    COUNT(CASE WHEN created_at IS NULL THEN 1 END) as null_timestamps,
+                    COUNT(CASE WHEN payload IS NULL THEN 1 END) as null_payloads
+                FROM github_events
+            """)
+            
+            # Processing statistics
+            processing_stats = await conn.fetchrow("""
+                SELECT 
+                    COUNT(*) as total_files,
+                    SUM(event_count) as total_processed_events,
+                    AVG(event_count) as avg_events_per_file,
+                    MIN(processed_at) as first_processed,
+                    MAX(processed_at) as last_processed,
+                    SUM(file_size) / (1024*1024*1024) as total_gb_processed
+                FROM processed_files
+            """)
+            
+            # Recent processing activity (last 24 hours)
+            recent_activity = await conn.fetchrow("""
+                SELECT 
+                    COUNT(*) as files_processed_24h,
+                    SUM(event_count) as events_processed_24h
+                FROM processed_files 
+                WHERE processed_at > NOW() - INTERVAL '24 hours'
+            """)
+            
+            # Repository statistics
+            repo_stats = await conn.fetchrow("""
+                SELECT 
+                    COUNT(*) as total_repositories,
+                    COUNT(CASE WHEN stargazers_count > 0 THEN 1 END) as repos_with_stars,
+                    AVG(stargazers_count) as avg_stars,
+                    MAX(stargazers_count) as max_stars,
+                    COUNT(DISTINCT language) as unique_languages
+                FROM repositories
+            """)
+            
+            metrics = {
+                'events': {
+                    'total': event_stats['total_events'],
+                    'unique_actors': event_stats['unique_actors'],
+                    'unique_repos': event_stats['unique_repos'],
+                    'event_types_count': event_stats['event_types'],
+                    'null_actor_ids': event_stats['null_actor_ids'],
+                    'null_repo_ids': event_stats['null_repo_ids'],
+                    'date_range': {
+                        'earliest': event_stats['earliest_event'].isoformat() if event_stats['earliest_event'] else None,
+                        'latest': event_stats['latest_event'].isoformat() if event_stats['latest_event'] else None
+                    }
+                },
+                'event_types': [{'type': row['type'], 'count': row['count']} for row in event_types],
+                'data_integrity': {
+                    'null_ids': integrity_issues['null_ids'],
+                    'invalid_types': integrity_issues['invalid_types'],
+                    'null_timestamps': integrity_issues['null_timestamps'],
+                    'null_payloads': integrity_issues['null_payloads']
+                },
+                'processing': {
+                    'total_files': processing_stats['total_files'] or 0,
+                    'total_processed_events': processing_stats['total_processed_events'] or 0,
+                    'avg_events_per_file': float(processing_stats['avg_events_per_file'] or 0),
+                    'total_gb_processed': float(processing_stats['total_gb_processed'] or 0),
+                    'first_processed': processing_stats['first_processed'].isoformat() if processing_stats['first_processed'] else None,
+                    'last_processed': processing_stats['last_processed'].isoformat() if processing_stats['last_processed'] else None
+                },
+                'recent_activity': {
+                    'files_processed_24h': recent_activity['files_processed_24h'] or 0,
+                    'events_processed_24h': recent_activity['events_processed_24h'] or 0
+                },
+                'repositories': {
+                    'total': repo_stats['total_repositories'] or 0,
+                    'with_stars': repo_stats['repos_with_stars'] or 0,
+                    'avg_stars': float(repo_stats['avg_stars'] or 0),
+                    'max_stars': repo_stats['max_stars'] or 0,
+                    'unique_languages': repo_stats['unique_languages'] or 0
+                },
+                'quality_score': self._calculate_quality_score(event_stats, integrity_issues)
+            }
+            
+            return metrics
+    
+    def _calculate_quality_score(self, event_stats: Dict, integrity_issues: Dict) -> float:
+        """Calculate a data quality score (0-100)"""
+        if not event_stats or event_stats['total_events'] == 0:
+            return 0.0
+            
+        total_events = event_stats['total_events']
+        issues = (
+            integrity_issues['null_ids'] + 
+            integrity_issues['invalid_types'] + 
+            integrity_issues['null_timestamps']
+        )
+        
+        # Calculate percentage of clean data
+        clean_percentage = ((total_events - issues) / total_events) * 100
+        return min(100.0, max(0.0, clean_percentage))
 
 
 class GitHubArchiveScraper:
@@ -1179,9 +1693,18 @@ class GitHubArchiveScraper:
         repo = event.get('repo', {})
         payload = event.get('payload', {})
         
+        # Helper function for safe integer conversion
+        def safe_int(value):
+            if value is None or value == '':
+                return None
+            try:
+                return int(value)
+            except (ValueError, TypeError):
+                return None
+        
         change = {
-            'repo_id': repo.get('id'),
-            'event_id': event.get('id'),
+            'repo_id': safe_int(repo.get('id')),
+            'event_id': safe_int(event.get('id')),
             'change_type': event.get('type', '').replace('Event', '').lower(),
             'created_at': event.get('created_at')
         }
