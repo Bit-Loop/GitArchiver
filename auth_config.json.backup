@@ -1,9 +1,0 @@
-{
-  "admin_password_hash": {
-    "hash": "44027fd74c09151348ba410dce3a8ff4c5f2def8f3d91c640c641fbbc00f3516",
-    "salt": "198a0cccd279f6c8a89d090d42eeaa96b4a4bd06ebcff2adf2945b4a1ad54d6f"
-  },
-  "session_timeout_hours": 24,
-  "require_auth_for_downloads": true,
-  "allow_github_token_config": true
-}
