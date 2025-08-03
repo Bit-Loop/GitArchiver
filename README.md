@@ -1,14 +1,20 @@
 # 🚀 GitArchiver - GitHub Archive Data Scraper & Analyzer
 
-A comprehensive, production-ready GitHub Archive data scraper and analyzer designed for Oracle Cloud infrastructure with advanced resource management, real-time monitoring, and intelligent data processing capabilities.
+A comprehensive, production-ready GitHub Archive data scraper and analyzer built with **Rust** for maximum performance and safety. Designed for cloud infrastructure with advanced resource management, real-time monitoring, and intelligent data processing capabilities.
 
 ## 🎯 Overview
 
-GitArchiver is a sophisticated Python-based system that downloads, processes, and analyzes GitHub Archive data from https://data.gharchive.org/. It provides a complete solution for researchers, security professionals, and developers who need to analyze GitHub activity patterns, track repository changes, and generate actionable insights from GitHub's public event stream.
+GitArchiver is a sophisticated **Rust-based system** that downloads, processes, and analyzes GitHub Archive data from https://data.gharchive.org/. It provides a complete solution for researchers, security professionals, and developers who need to analyze GitHub activity patterns, track repository changes, and generate actionable insights from GitHub's public event stream.
 
 ## ✨ Key Features
 
-### 🛡️ Oracle Cloud Optimized
+### 🦀 Rust-Powered Performance
+- **Memory Safety**: Zero-cost abstractions with guaranteed memory safety
+- **Async Processing**: High-performance concurrent downloads and processing
+- **Type Safety**: Compile-time guarantees for data integrity
+- **Cross-Platform**: Runs on any Linux distribution with automatic dependency detection
+
+### 🛡️ Cloud Optimized
 - **Resource Management**: Intelligent memory, CPU, and disk usage monitoring
 - **Safety Limits**: Automatic throttling and cleanup to prevent system overload
 - **Emergency Protocols**: Graceful degradation under resource pressure
@@ -22,107 +28,144 @@ GitArchiver is a sophisticated Python-based system that downloads, processes, an
 - **Data Validation**: Comprehensive error handling and data integrity checks
 
 ### 🌐 Professional Web Interface
-- **Real-time Dashboard**: Live monitoring of scraper status and metrics
-- **Resource Visualization**: Progress bars for memory, disk, and CPU usage
-- **Event Search**: Full-text search with advanced filtering capabilities
-- **Log Viewer**: Real-time log streaming with download functionality
-- **Control Panel**: Start/stop/restart operations with safety checks
+- **JWT Authentication**: Secure token-based authentication system
+- **Real-time API**: RESTful endpoints with WebSocket support
+- **Resource Monitoring**: Live system resource tracking
+- **Event Management**: Comprehensive GitHub event processing
+- **Admin Interface**: User management and system configuration
 
 ### 🔍 Advanced Analytics
 - **Event Analysis**: Comprehensive GitHub event type tracking
 - **Repository Insights**: Repository change monitoring and statistics
-- **Wordlist Generation**: Security research wordlist creation from GitHub data
+- **Security Research**: Advanced data mining capabilities
 - **Trend Analysis**: Historical data analysis and pattern recognition
 
 ### 🔐 Security & Authentication
+- **JWT Tokens**: Secure authentication with configurable expiration
+- **Password Hashing**: Argon2 password hashing for security
 - **Rate Limiting**: Intelligent GitHub API rate limit management
-- **Authentication**: Secure web interface with session management
-- **API Security**: Protected endpoints with proper authentication
 - **Audit Logging**: Comprehensive activity logging and monitoring
 
 ## 🏗️ Architecture
 
 ```
 GitArchiver/
-├── Core Components/
-│   ├── gharchive_scraper.py    # Main scraper engine
-│   ├── api.py                  # Web API with resource monitoring
-│   ├── db_manager.py           # Database management and queries
-│   └── config.py               # Configuration management
-├── Utilities/
-│   ├── auth_manager.py         # Authentication system
-│   ├── rate_limiter.py         # GitHub API rate limiting
-│   ├── data_importer.py        # Multi-source data import
-│   ├── wordlist_generator.py   # Security wordlist generation
-│   └── system_monitor.py       # System resource monitoring
-├── Web Interface/
-│   └── dashboard.html          # Professional web dashboard
-├── Scripts/
-│   ├── Grabber.sh             # Bash wrapper for common operations
-│   ├── start_safe_api.sh      # Safe API startup with monitoring
-│   └── safe_scraper.sh        # Safe scraper execution
-└── Data/
-    ├── gharchive_data/        # Downloaded GitHub Archive files
-    ├── logs/                  # Application logs
-    └── reports/               # System monitoring reports
+├── Core Components (Rust)/
+│   ├── src/core/
+│   │   ├── config.rs              # Configuration management
+│   │   └── database.rs            # PostgreSQL integration
+│   ├── src/auth/
+│   │   ├── jwt.rs                 # JWT token management
+│   │   ├── users.rs               # User management
+│   │   └── middleware.rs          # Authentication middleware
+│   ├── src/api/
+│   │   ├── server.rs              # Axum web server
+│   │   ├── routes.rs              # API routing
+│   │   └── handlers.rs            # Request handlers
+│   └── src/scraper/
+│       ├── archive_scraper.rs     # GitHub Archive scraper
+│       ├── file_processor.rs      # File processing engine
+│       └── downloader.rs          # Concurrent downloader
+├── Setup & Management/
+│   ├── setup.sh                   # Professional interactive setup
+│   ├── start.sh                   # Launcher script
+│   └── Cargo.toml                 # Rust dependencies
+├── Configuration/
+│   ├── .env                       # Environment configuration
+│   └── .env.example               # Configuration template
+└── Data & Logs/
+    ├── gharchive_data/            # Downloaded GitHub Archive files
+    ├── logs/                      # Application logs
+    └── target/release/            # Compiled Rust binary
 ```
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Python 3.8+
-- PostgreSQL 12+
-- 16GB+ RAM (recommended for Oracle Cloud)
-- 50GB+ disk space
+- **Any Linux Distribution** (Ubuntu, CentOS, Fedora, Arch, Alpine, etc.)
+- **PostgreSQL 12+** (can be installed automatically)
+- **8GB+ RAM** (recommended for optimal performance)
+- **20GB+ disk space** for data storage
 
-### Installation
+### One-Command Installation
 
-1. **Clone the repository:**
+The enhanced setup script automatically detects your Linux distribution and installs all required dependencies:
+
 ```bash
 git clone https://github.com/Bit-Loop/GitArchiver.git
 cd GitArchiver
+./start.sh
 ```
 
-2. **Create and activate virtual environment:**
+### Interactive Setup Menu
+
+The professional setup script provides a comprehensive installation experience:
+
+- **🔍 System Check** - Verify all dependencies and environment
+- **🔧 Install Dependencies** - Auto-install Rust, OpenSSL, build tools for any Linux distro
+- **📦 Full Installation** - Complete automated setup with progress tracking
+- **🔨 Build Project** - Compile the optimized Rust binary
+- **🚀 Service Management** - Start/stop/monitor the application
+- **📊 System Monitoring** - Real-time resource usage and status
+
+### Supported Linux Distributions
+
+The setup script automatically detects and supports:
+- **Ubuntu/Debian** - `apt-get` package management
+- **RHEL/CentOS/Fedora** - `dnf/yum` package management  
+- **Arch Linux/Manjaro** - `pacman` package management
+- **openSUSE/SLES** - `zypper` package management
+- **Alpine Linux** - `apk` package management
+- **Generic Linux** - Manual installation guidance
+
+### Manual Installation (Advanced Users)
+
+If you prefer manual installation:
+
+1. **Install system dependencies:**
 ```bash
-python3 -m venv github_scraper_env
-source github_scraper_env/bin/activate
+# Ubuntu/Debian
+sudo apt-get install build-essential curl git pkg-config libssl-dev jq
+
+# RHEL/CentOS/Fedora
+sudo dnf install gcc gcc-c++ curl git pkg-config openssl-devel jq
+
+# Arch Linux
+sudo pacman -S base-devel curl git pkg-config openssl jq
 ```
 
-3. **Install dependencies:**
+2. **Install Rust:**
 ```bash
-pip install -r requirements.txt
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source ~/.cargo/env
 ```
 
-4. **Configure environment:**
+3. **Build the project:**
 ```bash
-cp .env.example .env
-# Edit .env with your database and GitHub API credentials
-```
-
-5. **Set up database:**
-```bash
-python3 db_manager.py --setup
+cd GitArchiver/rust_github_archiver
+cargo build --release
 ```
 
 ### Configuration
 
-Create a `.env` file with your settings:
+The application uses a `.env` file for configuration (automatically created during setup):
 
 ```bash
 # Database Configuration
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=gharchive
-DB_USER=gharchive
-DB_PASSWORD=your_secure_password
+DATABASE_URL=postgresql://github_archiver:secure_password@localhost/github_archiver
+
+# JWT Authentication
+JWT_SECRET=your-super-secure-jwt-secret-key-change-this-in-production
+
+# Server Configuration
+SERVER_HOST=127.0.0.1
+SERVER_PORT=8081
 
 # GitHub API (optional, for higher rate limits)
-GITHUB_TOKEN=your_github_token
-GITHUB_USERNAME=your_username
+GITHUB_TOKEN=your_github_token_here
 
-# Resource Limits (Oracle Cloud optimized)
+# Resource Limits (auto-configured based on system)
 MAX_CONCURRENT_DOWNLOADS=6
 BATCH_SIZE=500
 REQUEST_TIMEOUT=180
@@ -133,60 +176,55 @@ DOWNLOAD_DIR=./gharchive_data
 
 ## 🎮 Usage
 
-### Web Dashboard
+### Web API and Authentication
 
-Start the web API and dashboard:
+Start the service:
 
 ```bash
-./start_safe_api.sh
+./start.sh
+# Then select option 5 (Start Service)
 ```
 
-Access the dashboard at: `http://localhost:8080`
+Access the API at: `http://localhost:8081`
 
-The dashboard provides:
-- Real-time system monitoring
-- Scraper control (start/stop/restart)
-- Event search and analysis
-- Log viewing and download
-- Resource usage visualization
+**Authentication Endpoints:**
+- `POST /auth/login` - User login
+- `POST /auth/logout` - User logout  
+- `GET /auth/user` - Get current user info
+
+**Default Admin User:**
+- Username: `admin`
+- Password: `admin123` (change after first login)
+
+### API Endpoints
+
+**Health & Status:**
+- `GET /health` - Service health check
+- `GET /api/status` - System status and metrics
+
+**Authentication Required:**
+- `GET /api/events` - Search and retrieve GitHub events
+- `POST /api/scraper/start` - Start scraper
+- `POST /api/scraper/stop` - Stop scraper
+- `GET /api/stats` - Database statistics
 
 ### Command Line Interface
 
-**Basic scraping:**
+**Service Management:**
 ```bash
-# Scrape recent data (last 24 hours)
-python3 gharchive_scraper.py --recent
+# Start the complete application
+./start.sh
 
-# Scrape specific date range
-python3 gharchive_scraper.py --start-date 2024-01-01 --end-date 2024-01-31
-
-# Continuous monitoring mode
-python3 gharchive_scraper.py --monitor
+# Quick actions
+cargo run --release  # Direct binary execution
 ```
 
-**Database management:**
-```bash
-# View database statistics
-python3 db_manager.py --stats
-
-# Search events
-python3 db_manager.py --search "repository_name:example"
-
-# Export data
-python3 db_manager.py --export --format json --output results.json
-```
-
-**Bash wrapper (simplified commands):**
-```bash
-# Quick recent scrape
-./Grabber.sh recent
-
-# Custom date range
-./Grabber.sh range 2024-01-01 2024-01-31
-
-# System status
-./Grabber.sh status
-```
+**Interactive Setup Menu:**
+- System dependency checking and installation
+- Automatic PostgreSQL setup
+- Build optimization
+- Service monitoring
+- Configuration management
 
 ## 📊 Data Schema
 

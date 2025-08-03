@@ -28,3 +28,7 @@ echo "Start/Restart: ./restart_server.sh"
 echo "Stop:          ./restart_server.sh stop"  
 echo "Logs:          ./restart_server.sh logs"
 echo "Dashboard:     http://localhost:8080"
+echo
+echo "=== Login Credentials ==="
+echo "Username: admin"
+echo "Password: admin123"

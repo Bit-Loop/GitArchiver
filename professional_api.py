@@ -19,7 +19,6 @@ import aiohttp_cors
 from core.config import Config
 from core.database import DatabaseManager, QualityMetrics
 from core.auth import AuthManager, UserSession
-# from enhanced_scraper import GitHubArchiveScraper, ResourceMonitor
 
 
 class APIError(Exception):
@@ -56,7 +55,23 @@ async def auth_middleware(request: web.Request, handler):
         if datetime.utcnow() > datetime.fromtimestamp(payload['exp']):
             return web.json_response({'error': 'Token expired'}, status=401)
         
-        # Store user info in request
+        # Create a session-like object for compatibility
+        from core.auth import UserSession
+        import time
+        
+        session = UserSession(
+            session_id=token[:16],  # Use first 16 chars of token as session ID
+            user_id='admin',
+            username=payload['user'],
+            permissions={'admin'},  # Admin permissions
+            created_at=payload['iat'],
+            expires_at=payload['exp'],
+            last_activity=time.time(),
+            ip_address=payload.get('ip', 'unknown')
+        )
+        
+        # Store session in request for endpoint compatibility
+        request['session'] = session
         request['user'] = {
             'username': payload['user'],
             'role': payload['role'],
@@ -123,7 +138,7 @@ class ProfessionalAPI:
         self.auth = AuthManager()
         # Initialize resource monitoring (placeholder for now)
         self.resource_monitor = self._create_mock_resource_monitor()
-        self.scraper = None  # Optional[GitHubArchiveScraper] = None
+        self.scraper = None  # Will be initialized after database connection
         
         # Web application
         self.app = web.Application(middlewares=[
@@ -152,10 +167,18 @@ class ProfessionalAPI:
             await self.db.connect()
             self.logger.info("Database connected")
             
-            # Initialize scraper instance (placeholder for now)
-            # self.scraper = GitHubArchiveScraper(self.config)
-            # await self.scraper.initialize()
-            self.logger.info("Scraper initialization skipped (not available)")
+            # Initialize scraper instance
+            try:
+                from enhanced_scraper import GitHubArchiveScraper
+                self.scraper = GitHubArchiveScraper(self.config)
+                await self.scraper.initialize()
+                self.logger.info("Enhanced scraper initialized successfully")
+            except ImportError as e:
+                self.logger.warning(f"Scraper module not available: {e}")
+                self.scraper = None
+            except Exception as e:
+                self.logger.error(f"Scraper initialization failed: {e}")
+                self.scraper = None
             
             # Setup authentication
             self.auth.create_admin_user('admin', self.config.security.admin_password)
@@ -171,8 +194,9 @@ class ProfessionalAPI:
         self.logger.info("Shutting down Professional API...")
         
         try:
-            # if self.scraper:
-            #     await self.scraper.shutdown()
+            # Stop scraper if running
+            if self.scraper:
+                await self.scraper.shutdown()
             await self.db.disconnect()
             self.logger.info("Professional API shutdown complete")
         except Exception as e:
@@ -254,6 +278,16 @@ class ProfessionalAPI:
         self.app.router.add_post('/api/scraper/stop', self.stop_scraper)
         self.app.router.add_get('/api/scraper/status', self.get_scraper_status)
         self.app.router.add_get('/api/scraper/logs', self.get_scraper_logs)
+        
+        # Dashboard-compatible endpoints (aliases for backward compatibility)
+        self.app.router.add_post('/api/start-scraper', self.start_scraper)
+        self.app.router.add_post('/api/stop-scraper', self.stop_scraper)
+        self.app.router.add_get('/api/scraper-status', self.get_scraper_status)
+        self.app.router.add_get('/api/scraper-logs', self.get_scraper_logs)
+        
+        # Wordlist generation endpoints
+        self.app.router.add_post('/api/wordlists/generate', self.generate_comprehensive_wordlists)
+        self.app.router.add_post('/api/wordlists/targeted', self.generate_targeted_wordlist)
         
         # Resource monitoring endpoints
         self.app.router.add_get('/api/resources', self.get_resources)
@@ -678,19 +712,126 @@ class ProfessionalAPI:
     
     async def start_scraper(self, request: web.Request) -> web.Response:
         """Start scraper"""
-        return web.json_response({'message': 'Scraper control endpoint - Coming soon'})
+        try:
+            session: UserSession = request['session']
+            # Only admin can control scraper
+            if not session.has_permission('admin'):
+                return web.json_response({'error': 'Admin permission required'}, status=403)
+            
+            # Log the action
+            self.auth._audit_log('SCRAPER_START_REQUESTED', session.username, 'Scraper start requested')
+            
+            # Check if scraper is available
+            if not self.scraper:
+                return web.json_response({
+                    'success': False,
+                    'message': 'Scraper module not available',
+                    'timestamp': datetime.now().isoformat()
+                }, status=503)
+            
+            # Parse request parameters
+            data = await request.json() if request.can_read_body else {}
+            hours_back = data.get('hours_back', 24)  # Default: last 24 hours
+            
+            # Start the scraper
+            result = await self.scraper.start(hours_back=hours_back)
+            
+            if result['success']:
+                self.auth._audit_log('SCRAPER_STARTED', session.username, f'Scraper started successfully (hours_back={hours_back})')
+            else:
+                self.auth._audit_log('SCRAPER_START_FAILED', session.username, f'Scraper start failed: {result.get("message", "Unknown error")}')
+            
+            return web.json_response(result)
+            
+        except Exception as e:
+            self.logger.error(f"Start scraper error: {e}")
+            return web.json_response({'error': str(e)}, status=500)
     
     async def stop_scraper(self, request: web.Request) -> web.Response:
         """Stop scraper"""
-        return web.json_response({'message': 'Scraper control endpoint - Coming soon'})
+        try:
+            session: UserSession = request['session']
+            # Only admin can control scraper
+            if not session.has_permission('admin'):
+                return web.json_response({'error': 'Admin permission required'}, status=403)
+            
+            # Log the action
+            self.auth._audit_log('SCRAPER_STOP_REQUESTED', session.username, 'Scraper stop requested')
+            
+            # Check if scraper is available
+            if not self.scraper:
+                return web.json_response({
+                    'success': False,
+                    'message': 'Scraper module not available',
+                    'timestamp': datetime.now().isoformat()
+                }, status=503)
+            
+            # Stop the scraper
+            result = await self.scraper.stop()
+            
+            if result['success']:
+                self.auth._audit_log('SCRAPER_STOPPED', session.username, 'Scraper stopped successfully')
+            else:
+                self.auth._audit_log('SCRAPER_STOP_FAILED', session.username, f'Scraper stop failed: {result.get("message", "Unknown error")}')
+            
+            return web.json_response(result)
+            
+        except Exception as e:
+            self.logger.error(f"Stop scraper error: {e}")
+            return web.json_response({'error': str(e)}, status=500)
     
     async def get_scraper_status(self, request: web.Request) -> web.Response:
         """Get scraper status"""
-        return web.json_response({'message': 'Scraper status endpoint - Coming soon'})
+        try:
+            session: UserSession = request['session']
+            
+            # Check if scraper is available
+            if not self.scraper:
+                return web.json_response({
+                    'running': False,
+                    'status': 'not_available',
+                    'message': 'Scraper module not available',
+                    'last_run': None,
+                    'events_processed': 0,
+                    'timestamp': datetime.now().isoformat()
+                })
+            
+            # Get actual scraper status
+            status = await self.scraper.get_status()
+            return web.json_response(status)
+            
+        except Exception as e:
+            self.logger.error(f"Get scraper status error: {e}")
+            return web.json_response({'error': str(e)}, status=500)
     
     async def get_scraper_logs(self, request: web.Request) -> web.Response:
         """Get scraper logs"""
-        return web.json_response({'message': 'Scraper logs endpoint - Coming soon'})
+        try:
+            session: UserSession = request['session']
+            
+            # Check if scraper is available
+            if not self.scraper:
+                return web.json_response({
+                    'logs': 'Scraper module not available - no logs to display',
+                    'timestamp': datetime.now().isoformat()
+                })
+            
+            # Parse query parameters
+            lines = int(request.query.get('lines', '100'))
+            lines = min(lines, 1000)  # Cap at 1000 lines
+            
+            # Get actual scraper logs
+            logs = await self.scraper.get_logs(lines=lines)
+            
+            return web.json_response({
+                'logs': logs,
+                'lines_requested': lines,
+                'timestamp': datetime.now().isoformat()
+            })
+            
+        except Exception as e:
+            self.logger.error(f"Get scraper logs error: {e}")
+            return web.json_response({'error': str(e)}, status=500)
     
     async def get_audit_log(self, request: web.Request) -> web.Response:
         """Get audit log"""
@@ -701,26 +842,139 @@ class ProfessionalAPI:
         """Prune old data and orphaned records (requires authentication)"""
         try:
             session: UserSession = request['session']
-            if not session:
-                return web.json_response({'error': 'Authentication required'}, status=401)
+            # Session is guaranteed to exist due to auth middleware
+            
+            # Parse request parameters
+            data = await request.json() if request.can_read_body else {}
+            days_old = data.get('days_old', 30)  # Default: prune data older than 30 days
+            dry_run = data.get('dry_run', False)  # Default: actually perform the pruning
             
             # Log the action
-            self.auth._audit_log('DATA_PRUNE_STARTED', session.username, 'Data pruning initiated')
+            self.auth._audit_log('DATA_PRUNE_STARTED', session.username, 
+                               f'Data pruning initiated (days_old={days_old}, dry_run={dry_run})')
             
-            # TODO: Implement actual data pruning logic
-            # For now, return a placeholder response
+            # Implement actual data pruning logic
+            pruning_actions = []
+            deleted_counts = {}
+            
+            # 1. Remove events with corrupted data (numeric types)
+            corrupted_query = """
+                SELECT COUNT(*) FROM github_events 
+                WHERE event_type ~ '^[0-9]+$' OR event_type IS NULL OR event_type = ''
+            """
+            corrupted_count = await self.db.execute_query(corrupted_query, fetch_method='fetchval')
+            
+            if corrupted_count > 0:
+                if not dry_run:
+                    delete_corrupted = """
+                        DELETE FROM github_events 
+                        WHERE event_type ~ '^[0-9]+$' OR event_type IS NULL OR event_type = ''
+                    """
+                    await self.db.execute_query(delete_corrupted, fetch_method='execute')
+                
+                deleted_counts['corrupted_events'] = corrupted_count
+                pruning_actions.append(f"Removed {corrupted_count:,} corrupted events")
+            
+            # 2. Remove old events beyond retention period
+            cutoff_date = datetime.now() - timedelta(days=days_old)
+            old_events_query = """
+                SELECT COUNT(*) FROM github_events 
+                WHERE event_created_at < $1
+            """
+            old_events_count = await self.db.execute_query(old_events_query, cutoff_date, fetch_method='fetchval')
+            
+            if old_events_count > 0:
+                if not dry_run:
+                    delete_old = """
+                        DELETE FROM github_events 
+                        WHERE event_created_at < $1
+                    """
+                    await self.db.execute_query(delete_old, cutoff_date, fetch_method='execute')
+                
+                deleted_counts['old_events'] = old_events_count
+                pruning_actions.append(f"Removed {old_events_count:,} events older than {days_old} days")
+            
+            # 3. Remove orphaned processed files entries
+            orphaned_files_query = """
+                SELECT COUNT(*) FROM processed_files 
+                WHERE processed_at < $1
+            """
+            orphaned_files_count = await self.db.execute_query(orphaned_files_query, cutoff_date, fetch_method='fetchval')
+            
+            if orphaned_files_count > 0:
+                if not dry_run:
+                    delete_orphaned = """
+                        DELETE FROM processed_files 
+                        WHERE processed_at < $1
+                    """
+                    await self.db.execute_query(delete_orphaned, cutoff_date, fetch_method='execute')
+                
+                deleted_counts['orphaned_files'] = orphaned_files_count
+                pruning_actions.append(f"Removed {orphaned_files_count:,} orphaned processed file entries")
+            
+            # 4. Clean up temporary and log files
+            import os
+            import glob
+            temp_files_cleaned = 0
+            log_files_cleaned = 0
+            
+            if not dry_run:
+                # Clean temporary files
+                temp_patterns = ['/tmp/gharchive_*', '/tmp/*.gz.tmp', './temp_*']
+                for pattern in temp_patterns:
+                    for temp_file in glob.glob(pattern):
+                        try:
+                            if os.path.isfile(temp_file) and (time.time() - os.path.getctime(temp_file)) > (24 * 3600):
+                                os.remove(temp_file)
+                                temp_files_cleaned += 1
+                        except Exception:
+                            pass
+                
+                # Clean old log files
+                log_patterns = ['./logs/*.log.old', './logs/*.log.[0-9]*']
+                for pattern in log_patterns:
+                    for log_file in glob.glob(pattern):
+                        try:
+                            if os.path.isfile(log_file) and (time.time() - os.path.getctime(log_file)) > (7 * 24 * 3600):
+                                os.remove(log_file)
+                                log_files_cleaned += 1
+                        except Exception:
+                            pass
+            
+            if temp_files_cleaned > 0:
+                pruning_actions.append(f"Cleaned {temp_files_cleaned} temporary files")
+            if log_files_cleaned > 0:
+                pruning_actions.append(f"Cleaned {log_files_cleaned} old log files")
+            
+            # 5. Vacuum and analyze database if significant deletions occurred
+            total_deleted = sum(deleted_counts.values())
+            if total_deleted > 1000 and not dry_run:
+                try:
+                    # Note: VACUUM cannot be run in transaction, so we use a separate connection
+                    async with self.db.get_connection() as conn:
+                        await conn.execute("VACUUM ANALYZE github_events")
+                        await conn.execute("VACUUM ANALYZE processed_files")
+                    pruning_actions.append("Optimized database tables with VACUUM ANALYZE")
+                except Exception as e:
+                    self.logger.warning(f"Database optimization failed: {e}")
+            
+            # Prepare result
             result = {
                 'success': True,
-                'summary': 'Data pruning completed successfully',
-                'actions': [
-                    'Removed orphaned events',
-                    'Cleaned up temporary files',
-                    'Optimized database tables'
-                ],
+                'dry_run': dry_run,
+                'summary': f"Data pruning {'simulation' if dry_run else 'completed'} successfully",
+                'actions': pruning_actions if pruning_actions else ['No data needed pruning'],
+                'deleted_counts': deleted_counts,
+                'total_deleted': total_deleted,
+                'parameters': {
+                    'days_old': days_old,
+                    'cutoff_date': cutoff_date.isoformat()
+                },
                 'timestamp': datetime.now().isoformat()
             }
             
-            self.auth._audit_log('DATA_PRUNE_COMPLETED', session.username, 'Data pruning completed successfully')
+            action_summary = f"Data pruning {'simulated' if dry_run else 'completed'}: {total_deleted:,} records affected"
+            self.auth._audit_log('DATA_PRUNE_COMPLETED', session.username, action_summary)
             return web.json_response(result)
             
         except Exception as e:
@@ -731,30 +985,151 @@ class ProfessionalAPI:
         """Remove selected repositories and their events (requires authentication)"""
         try:
             session: UserSession = request['session']
-            if not session:
-                return web.json_response({'error': 'Authentication required'}, status=401)
+            # Session is guaranteed to exist due to auth middleware
             
             data = await request.json()
             repository_ids = data.get('repository_ids', [])
+            repository_names = data.get('repository_names', [])  # Support removal by name too
+            dry_run = data.get('dry_run', False)
             
-            if not repository_ids:
-                return web.json_response({'error': 'No repository IDs provided'}, status=400)
+            if not repository_ids and not repository_names:
+                return web.json_response({'error': 'No repository IDs or names provided'}, status=400)
             
             # Log the action
+            target_count = len(repository_ids) + len(repository_names)
             self.auth._audit_log('REPOSITORIES_REMOVAL_STARTED', session.username, 
-                               f'Repository removal initiated for {len(repository_ids)} repositories')
+                               f'Repository removal initiated for {target_count} repositories (dry_run={dry_run})')
             
-            # TODO: Implement actual repository removal logic
-            # For now, return a placeholder response
+            # Implement actual repository removal logic
+            removal_actions = []
+            removed_details = {
+                'repositories': [],
+                'events_deleted': 0,
+                'total_repositories_affected': 0
+            }
+            
+            # Build the WHERE clause for repository selection
+            where_conditions = []
+            query_params = []
+            param_counter = 1
+            
+            if repository_ids:
+                # Convert string IDs to integers if needed
+                valid_repo_ids = []
+                for repo_id in repository_ids:
+                    try:
+                        valid_repo_ids.append(int(repo_id))
+                    except (ValueError, TypeError):
+                        self.logger.warning(f"Invalid repository ID: {repo_id}")
+                
+                if valid_repo_ids:
+                    placeholders = ','.join([f'${i + param_counter}' for i in range(len(valid_repo_ids))])
+                    where_conditions.append(f"repo_id IN ({placeholders})")
+                    query_params.extend(valid_repo_ids)
+                    param_counter += len(valid_repo_ids)
+            
+            if repository_names:
+                placeholders = ','.join([f'${i + param_counter}' for i in range(len(repository_names))])
+                where_conditions.append(f"repo_full_name IN ({placeholders})")
+                query_params.extend(repository_names)
+                param_counter += len(repository_names)
+            
+            if not where_conditions:
+                return web.json_response({'error': 'No valid repository identifiers provided'}, status=400)
+            
+            where_clause = ' OR '.join(where_conditions)
+            
+            # First, get information about repositories that will be affected
+            repo_info_query = f"""
+                SELECT DISTINCT repo_id, repo_name, repo_full_name, COUNT(*) as event_count
+                FROM github_events 
+                WHERE {where_clause}
+                GROUP BY repo_id, repo_name, repo_full_name
+                ORDER BY event_count DESC
+            """
+            
+            affected_repos = await self.db.execute_query(repo_info_query, *query_params)
+            
+            if not affected_repos:
+                return web.json_response({
+                    'success': True,
+                    'message': 'No repositories found matching the provided criteria',
+                    'removed_count': 0,
+                    'timestamp': datetime.now().isoformat()
+                })
+            
+            total_events_to_delete = sum(repo['event_count'] for repo in affected_repos)
+            removed_details['total_repositories_affected'] = len(affected_repos)
+            
+            # Collect repository details
+            for repo in affected_repos:
+                removed_details['repositories'].append({
+                    'id': repo['repo_id'],
+                    'name': repo['repo_name'],
+                    'full_name': repo['repo_full_name'],
+                    'events_count': repo['event_count']
+                })
+            
+            if not dry_run:
+                # Perform the actual deletion
+                delete_query = f"""
+                    DELETE FROM github_events 
+                    WHERE {where_clause}
+                """
+                
+                delete_result = await self.db.execute_query(delete_query, *query_params, fetch_method='execute')
+                
+                # Extract the number of deleted rows from the result
+                # PostgreSQL returns something like "DELETE 1234"
+                if isinstance(delete_result, str) and delete_result.startswith('DELETE '):
+                    removed_details['events_deleted'] = int(delete_result.split(' ')[1])
+                else:
+                    removed_details['events_deleted'] = total_events_to_delete  # Fallback estimate
+                
+                removal_actions.append(f"Deleted {removed_details['events_deleted']:,} events from {len(affected_repos)} repositories")
+                
+                # Clean up any orphaned processed file entries related to these repositories
+                # This is a best-effort cleanup since processed_files doesn't directly reference repositories
+                try:
+                    cleanup_query = """
+                        DELETE FROM processed_files 
+                        WHERE event_count = 0 AND processed_at < NOW() - INTERVAL '7 days'
+                    """
+                    cleanup_result = await self.db.execute_query(cleanup_query, fetch_method='execute')
+                    if isinstance(cleanup_result, str) and cleanup_result.startswith('DELETE '):
+                        cleaned_files = int(cleanup_result.split(' ')[1])
+                        if cleaned_files > 0:
+                            removal_actions.append(f"Cleaned up {cleaned_files} orphaned processed file entries")
+                except Exception as e:
+                    self.logger.warning(f"Failed to clean up processed files: {e}")
+                
+                # Optimize database if significant deletions occurred
+                if removed_details['events_deleted'] > 1000:
+                    try:
+                        async with self.db.get_connection() as conn:
+                            await conn.execute("VACUUM ANALYZE github_events")
+                        removal_actions.append("Optimized database tables after deletion")
+                    except Exception as e:
+                        self.logger.warning(f"Database optimization failed: {e}")
+            else:
+                # Dry run - just report what would be deleted
+                removed_details['events_deleted'] = total_events_to_delete
+                removal_actions.append(f"Would delete {total_events_to_delete:,} events from {len(affected_repos)} repositories")
+            
+            # Prepare result
             result = {
                 'success': True,
-                'removed_count': len(repository_ids),
-                'message': f'Successfully removed {len(repository_ids)} repositories and their associated events',
+                'dry_run': dry_run,
+                'removed_count': removed_details['total_repositories_affected'],
+                'events_deleted': removed_details['events_deleted'],
+                'message': f"Successfully {'simulated removal of' if dry_run else 'removed'} {len(affected_repos)} repositories and their associated events",
+                'actions': removal_actions,
+                'details': removed_details,
                 'timestamp': datetime.now().isoformat()
             }
             
-            self.auth._audit_log('REPOSITORIES_REMOVAL_COMPLETED', session.username, 
-                               f'Repository removal completed: {len(repository_ids)} repositories removed')
+            action_summary = f"Repository removal {'simulated' if dry_run else 'completed'}: {len(affected_repos)} repositories, {removed_details['events_deleted']:,} events"
+            self.auth._audit_log('REPOSITORIES_REMOVAL_COMPLETED', session.username, action_summary)
             return web.json_response(result)
             
         except Exception as e:
@@ -765,8 +1140,7 @@ class ProfessionalAPI:
         """Get disk usage analysis (requires authentication)"""
         try:
             session: UserSession = request['session']
-            if not session:
-                return web.json_response({'error': 'Authentication required'}, status=401)
+            # Session is guaranteed to exist due to auth middleware
             
             import psutil
             import os
@@ -825,6 +1199,73 @@ class ProfessionalAPI:
             
         except Exception as e:
             self.logger.error(f"Disk usage analysis error: {e}")
+            return web.json_response({'error': str(e)}, status=500)
+    
+    # Wordlist generation endpoints
+    async def generate_comprehensive_wordlists(self, request: web.Request) -> web.Response:
+        """Generate comprehensive wordlists for bug bounty hunting"""
+        try:
+            session: UserSession = request['session']
+            
+            # Log the action
+            self.auth._audit_log('WORDLIST_GENERATION_REQUESTED', session.username, 'Comprehensive wordlist generation requested')
+            
+            data = await request.json()
+            target_domains = data.get('target_domains', [])
+            technologies = data.get('technologies', [])
+            days_back = data.get('days_back', 30)
+            max_words = data.get('max_words', 10000)
+            
+            # For now, return a mock response since wordlist generation is not implemented
+            result = {
+                'success': True,
+                'message': 'Wordlist generation initiated (placeholder - feature not available)',
+                'task_id': f'wordlist_{int(time.time())}',
+                'parameters': {
+                    'target_domains': target_domains,
+                    'technologies': technologies,
+                    'days_back': days_back,
+                    'max_words': max_words
+                },
+                'estimated_completion': '5-10 minutes',
+                'timestamp': datetime.now().isoformat()
+            }
+            
+            return web.json_response(result)
+            
+        except Exception as e:
+            self.logger.error(f"Comprehensive wordlist generation error: {e}")
+            return web.json_response({'error': str(e)}, status=500)
+    
+    async def generate_targeted_wordlist(self, request: web.Request) -> web.Response:
+        """Generate targeted wordlist for specific domains"""
+        try:
+            session: UserSession = request['session']
+            
+            # Log the action
+            self.auth._audit_log('TARGETED_WORDLIST_REQUESTED', session.username, 'Targeted wordlist generation requested')
+            
+            data = await request.json()
+            target_domain = data.get('target_domain', '')
+            wordlist_type = data.get('type', 'comprehensive')
+            
+            # For now, return a mock response since wordlist generation is not implemented
+            result = {
+                'success': True,
+                'message': 'Targeted wordlist generation initiated (placeholder - feature not available)',
+                'task_id': f'targeted_{int(time.time())}',
+                'parameters': {
+                    'target_domain': target_domain,
+                    'type': wordlist_type
+                },
+                'estimated_completion': '2-5 minutes',
+                'timestamp': datetime.now().isoformat()
+            }
+            
+            return web.json_response(result)
+            
+        except Exception as e:
+            self.logger.error(f"Targeted wordlist generation error: {e}")
             return web.json_response({'error': str(e)}, status=500)
 
 
