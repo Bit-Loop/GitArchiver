@@ -1,0 +1,18 @@
+2025-08-02 01:26:39,169 - INFO - ACTION=USER_CREATED USER=admin DETAILS=Admin user created
+2025-08-03 03:49:01,296 - INFO - ACTION=SCRAPER_START_REQUESTED USER=admin DETAILS=Scraper start requested
+2025-08-03 03:49:23,444 - INFO - ACTION=WORDLIST_GENERATION_REQUESTED USER=admin DETAILS=Comprehensive wordlist generation requested
+2025-08-03 03:51:02,671 - INFO - ACTION=SCRAPER_START_REQUESTED USER=admin DETAILS=Scraper start requested
+2025-08-03 03:51:20,588 - INFO - ACTION=SCRAPER_START_REQUESTED USER=admin DETAILS=Scraper start requested
+2025-08-03 03:52:54,746 - INFO - ACTION=TARGETED_WORDLIST_REQUESTED USER=admin DETAILS=Targeted wordlist generation requested
+2025-08-03 03:53:02,477 - INFO - ACTION=TARGETED_WORDLIST_REQUESTED USER=admin DETAILS=Targeted wordlist generation requested
+2025-08-03 03:53:06,067 - INFO - ACTION=TARGETED_WORDLIST_REQUESTED USER=admin DETAILS=Targeted wordlist generation requested
+2025-08-03 04:05:15,371 - INFO - ACTION=DATA_PRUNE_STARTED USER=admin DETAILS=Data pruning initiated (days_old=30, dry_run=True)
+2025-08-03 04:05:15,381 - INFO - ACTION=DATA_PRUNE_COMPLETED USER=admin DETAILS=Data pruning simulated: 12,646 records affected
+2025-08-03 04:05:34,817 - INFO - ACTION=TARGETED_WORDLIST_REQUESTED USER=admin DETAILS=Targeted wordlist generation requested
+2025-08-03 04:06:05,892 - INFO - ACTION=SCRAPER_START_REQUESTED USER=admin DETAILS=Scraper start requested
+2025-08-03 04:06:06,931 - INFO - ACTION=SCRAPER_STARTED USER=admin DETAILS=Scraper started successfully (hours_back=24)
+2025-08-03 04:06:22,313 - INFO - ACTION=REPOSITORIES_REMOVAL_STARTED USER=admin DETAILS=Repository removal initiated for 1 repositories (dry_run=True)
+2025-08-03 04:06:46,656 - INFO - ACTION=SCRAPER_START_REQUESTED USER=admin DETAILS=Scraper start requested
+2025-08-03 04:06:47,750 - INFO - ACTION=SCRAPER_START_FAILED USER=admin DETAILS=Scraper start failed: Scraper is already running
+2025-08-03 04:10:29,931 - INFO - ACTION=SCRAPER_START_REQUESTED USER=admin DETAILS=Scraper start requested
+2025-08-03 04:10:32,360 - INFO - ACTION=SCRAPER_START_FAILED USER=admin DETAILS=Scraper start failed: Scraper is already running

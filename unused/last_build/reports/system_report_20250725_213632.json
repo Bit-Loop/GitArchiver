@@ -1,0 +1,59 @@
+{
+  "timestamp": "2025-07-25T21:36:32.523186",
+  "uptime_seconds": 550.2,
+  "memory": {
+    "total_gb": 23.42,
+    "available_gb": 18.69,
+    "used_gb": 4.35,
+    "percent": 20.2,
+    "swap_used_gb": 0.0,
+    "swap_total_gb": 0.0
+  },
+  "disk": {
+    "total_gb": 44.07,
+    "used_gb": 11.79,
+    "free_gb": 32.27,
+    "percent": 26.75
+  },
+  "cpu": {
+    "percent": 7.3,
+    "count": 4,
+    "load_1min": 0.38525390625,
+    "load_5min": 0.32568359375,
+    "load_15min": 0.240234375
+  },
+  "top_processes": [
+    {
+      "pid": 154035,
+      "name": "node",
+      "memory_percent": 3.8,
+      "cpu_percent": 4.3
+    },
+    {
+      "pid": 152545,
+      "name": "node",
+      "memory_percent": 3.57,
+      "cpu_percent": 3.8
+    },
+    {
+      "pid": 148700,
+      "name": "node",
+      "memory_percent": 2.52,
+      "cpu_percent": 4.0
+    },
+    {
+      "pid": 1486,
+      "name": "k3s-server",
+      "memory_percent": 2.34,
+      "cpu_percent": 4.0
+    },
+    {
+      "pid": 156939,
+      "name": "node",
+      "memory_percent": 1.63,
+      "cpu_percent": 0.0
+    }
+  ],
+  "alerts": [],
+  "system_healthy": true
+}

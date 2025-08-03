@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitHub Secret Hunter</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: #000000;
+        color: #ffffff;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        overflow: hidden;
+      }
+
+      /* Loading screen */
+      .loading-screen {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(135deg, #000000 0%, #111111 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      }
+
+      .loading-content {
+        text-align: center;
+      }
+
+      .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 4px solid rgba(0, 255, 65, 0.1);
+        border-top: 4px solid #00FF41;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      .loading-text {
+        color: #00FF41;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .loading-subtext {
+        color: #666;
+        font-size: 14px;
+      }
+
+      /* Hide loading screen once app loads */
+      .app-loaded .loading-screen {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Loading screen -->
+    <div class="loading-screen">
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">GitHub Secret Hunter</div>
+        <div class="loading-subtext">Initializing secure environment...</div>
+      </div>
+    </div>
+
+    <!-- App root -->
+    <div id="root"></div>
+
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <script>
+      // Hide loading screen once app loads
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          document.body.classList.add('app-loaded');
+        }, 1000);
+      });
+
+      // Tauri security context
+      window.__TAURI_METADATA__ = {
+        __currentWindow: { label: 'main' },
+        __windows: [{ label: 'main' }],
+        __webviews: [{ label: 'main' }]
+      };
+    </script>
+  </body>
+</html>

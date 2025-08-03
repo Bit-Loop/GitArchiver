@@ -1,0 +1,12 @@
+/home/ubuntu/GitArchiver/rust_github_archiver/target/release/deps/base16ct-132422e49bb6d85e.d: /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/lib.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/lower.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/mixed.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/upper.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/display.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/error.rs
+
+/home/ubuntu/GitArchiver/rust_github_archiver/target/release/deps/libbase16ct-132422e49bb6d85e.rlib: /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/lib.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/lower.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/mixed.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/upper.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/display.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/error.rs
+
+/home/ubuntu/GitArchiver/rust_github_archiver/target/release/deps/libbase16ct-132422e49bb6d85e.rmeta: /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/lib.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/lower.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/mixed.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/upper.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/display.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/error.rs
+
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/lib.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/lower.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/mixed.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/upper.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/display.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/base16ct-0.1.1/src/error.rs:

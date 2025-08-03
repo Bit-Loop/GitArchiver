@@ -1,0 +1,59 @@
+{
+  "timestamp": "2025-08-03T04:36:40.400406",
+  "uptime_seconds": 716958.1,
+  "memory": {
+    "total_gb": 23.42,
+    "available_gb": 17.68,
+    "used_gb": 5.24,
+    "percent": 24.5,
+    "swap_used_gb": 0.0,
+    "swap_total_gb": 0.0
+  },
+  "disk": {
+    "total_gb": 44.07,
+    "used_gb": 19.06,
+    "free_gb": 25.0,
+    "percent": 43.25
+  },
+  "cpu": {
+    "percent": 100.0,
+    "count": 4,
+    "load_1min": 2.95068359375,
+    "load_5min": 2.8427734375,
+    "load_15min": 2.21533203125
+  },
+  "top_processes": [
+    {
+      "pid": 1300562,
+      "name": "node",
+      "memory_percent": 8.27,
+      "cpu_percent": 6.7
+    },
+    {
+      "pid": 1301380,
+      "name": "node",
+      "memory_percent": 4.57,
+      "cpu_percent": 0.0
+    },
+    {
+      "pid": 1486,
+      "name": "k3s-server",
+      "memory_percent": 2.37,
+      "cpu_percent": 4.4
+    },
+    {
+      "pid": 1372406,
+      "name": "rustc",
+      "memory_percent": 1.04,
+      "cpu_percent": 0.0
+    }
+  ],
+  "alerts": [
+    {
+      "type": "CRITICAL",
+      "category": "CPU",
+      "message": "CPU usage critical: 100.0%"
+    }
+  ],
+  "system_healthy": false
+}

@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-black text-white overflow-hidden;
+  }
+}
+
+@layer components {
+  .lava-lamp-container {
+    @apply fixed inset-0 w-full h-full overflow-hidden pointer-events-none;
+    background: radial-gradient(circle at 20% 80%, rgba(0, 255, 65, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 0, 65, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #000000 0%, #111111 100%);
+  }
+
+  .lava-blob {
+    @apply absolute rounded-full blur-sm;
+    background: linear-gradient(45deg, currentColor, transparent);
+    animation: lava-flow 10s ease-in-out infinite;
+  }
+
+  .lava-bubble {
+    @apply absolute rounded-full opacity-70;
+    animation: bubble 8s linear infinite;
+  }
+
+  .glass-panel {
+    @apply bg-black bg-opacity-30 backdrop-blur-md border border-gray-800 rounded-lg;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .status-indicator {
+    @apply w-3 h-3 rounded-full animate-pulse-glow;
+  }
+
+  .status-healthy {
+    @apply bg-lava-green;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+  }
+
+  .status-warning {
+    @apply bg-lava-yellow;
+    box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+  }
+
+  .status-critical {
+    @apply bg-lava-red;
+    box-shadow: 0 0 10px rgba(255, 0, 65, 0.5);
+  }
+
+  .metric-card {
+    @apply glass-panel p-6 hover:bg-opacity-40 transition-all duration-300;
+  }
+
+  .secret-card {
+    @apply glass-panel p-4 mb-4 hover:bg-opacity-40 transition-all duration-300;
+  }
+
+  .glow-button {
+    @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300;
+    background: linear-gradient(45deg, rgba(0, 255, 65, 0.1), rgba(0, 255, 65, 0.3));
+    border: 1px solid rgba(0, 255, 65, 0.5);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+  }
+
+  .glow-button:hover {
+    box-shadow: 0 0 30px rgba(0, 255, 65, 0.4);
+    transform: translateY(-2px);
+  }
+
+  .danger-button {
+    @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300;
+    background: linear-gradient(45deg, rgba(255, 0, 65, 0.1), rgba(255, 0, 65, 0.3));
+    border: 1px solid rgba(255, 0, 65, 0.5);
+    box-shadow: 0 0 20px rgba(255, 0, 65, 0.2);
+  }
+
+  .danger-button:hover {
+    box-shadow: 0 0 30px rgba(255, 0, 65, 0.4);
+    transform: translateY(-2px);
+  }
+
+  .nav-item {
+    @apply px-4 py-2 rounded-lg transition-all duration-300 cursor-pointer;
+  }
+
+  .nav-item:hover {
+    background: rgba(0, 255, 65, 0.1);
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+  }
+
+  .nav-item.active {
+    background: rgba(0, 255, 65, 0.2);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 65, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 65, 0.5);
+}
+
+/* Glitch effect for critical alerts */
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+.glitch-effect {
+  animation: glitch 0.3s ease-in-out infinite;
+}

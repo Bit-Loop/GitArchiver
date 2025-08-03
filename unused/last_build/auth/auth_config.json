@@ -1,0 +1,10 @@
+{
+  "secret_key": "tk7y2N1HcMdObSbE_DKuF5KdkuwL37O2ExsPj6NWaeg",
+  "session_duration_hours": 24,
+  "max_failed_attempts": 5,
+  "lockout_duration_minutes": 30,
+  "require_2fa": false,
+  "password_min_length": 8,
+  "password_require_special": true,
+  "jwt_algorithm": "HS256"
+}

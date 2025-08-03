@@ -1,0 +1,12 @@
+/home/ubuntu/GitArchiver/rust_github_archiver/target/release/deps/spki-c736d53b2dd064eb.d: /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/lib.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/algorithm.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/error.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/spki.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/traits.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/../README.md
+
+/home/ubuntu/GitArchiver/rust_github_archiver/target/release/deps/libspki-c736d53b2dd064eb.rlib: /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/lib.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/algorithm.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/error.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/spki.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/traits.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/../README.md
+
+/home/ubuntu/GitArchiver/rust_github_archiver/target/release/deps/libspki-c736d53b2dd064eb.rmeta: /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/lib.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/algorithm.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/error.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/spki.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/traits.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/../README.md
+
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/lib.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/algorithm.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/error.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/spki.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/traits.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spki-0.6.0/src/../README.md:

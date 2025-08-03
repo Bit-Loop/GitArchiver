@@ -1,0 +1,34 @@
+{
+  "bRXM7-FP4YQLOe6J64TfyWxgvnz_d5B0JTiHq7zAgeA": {
+    "token": "bRXM7-FP4YQLOe6J64TfyWxgvnz_d5B0JTiHq7zAgeA",
+    "user_id": "admin",
+    "github_token": null,
+    "created_at": 1753580707.6993248,
+    "expires_at": 1753667107.6993248,
+    "permissions": {
+      "read_data": true,
+      "search_data": true,
+      "view_stats": true,
+      "download_archives": false,
+      "manage_repositories": false,
+      "admin_operations": false,
+      "rate_limited_operations": false
+    }
+  },
+  "D3d-4Vwn4qH3dbCVtvYCmxCMQvVtGpNDqjm2dn28srw": {
+    "token": "D3d-4Vwn4qH3dbCVtvYCmxCMQvVtGpNDqjm2dn28srw",
+    "user_id": "admin",
+    "github_token": null,
+    "created_at": 1753580713.54154,
+    "expires_at": 1753667113.54154,
+    "permissions": {
+      "read_data": true,
+      "search_data": true,
+      "view_stats": true,
+      "download_archives": false,
+      "manage_repositories": false,
+      "admin_operations": false,
+      "rate_limited_operations": false
+    }
+  }
+}
