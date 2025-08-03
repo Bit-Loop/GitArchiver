@@ -3715,3 +3715,256 @@ aiohttp.http_exceptions.BadHttpMessage: 400, message:
 2025-07-27 01:12:18,405 - aiohttp.access - INFO - 127.0.0.1 [27/Jul/2025:01:12:18 +0000] "GET /api/status HTTP/1.1" 200 717 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
 2025-07-27 01:12:18,406 - root - INFO - Database disconnected
 2025-07-27 01:12:18,406 - __main__ - INFO - Server shutdown complete
+2025-08-03 03:39:23,862 - core.config - INFO - Logging configured at INFO level
+2025-08-03 03:39:23,864 - __main__ - INFO - Initializing Professional API...
+2025-08-03 03:39:24,013 - core.database - INFO - Connected to PostgreSQL: PostgreSQL 16.9 (Ubuntu 16.9-0ubuntu0.24.04.1) on aarch64-unknown-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0, 64-bit
+2025-08-03 03:39:24,016 - core.database - INFO - Database schema initialized
+2025-08-03 03:39:24,016 - core.database - INFO - Database connected successfully (attempt 1)
+2025-08-03 03:39:24,016 - __main__ - INFO - Database connected
+2025-08-03 03:39:24,016 - __main__ - INFO - Scraper initialization skipped (not available)
+2025-08-03 03:39:24,018 - core.auth - WARNING - Admin user admin already exists
+2025-08-03 03:39:24,018 - __main__ - INFO - Professional API initialization complete
+2025-08-03 03:39:24,018 - __main__ - INFO - Starting Professional API server on 0.0.0.0:8080
+2025-08-03 03:39:24,018 - __main__ - ERROR - API server failed: [Errno 98] error while attempting to bind on address ('0.0.0.0', 8080): address already in use
+2025-08-03 03:40:21,344 - core.config - INFO - Logging configured at INFO level
+2025-08-03 03:40:21,346 - __main__ - INFO - Initializing Professional API...
+2025-08-03 03:40:21,495 - core.database - INFO - Connected to PostgreSQL: PostgreSQL 16.9 (Ubuntu 16.9-0ubuntu0.24.04.1) on aarch64-unknown-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0, 64-bit
+2025-08-03 03:40:21,498 - core.database - INFO - Database schema initialized
+2025-08-03 03:40:21,498 - core.database - INFO - Database connected successfully (attempt 1)
+2025-08-03 03:40:21,498 - __main__ - INFO - Database connected
+2025-08-03 03:40:21,498 - __main__ - INFO - Scraper initialization skipped (not available)
+2025-08-03 03:40:21,500 - core.auth - WARNING - Admin user admin already exists
+2025-08-03 03:40:21,500 - __main__ - INFO - Professional API initialization complete
+2025-08-03 03:40:21,500 - __main__ - INFO - Starting Professional API server on 0.0.0.0:8080
+2025-08-03 03:40:21,500 - __main__ - INFO - Professional API server running at http://0.0.0.0:8080
+2025-08-03 03:40:32,301 - api_access - INFO - GET /api/health - 200 - 0.006s
+2025-08-03 03:40:32,302 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:40:32 +0000] "GET /api/health HTTP/1.1" 200 294 "-" "curl/8.5.0"
+2025-08-03 03:41:12,229 - api_access - INFO - GET /api/health - 200 - 0.002s
+2025-08-03 03:41:12,229 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:41:12 +0000] "GET /api/health HTTP/1.1" 200 294 "-" "curl/8.5.0"
+2025-08-03 03:41:12,239 - api_access - INFO - GET /api/health - 200 - 0.002s
+2025-08-03 03:41:12,240 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:41:12 +0000] "GET /api/health HTTP/1.1" 200 294 "-" "curl/8.5.0"
+/home/ubuntu/GitArchiver/professional_api.py:401: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'iat': datetime.utcnow(),
+/home/ubuntu/GitArchiver/professional_api.py:402: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'exp': datetime.utcnow() + timedelta(hours=24),
+2025-08-03 03:41:22,308 - api_access - INFO - POST /api/login - 200 - 0.001s
+2025-08-03 03:41:22,308 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:41:22 +0000] "POST /api/login HTTP/1.1" 200 434 "-" "curl/8.5.0"
+2025-08-03 03:42:29,516 - api_access - INFO - POST /api/login - 200 - 0.000s
+2025-08-03 03:42:29,517 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:29 +0000] "POST /api/login HTTP/1.1" 200 585 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+/home/ubuntu/GitArchiver/professional_api.py:451: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  current_time = datetime.utcnow().timestamp()
+2025-08-03 03:42:29,552 - api_access - INFO - GET /api/auth/status - 200 - 0.000s
+2025-08-03 03:42:29,552 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:29 +0000] "GET /api/auth/status HTTP/1.1" 200 243 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:34,591 - api_access - INFO - GET /api/status - 200 - 0.032s
+2025-08-03 03:42:34,591 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:34 +0000] "GET /api/status HTTP/1.1" 200 954 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:35,096 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:42:35,097 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:35 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:35,097 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:42:35,098 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:35 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:35,694 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:42:35,694 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:35 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:39,578 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:42:39,578 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:39 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:39,579 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:42:39,579 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:39 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:39,580 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:42:39,581 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:39 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:39,608 - api_access - INFO - GET /api/status - 200 - 0.029s
+2025-08-03 03:42:39,608 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:39 +0000] "GET /api/status HTTP/1.1" 200 954 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:44,593 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:42:44,593 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:44 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:44,593 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.002s
+2025-08-03 03:42:44,594 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:42:44,594 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:44 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:44,594 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:44 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:44,621 - api_access - INFO - GET /api/status - 200 - 0.028s
+2025-08-03 03:42:44,621 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:44 +0000] "GET /api/status HTTP/1.1" 200 955 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+/home/ubuntu/GitArchiver/professional_api.py:56: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  if datetime.utcnow() > datetime.fromtimestamp(payload['exp']):
+2025-08-03 03:42:47,139 - api_access - INFO - POST /api/wordlists/targeted - 401 - 0.000s
+2025-08-03 03:42:47,139 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:47 +0000] "POST /api/wordlists/targeted HTTP/1.1" 401 203 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:48,792 - api_access - INFO - POST /api/wordlists/generate - 401 - 0.000s
+2025-08-03 03:42:48,792 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:48 +0000] "POST /api/wordlists/generate HTTP/1.1" 401 203 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:49,610 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:42:49,610 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:49 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:49,611 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:42:49,611 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:49 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:49,614 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:42:49,614 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:49 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:49,641 - api_access - INFO - GET /api/status - 200 - 0.030s
+2025-08-03 03:42:49,641 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:49 +0000] "GET /api/status HTTP/1.1" 200 955 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:54,555 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:42:54,555 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:54 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:54,555 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:42:54,556 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:54 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:54,572 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:42:54,573 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:54 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:54,583 - api_access - INFO - GET /api/status - 200 - 0.029s
+2025-08-03 03:42:54,583 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:54 +0000] "GET /api/status HTTP/1.1" 200 955 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:59,554 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:42:59,555 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:59 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:59,555 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:42:59,555 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:59 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:59,557 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:42:59,557 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:59 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:42:59,584 - api_access - INFO - GET /api/status - 200 - 0.029s
+2025-08-03 03:42:59,585 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:42:59 +0000] "GET /api/status HTTP/1.1" 200 955 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:02,514 - api_access - INFO - POST /api/start-scraper - 401 - 0.000s
+2025-08-03 03:43:02,514 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:02 +0000] "POST /api/start-scraper HTTP/1.1" 401 203 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:02,576 - api_access - INFO - GET /api/status - 200 - 0.028s
+2025-08-03 03:43:02,576 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:02 +0000] "GET /api/status HTTP/1.1" 200 955 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:04,563 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:43:04,563 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:04 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:04,564 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:43:04,564 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:04 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:04,565 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:43:04,565 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:04 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:04,591 - api_access - INFO - GET /api/status - 200 - 0.028s
+2025-08-03 03:43:04,592 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:04 +0000] "GET /api/status HTTP/1.1" 200 955 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:09,554 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:43:09,555 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:09 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:09,555 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:43:09,556 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:09 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:09,557 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:43:09,557 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:09 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:09,584 - api_access - INFO - GET /api/status - 200 - 0.029s
+2025-08-03 03:43:09,584 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:09 +0000] "GET /api/status HTTP/1.1" 200 955 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:14,581 - api_access - INFO - GET /api/status - 200 - 0.028s
+2025-08-03 03:43:14,581 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:14 +0000] "GET /api/status HTTP/1.1" 200 955 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:14,596 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:43:14,596 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:14 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:14,596 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:43:14,597 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:14 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:14,597 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:43:14,598 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:14 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:19,613 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:43:19,614 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:19 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:19,614 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:43:19,614 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:19 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:19,615 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:43:19,616 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:19 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:19,642 - api_access - INFO - GET /api/status - 200 - 0.029s
+2025-08-03 03:43:19,643 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:19 +0000] "GET /api/status HTTP/1.1" 200 954 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:24,565 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:43:24,565 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:24 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:24,566 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.002s
+2025-08-03 03:43:24,566 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:24 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:24,586 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:43:24,586 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:24 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:24,593 - api_access - INFO - GET /api/status - 200 - 0.029s
+2025-08-03 03:43:24,594 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:24 +0000] "GET /api/status HTTP/1.1" 200 954 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:29,552 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:43:29,552 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:29 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:29,553 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:43:29,553 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:29 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:29,554 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:43:29,555 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:29 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:29,582 - api_access - INFO - GET /api/status - 200 - 0.029s
+2025-08-03 03:43:29,582 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:29 +0000] "GET /api/status HTTP/1.1" 200 955 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:34,552 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:43:34,553 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:34 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:34,553 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:43:34,553 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:34 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:34,554 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.002s
+2025-08-03 03:43:34,554 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:34 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:34,581 - api_access - INFO - GET /api/status - 200 - 0.029s
+2025-08-03 03:43:34,581 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:34 +0000] "GET /api/status HTTP/1.1" 200 954 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:39,554 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:43:39,555 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:39 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:39,555 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:43:39,556 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:39 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:39,563 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:43:39,563 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:39 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:39,583 - api_access - INFO - GET /api/status - 200 - 0.028s
+2025-08-03 03:43:39,583 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:39 +0000] "GET /api/status HTTP/1.1" 200 954 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:44,553 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:43:44,553 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:44 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:44,554 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:43:44,554 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:44 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:44,555 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:43:44,556 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:44 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:44,583 - api_access - INFO - GET /api/status - 200 - 0.029s
+2025-08-03 03:43:44,583 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:44 +0000] "GET /api/status HTTP/1.1" 200 955 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:49,617 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:43:49,618 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:49 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:49,618 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:43:49,619 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:49 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:49,619 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:43:49,620 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:49 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:49,645 - api_access - INFO - GET /api/status - 200 - 0.027s
+2025-08-03 03:43:49,646 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:49 +0000] "GET /api/status HTTP/1.1" 200 955 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:50,373 - __main__ - ERROR - Disk usage analysis error: 'session'
+2025-08-03 03:43:50,374 - api_access - INFO - GET /api/system/disk-usage - 500 - 0.000s
+2025-08-03 03:43:50,374 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:50 +0000] "GET /api/system/disk-usage HTTP/1.1" 500 201 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:54,559 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:43:54,560 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:54 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:54,560 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:43:54,561 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:54 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:54,565 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:43:54,566 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:54 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:54,588 - api_access - INFO - GET /api/status - 200 - 0.028s
+2025-08-03 03:43:54,589 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:54 +0000] "GET /api/status HTTP/1.1" 200 955 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:59,556 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:43:59,557 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:59 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:59,557 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.002s
+2025-08-03 03:43:59,558 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:59 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:59,560 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:43:59,560 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:59 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:43:59,585 - api_access - INFO - GET /api/status - 200 - 0.029s
+2025-08-03 03:43:59,586 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:43:59 +0000] "GET /api/status HTTP/1.1" 200 953 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:04,574 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:44:04,575 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:04 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:04,576 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:44:04,577 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:04 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:04,577 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:44:04,578 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:04 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:04,604 - api_access - INFO - GET /api/status - 200 - 0.029s
+2025-08-03 03:44:04,604 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:04 +0000] "GET /api/status HTTP/1.1" 200 953 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:09,586 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:44:09,586 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:09 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:09,587 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:44:09,587 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:09 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:09,588 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:44:09,589 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:09 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:09,614 - api_access - INFO - GET /api/status - 200 - 0.029s
+2025-08-03 03:44:09,615 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:09 +0000] "GET /api/status HTTP/1.1" 200 955 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:14,608 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:44:14,608 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:14 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:14,608 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:44:14,609 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:14 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:14,609 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:44:14,610 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:14 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:14,636 - api_access - INFO - GET /api/status - 200 - 0.029s
+2025-08-03 03:44:14,637 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:14 +0000] "GET /api/status HTTP/1.1" 200 955 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:19,570 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:44:19,570 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:19 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:19,571 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:44:19,571 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:19 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:19,572 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:44:19,573 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:19 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:19,599 - api_access - INFO - GET /api/status - 200 - 0.028s
+2025-08-03 03:44:19,600 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:19 +0000] "GET /api/status HTTP/1.1" 200 954 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:24,560 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:44:24,560 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:24 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:24,560 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:44:24,560 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:24 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:24,562 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:44:24,562 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:24 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:24,589 - api_access - INFO - GET /api/status - 200 - 0.028s
+2025-08-03 03:44:24,589 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:24 +0000] "GET /api/status HTTP/1.1" 200 956 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:29,576 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:44:29,577 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:29 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:29,577 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:44:29,577 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:29 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:29,578 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:44:29,579 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:29 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:29,606 - api_access - INFO - GET /api/status - 200 - 0.028s
+2025-08-03 03:44:29,606 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:29 +0000] "GET /api/status HTTP/1.1" 200 956 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:34,624 - api_access - INFO - GET /api/scraper-status - 401 - 0.000s
+2025-08-03 03:44:34,625 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:34 +0000] "GET /api/scraper-status HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:34,625 - api_access - INFO - GET /api/stats - 401 - 0.000s
+2025-08-03 03:44:34,626 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:34 +0000] "GET /api/stats HTTP/1.1" 401 206 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:34,626 - api_access - INFO - GET /api/rate-limit/status - 200 - 0.001s
+2025-08-03 03:44:34,627 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:34 +0000] "GET /api/rate-limit/status HTTP/1.1" 404 173 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
+2025-08-03 03:44:34,654 - api_access - INFO - GET /api/status - 200 - 0.028s
+2025-08-03 03:44:34,654 - aiohttp.access - INFO - 127.0.0.1 [03/Aug/2025:03:44:34 +0000] "GET /api/status HTTP/1.1" 200 955 "http://localhost:8081/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0"
