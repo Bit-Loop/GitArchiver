@@ -1,0 +1,1 @@
+cargo:rustc-env=MIME_TYPES_GENERATED_PATH=/home/ubuntu/GitArchiver/rust_github_archiver/target/release/build/mime_guess-672a1260473c89a8/out/mime_types_generated.rs

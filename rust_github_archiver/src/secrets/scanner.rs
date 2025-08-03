@@ -107,7 +107,7 @@ impl SecretScanner {
             SecretDetector {
                 name: "AWS Secret Access Key".to_string(),
                 description: "Amazon Web Services Secret Access Key".to_string(),
-                pattern: r"(?i)(aws.{0,20})?['\"]([0-9a-zA-Z/+]{40})['\"]".to_string(),
+                pattern: r#"(?i)(aws.{0,20})?['"]([0-9a-zA-Z/+]{40})['"]"#.to_string(),
                 keywords: vec!["aws".to_string(), "secret".to_string()],
                 entropy_threshold: Some(4.5),
                 verify_func: Some("verify_aws_secret_key".to_string()),
@@ -117,7 +117,7 @@ impl SecretScanner {
             SecretDetector {
                 name: "AWS Session Token".to_string(),
                 description: "Amazon Web Services Session Token".to_string(),
-                pattern: r"(?i)(aws.session.token.{0,20})?['\"]([0-9a-zA-Z/+=]{16,})['\"]".to_string(),
+                pattern: r#"(?i)(aws.session.token.{0,20})?['"]([0-9a-zA-Z/+=]{16,})['"]"#.to_string(),
                 keywords: vec!["aws".to_string(), "session".to_string(), "token".to_string()],
                 entropy_threshold: Some(4.0),
                 verify_func: None,
@@ -319,7 +319,7 @@ impl SecretScanner {
             SecretDetector {
                 name: "Generic API Key".to_string(),
                 description: "Generic API key pattern".to_string(),
-                pattern: r"(?i)(api.key|apikey|api_key).{0,20}['\"]([0-9a-zA-Z_-]{16,})['\"]".to_string(),
+                pattern: r#"(?i)(api.key|apikey|api_key).{0,20}['"]([0-9a-zA-Z_-]{16,})['"]"#.to_string(),
                 keywords: vec!["api".to_string(), "key".to_string()],
                 entropy_threshold: Some(4.0),
                 verify_func: None,
@@ -329,7 +329,7 @@ impl SecretScanner {
             SecretDetector {
                 name: "Generic Password".to_string(),
                 description: "Generic password pattern".to_string(),
-                pattern: r"(?i)(password|passwd|pwd).{0,20}['\"]([0-9a-zA-Z_!@#$%^&*-]{8,})['\"]".to_string(),
+                pattern: r#"(?i)(password|passwd|pwd).{0,20}['"]([0-9a-zA-Z_!@#$%^&*-]{8,})['"]"#.to_string(),
                 keywords: vec!["password".to_string(), "passwd".to_string(), "pwd".to_string()],
                 entropy_threshold: Some(3.5),
                 verify_func: None,
@@ -339,7 +339,7 @@ impl SecretScanner {
             SecretDetector {
                 name: "Generic Secret".to_string(),
                 description: "Generic secret pattern".to_string(),
-                pattern: r"(?i)(secret|token).{0,20}['\"]([0-9a-zA-Z_-]{16,})['\"]".to_string(),
+                pattern: r#"(?i)(secret|token).{0,20}['"]([0-9a-zA-Z_-]{16,})['"]"#.to_string(),
                 keywords: vec!["secret".to_string(), "token".to_string()],
                 entropy_threshold: Some(4.0),
                 verify_func: None,

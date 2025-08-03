@@ -1,0 +1,11 @@
+/home/ubuntu/GitArchiver/rust_github_archiver/target/release/deps/hyper_rustls-af0925cc9284c1be.d: /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/lib.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/config.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/connector.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/connector/builder.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/stream.rs
+
+/home/ubuntu/GitArchiver/rust_github_archiver/target/release/deps/libhyper_rustls-af0925cc9284c1be.rlib: /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/lib.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/config.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/connector.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/connector/builder.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/stream.rs
+
+/home/ubuntu/GitArchiver/rust_github_archiver/target/release/deps/libhyper_rustls-af0925cc9284c1be.rmeta: /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/lib.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/config.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/connector.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/connector/builder.rs /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/stream.rs
+
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/lib.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/config.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/connector.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/connector/builder.rs:
+/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-rustls-0.26.0/src/stream.rs:

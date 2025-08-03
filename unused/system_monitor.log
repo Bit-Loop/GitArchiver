@@ -339,3 +339,104 @@
 2025-08-03 20:28:34,680 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_202834.json'
 2025-08-03 20:29:35,711 - ERROR - CPU: CPU usage critical: 100.0%
 2025-08-03 20:29:35,711 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_202935.json'
+2025-08-03 20:30:36,743 - ERROR - CPU: CPU usage critical: 100.0%
+2025-08-03 20:30:36,743 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203036.json'
+2025-08-03 20:31:37,770 - ERROR - CPU: CPU usage critical: 100.0%
+2025-08-03 20:31:37,770 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203137.json'
+2025-08-03 20:32:38,798 - ERROR - CPU: CPU usage critical: 100.0%
+2025-08-03 20:32:38,799 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203238.json'
+2025-08-03 20:33:39,821 - ERROR - CPU: CPU usage critical: 97.2%
+2025-08-03 20:33:39,822 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203339.json'
+2025-08-03 20:34:40,843 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203440.json'
+2025-08-03 20:35:41,870 - ERROR - CPU: CPU usage critical: 98.5%
+2025-08-03 20:35:41,870 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203541.json'
+2025-08-03 20:36:42,944 - ERROR - CPU: CPU usage critical: 96.8%
+2025-08-03 20:36:42,945 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203642.json'
+2025-08-03 20:37:43,968 - ERROR - CPU: CPU usage critical: 100.0%
+2025-08-03 20:37:43,969 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203743.json'
+2025-08-03 20:38:44,995 - ERROR - CPU: CPU usage critical: 100.0%
+2025-08-03 20:38:44,995 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203844.json'
+2025-08-03 20:39:46,023 - ERROR - CPU: CPU usage critical: 96.3%
+2025-08-03 20:39:46,023 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203946.json'
+2025-08-03 20:40:47,066 - ERROR - CPU: CPU usage critical: 90.2%
+2025-08-03 20:40:47,066 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204047.json'
+2025-08-03 20:41:48,092 - ERROR - CPU: CPU usage critical: 99.5%
+2025-08-03 20:41:48,093 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204148.json'
+2025-08-03 20:42:49,114 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204249.json'
+2025-08-03 20:43:50,135 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204350.json'
+2025-08-03 20:44:51,157 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204451.json'
+2025-08-03 20:45:52,178 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204552.json'
+2025-08-03 20:46:53,199 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204653.json'
+2025-08-03 20:47:54,221 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204754.json'
+2025-08-03 20:48:55,242 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204855.json'
+2025-08-03 20:49:56,264 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204956.json'
+2025-08-03 20:50:57,296 - ERROR - CPU: CPU usage critical: 96.5%
+2025-08-03 20:50:57,296 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205057.json'
+2025-08-03 20:51:58,324 - ERROR - CPU: CPU usage critical: 99.8%
+2025-08-03 20:51:58,325 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205158.json'
+2025-08-03 20:52:59,358 - ERROR - CPU: CPU usage critical: 95.5%
+2025-08-03 20:52:59,358 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205259.json'
+2025-08-03 20:54:00,387 - ERROR - CPU: CPU usage critical: 97.2%
+2025-08-03 20:54:00,387 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205400.json'
+2025-08-03 20:55:01,409 - ERROR - CPU: CPU usage critical: 91.7%
+2025-08-03 20:55:01,410 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205501.json'
+2025-08-03 20:56:02,438 - ERROR - CPU: CPU usage critical: 99.0%
+2025-08-03 20:56:02,438 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205602.json'
+2025-08-03 20:57:03,467 - ERROR - CPU: CPU usage critical: 99.7%
+2025-08-03 20:57:03,467 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205703.json'
+2025-08-03 20:58:04,502 - ERROR - CPU: CPU usage critical: 100.0%
+2025-08-03 20:58:04,504 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205804.json'
+2025-08-03 20:59:05,525 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205905.json'
+2025-08-03 21:00:06,547 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210006.json'
+2025-08-03 21:01:07,573 - ERROR - CPU: CPU usage critical: 100.0%
+2025-08-03 21:01:07,573 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210107.json'
+2025-08-03 21:02:08,595 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210208.json'
+2025-08-03 21:03:09,616 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210309.json'
+2025-08-03 21:04:10,638 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210410.json'
+2025-08-03 21:05:11,659 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210511.json'
+2025-08-03 21:06:12,681 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210612.json'
+2025-08-03 21:07:13,702 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210713.json'
+2025-08-03 21:08:14,723 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210814.json'
+2025-08-03 21:09:15,745 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210915.json'
+2025-08-03 21:10:16,766 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211016.json'
+2025-08-03 21:11:17,788 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211117.json'
+2025-08-03 21:12:18,810 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211218.json'
+2025-08-03 21:13:19,838 - ERROR - CPU: CPU usage critical: 99.8%
+2025-08-03 21:13:19,838 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211319.json'
+2025-08-03 21:14:20,859 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211420.json'
+2025-08-03 21:15:21,880 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211521.json'
+2025-08-03 21:16:22,901 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211622.json'
+2025-08-03 21:17:23,922 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211723.json'
+2025-08-03 21:18:24,943 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211824.json'
+2025-08-03 21:19:25,964 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211925.json'
+2025-08-03 21:20:26,985 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212026.json'
+2025-08-03 21:21:28,006 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212128.json'
+2025-08-03 21:22:29,028 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212229.json'
+2025-08-03 21:23:30,049 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212330.json'
+2025-08-03 21:24:31,071 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212431.json'
+2025-08-03 21:25:32,092 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212532.json'
+2025-08-03 21:26:33,113 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212633.json'
+2025-08-03 21:27:34,134 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212734.json'
+2025-08-03 21:28:35,156 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212835.json'
+2025-08-03 21:29:36,178 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212936.json'
+2025-08-03 21:30:37,199 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213037.json'
+2025-08-03 21:31:38,220 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213138.json'
+2025-08-03 21:32:39,242 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213239.json'
+2025-08-03 21:33:40,264 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213340.json'
+2025-08-03 21:34:41,286 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213441.json'
+2025-08-03 21:35:42,307 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213542.json'
+2025-08-03 21:36:43,328 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213643.json'
+2025-08-03 21:37:44,349 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213744.json'
+2025-08-03 21:38:45,370 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213845.json'
+2025-08-03 21:39:46,391 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213946.json'
+2025-08-03 21:40:47,412 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214047.json'
+2025-08-03 21:41:48,434 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214148.json'
+2025-08-03 21:42:49,455 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214249.json'
+2025-08-03 21:43:50,477 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214350.json'
+2025-08-03 21:44:51,499 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214451.json'
+2025-08-03 21:45:52,519 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214552.json'
+2025-08-03 21:46:53,540 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214653.json'
+2025-08-03 21:47:54,562 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214754.json'
+2025-08-03 21:48:55,584 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214855.json'
+2025-08-03 21:49:56,605 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214956.json'
+2025-08-03 21:50:57,628 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_215057.json'

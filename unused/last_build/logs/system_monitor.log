@@ -76188,3 +76188,780 @@ CPU:    1.0% (Load: 0.24)
 2025-08-03 20:28:34,680 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_202834.json'
 2025-08-03 20:29:35,711 - ERROR - CPU: CPU usage critical: 100.0%
 2025-08-03 20:29:35,711 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_202935.json'
+2025-08-03 20:30:36,743 - ERROR - CPU: CPU usage critical: 100.0%
+2025-08-03 20:30:36,743 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203036.json'
+2025-08-03 20:31:37,770 - ERROR - CPU: CPU usage critical: 100.0%
+2025-08-03 20:31:37,770 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203137.json'
+2025-08-03 20:32:38,798 - ERROR - CPU: CPU usage critical: 100.0%
+2025-08-03 20:32:38,799 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203238.json'
+2025-08-03 20:33:39,821 - ERROR - CPU: CPU usage critical: 97.2%
+2025-08-03 20:33:39,822 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203339.json'
+2025-08-03 20:34:40,843 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203440.json'
+2025-08-03 20:35:41,870 - ERROR - CPU: CPU usage critical: 98.5%
+2025-08-03 20:35:41,870 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203541.json'
+2025-08-03 20:36:42,944 - ERROR - CPU: CPU usage critical: 96.8%
+2025-08-03 20:36:42,945 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203642.json'
+2025-08-03 20:37:43,968 - ERROR - CPU: CPU usage critical: 100.0%
+✅ All systems normal
+
+2025-08-03 19:42:48 - System Status
+Memory: 5.6GB/23.4GB (26.0%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    27.6% (Load: 0.97)
+✅ All systems normal
+
+2025-08-03 19:43:49 - System Status
+Memory: 5.8GB/23.4GB (26.6%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    1.5% (Load: 0.40)
+✅ All systems normal
+
+2025-08-03 19:44:50 - System Status
+Memory: 5.9GB/23.4GB (27.0%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    4.3% (Load: 0.15)
+✅ All systems normal
+
+2025-08-03 19:45:51 - System Status
+Memory: 5.6GB/23.4GB (26.0%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    1.0% (Load: 0.14)
+✅ All systems normal
+
+2025-08-03 19:46:52 - System Status
+Memory: 5.7GB/23.4GB (26.1%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    1.3% (Load: 0.05)
+✅ All systems normal
+
+2025-08-03 19:47:53 - System Status
+Memory: 5.5GB/23.4GB (25.4%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    5.0% (Load: 0.46)
+✅ All systems normal
+
+2025-08-03 19:48:54 - System Status
+Memory: 5.5GB/23.4GB (25.5%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    0.8% (Load: 0.17)
+✅ All systems normal
+
+2025-08-03 19:49:55 - System Status
+Memory: 5.5GB/23.4GB (25.5%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    0.8% (Load: 0.23)
+✅ All systems normal
+
+2025-08-03 19:50:56 - System Status
+Memory: 5.5GB/23.4GB (25.5%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    1.8% (Load: 0.08)
+✅ All systems normal
+
+2025-08-03 19:51:57 - System Status
+Memory: 5.5GB/23.4GB (25.5%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    1.3% (Load: 0.13)
+✅ All systems normal
+
+2025-08-03 19:52:58 - System Status
+Memory: 5.7GB/23.4GB (26.1%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    8.7% (Load: 0.04)
+✅ All systems normal
+
+2025-08-03 19:53:59 - System Status
+Memory: 5.5GB/23.4GB (25.6%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    1.0% (Load: 0.05)
+✅ All systems normal
+
+2025-08-03 19:55:00 - System Status
+Memory: 5.5GB/23.4GB (25.6%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    6.3% (Load: 0.15)
+✅ All systems normal
+
+2025-08-03 19:56:01 - System Status
+Memory: 5.7GB/23.4GB (26.3%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    6.3% (Load: 0.36)
+✅ All systems normal
+
+2025-08-03 19:57:02 - System Status
+Memory: 5.7GB/23.4GB (26.3%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    0.8% (Load: 0.13)
+✅ All systems normal
+
+2025-08-03 19:58:04 - System Status
+Memory: 5.6GB/23.4GB (26.0%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    4.3% (Load: 0.04)
+✅ All systems normal
+
+2025-08-03 19:59:05 - System Status
+Memory: 5.7GB/23.4GB (26.2%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    31.0% (Load: 0.05)
+✅ All systems normal
+
+2025-08-03 20:00:06 - System Status
+Memory: 5.7GB/23.4GB (26.3%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    0.8% (Load: 0.20)
+✅ All systems normal
+
+2025-08-03 20:01:07 - System Status
+Memory: 5.7GB/23.4GB (26.3%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    1.5% (Load: 0.33)
+✅ All systems normal
+
+2025-08-03 20:02:08 - System Status
+Memory: 5.8GB/23.4GB (26.8%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    6.0% (Load: 0.43)
+✅ All systems normal
+
+2025-08-03 20:03:09 - System Status
+Memory: 5.8GB/23.4GB (26.6%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    1.0% (Load: 0.19)
+✅ All systems normal
+
+2025-08-03 20:04:10 - System Status
+Memory: 5.8GB/23.4GB (26.9%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    10.0% (Load: 0.49)
+✅ All systems normal
+
+2025-08-03 20:05:11 - System Status
+Memory: 5.8GB/23.4GB (26.8%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    1.3% (Load: 0.32)
+✅ All systems normal
+
+2025-08-03 20:06:12 - System Status
+Memory: 5.7GB/23.4GB (26.1%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    2.0% (Load: 0.25)
+✅ All systems normal
+
+2025-08-03 20:07:13 - System Status
+Memory: 5.7GB/23.4GB (26.1%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    11.8% (Load: 0.09)
+✅ All systems normal
+
+2025-08-03 20:08:14 - System Status
+Memory: 5.7GB/23.4GB (26.1%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    2.5% (Load: 0.50)
+✅ All systems normal
+
+2025-08-03 20:09:15 - System Status
+Memory: 5.8GB/23.4GB (26.6%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    2.0% (Load: 0.49)
+✅ All systems normal
+
+2025-08-03 20:10:16 - System Status
+Memory: 5.8GB/23.4GB (26.8%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    6.5% (Load: 0.29)
+✅ All systems normal
+
+2025-08-03 20:11:17 - System Status
+Memory: 5.8GB/23.4GB (26.7%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    6.5% (Load: 0.19)
+✅ All systems normal
+
+2025-08-03 20:12:18 - System Status
+Memory: 5.9GB/23.4GB (27.2%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    17.8% (Load: 0.88)
+✅ All systems normal
+
+2025-08-03 20:13:19 - System Status
+Memory: 5.8GB/23.4GB (26.9%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    2.8% (Load: 0.36)
+✅ All systems normal
+
+2025-08-03 20:14:20 - System Status
+Memory: 5.9GB/23.4GB (27.0%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    1.3% (Load: 0.20)
+✅ All systems normal
+
+2025-08-03 20:15:21 - System Status
+Memory: 5.9GB/23.4GB (27.0%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    6.0% (Load: 0.07)
+✅ All systems normal
+
+2025-08-03 20:16:22 - System Status
+Memory: 5.9GB/23.4GB (27.1%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    9.5% (Load: 0.56)
+✅ All systems normal
+
+2025-08-03 20:17:23 - System Status
+Memory: 5.6GB/23.4GB (26.0%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    6.8% (Load: 0.28)
+✅ All systems normal
+
+2025-08-03 20:18:24 - System Status
+Memory: 5.7GB/23.4GB (26.5%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    10.5% (Load: 0.20)
+✅ All systems normal
+
+2025-08-03 20:19:25 - System Status
+Memory: 5.8GB/23.4GB (26.6%)
+Disk:   21.0GB/44.1GB (47.7%)
+CPU:    2.5% (Load: 0.28)
+✅ All systems normal
+
+2025-08-03 20:20:26 - System Status
+Memory: 5.8GB/23.4GB (26.7%)
+Disk:   18.2GB/44.1GB (41.4%)
+CPU:    1.3% (Load: 0.34)
+✅ All systems normal
+
+2025-08-03 20:21:27 - System Status
+Memory: 5.9GB/23.4GB (27.0%)
+Disk:   18.2GB/44.1GB (41.4%)
+CPU:    2.0% (Load: 0.35)
+✅ All systems normal
+
+2025-08-03 20:22:28 - System Status
+Memory: 5.8GB/23.4GB (26.5%)
+Disk:   18.2GB/44.1GB (41.4%)
+CPU:    1.0% (Load: 0.13)
+✅ All systems normal
+
+2025-08-03 20:23:29 - System Status
+Memory: 5.8GB/23.4GB (26.5%)
+Disk:   18.2GB/44.1GB (41.4%)
+CPU:    4.8% (Load: 0.13)
+✅ All systems normal
+
+2025-08-03 20:24:30 - System Status
+Memory: 5.8GB/23.4GB (26.5%)
+Disk:   18.2GB/44.1GB (41.4%)
+CPU:    9.8% (Load: 0.12)
+✅ All systems normal
+
+2025-08-03 20:25:31 - System Status
+Memory: 5.8GB/23.4GB (26.6%)
+Disk:   18.2GB/44.1GB (41.4%)
+CPU:    5.0% (Load: 0.04)
+✅ All systems normal
+
+2025-08-03 20:26:32 - System Status
+Memory: 6.5GB/23.4GB (29.7%)
+Disk:   18.9GB/44.1GB (42.9%)
+CPU:    97.8% (Load: 2.61)
+🚨 ALERTS:
+  🔴 CPU usage critical: 97.8%
+
+2025-08-03 20:27:33 - System Status
+Memory: 6.9GB/23.4GB (31.5%)
+Disk:   19.2GB/44.1GB (43.6%)
+CPU:    97.5% (Load: 3.59)
+🚨 ALERTS:
+  🔴 CPU usage critical: 97.5%
+
+2025-08-03 20:28:34 - System Status
+Memory: 6.9GB/23.4GB (31.5%)
+Disk:   19.5GB/44.1GB (44.2%)
+CPU:    100.0% (Load: 3.81)
+🚨 ALERTS:
+  🔴 CPU usage critical: 100.0%
+
+2025-08-03 20:29:35 - System Status
+Memory: 6.9GB/23.4GB (31.3%)
+Disk:   19.8GB/44.1GB (45.0%)
+CPU:    100.0% (Load: 4.26)
+🚨 ALERTS:
+  🔴 CPU usage critical: 100.0%
+
+2025-08-03 20:30:36 - System Status
+Memory: 7.5GB/23.4GB (33.9%)
+Disk:   20.2GB/44.1GB (45.9%)
+CPU:    100.0% (Load: 6.19)
+🚨 ALERTS:
+  🔴 CPU usage critical: 100.0%
+
+2025-08-03 20:31:37 - System Status
+Memory: 6.8GB/23.4GB (30.9%)
+Disk:   20.4GB/44.1GB (46.2%)
+CPU:    100.0% (Load: 9.12)
+🚨 ALERTS:
+  🔴 CPU usage critical: 100.0%
+
+2025-08-03 20:32:38 - System Status
+Memory: 6.8GB/23.4GB (31.2%)
+Disk:   20.9GB/44.1GB (47.3%)
+CPU:    100.0% (Load: 8.09)
+🚨 ALERTS:
+  🔴 CPU usage critical: 100.0%
+
+2025-08-03 20:33:39 - System Status
+Memory: 6.7GB/23.4GB (30.4%)
+Disk:   20.6GB/44.1GB (46.8%)
+CPU:    97.2% (Load: 6.63)
+🚨 ALERTS:
+  🔴 CPU usage critical: 97.2%
+
+2025-08-03 20:34:40 - System Status
+Memory: 6.0GB/23.4GB (27.5%)
+Disk:   20.7GB/44.1GB (47.1%)
+CPU:    1.5% (Load: 5.32)
+✅ All systems normal
+
+2025-08-03 20:35:41 - System Status
+Memory: 6.6GB/23.4GB (30.0%)
+Disk:   19.3GB/44.1GB (43.8%)
+CPU:    98.5% (Load: 3.88)
+🚨 ALERTS:
+  🔴 CPU usage critical: 98.5%
+
+2025-08-03 20:36:42 - System Status
+Memory: 6.8GB/23.4GB (30.9%)
+Disk:   19.6GB/44.1GB (44.4%)
+CPU:    96.8% (Load: 4.23)
+🚨 ALERTS:
+  🔴 CPU usage critical: 96.8%
+
+2025-08-03 20:37:43 - System Status
+Memory: 7.0GB/23.4GB (31.9%)
+2025-08-03 20:37:43,969 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203743.json'
+2025-08-03 20:38:44,995 - ERROR - CPU: CPU usage critical: 100.0%
+2025-08-03 20:38:44,995 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203844.json'
+2025-08-03 20:39:46,023 - ERROR - CPU: CPU usage critical: 96.3%
+2025-08-03 20:39:46,023 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_203946.json'
+2025-08-03 20:40:47,066 - ERROR - CPU: CPU usage critical: 90.2%
+2025-08-03 20:40:47,066 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204047.json'
+2025-08-03 20:41:48,092 - ERROR - CPU: CPU usage critical: 99.5%
+2025-08-03 20:41:48,093 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204148.json'
+2025-08-03 20:42:49,114 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204249.json'
+2025-08-03 20:43:50,135 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204350.json'
+2025-08-03 20:44:51,157 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204451.json'
+2025-08-03 20:45:52,178 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204552.json'
+2025-08-03 20:46:53,199 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204653.json'
+2025-08-03 20:47:54,221 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204754.json'
+2025-08-03 20:48:55,242 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204855.json'
+2025-08-03 20:49:56,264 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_204956.json'
+2025-08-03 20:50:57,296 - ERROR - CPU: CPU usage critical: 96.5%
+2025-08-03 20:50:57,296 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205057.json'
+2025-08-03 20:51:58,324 - ERROR - CPU: CPU usage critical: 99.8%
+2025-08-03 20:51:58,325 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205158.json'
+2025-08-03 20:52:59,358 - ERROR - CPU: CPU usage critical: 95.5%
+2025-08-03 20:52:59,358 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205259.json'
+2025-08-03 20:54:00,387 - ERROR - CPU: CPU usage critical: 97.2%
+2025-08-03 20:54:00,387 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205400.json'
+2025-08-03 20:55:01,409 - ERROR - CPU: CPU usage critical: 91.7%
+2025-08-03 20:55:01,410 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205501.json'
+2025-08-03 20:56:02,438 - ERROR - CPU: CPU usage critical: 99.0%
+2025-08-03 20:56:02,438 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205602.json'
+2025-08-03 20:57:03,467 - ERROR - CPU: CPU usage critical: 99.7%
+2025-08-03 20:57:03,467 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205703.json'
+2025-08-03 20:58:04,502 - ERROR - CPU: CPU usage critical: 100.0%
+2025-08-03 20:58:04,504 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205804.json'
+2025-08-03 20:59:05,525 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_205905.json'
+2025-08-03 21:00:06,547 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210006.json'
+2025-08-03 21:01:07,573 - ERROR - CPU: CPU usage critical: 100.0%
+2025-08-03 21:01:07,573 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210107.json'
+2025-08-03 21:02:08,595 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210208.json'
+2025-08-03 21:03:09,616 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210309.json'
+2025-08-03 21:04:10,638 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210410.json'
+2025-08-03 21:05:11,659 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210511.json'
+2025-08-03 21:06:12,681 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210612.json'
+2025-08-03 21:07:13,702 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210713.json'
+2025-08-03 21:08:14,723 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210814.json'
+2025-08-03 21:09:15,745 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_210915.json'
+2025-08-03 21:10:16,766 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211016.json'
+2025-08-03 21:11:17,788 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211117.json'
+2025-08-03 21:12:18,810 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211218.json'
+2025-08-03 21:13:19,838 - ERROR - CPU: CPU usage critical: 99.8%
+2025-08-03 21:13:19,838 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211319.json'
+2025-08-03 21:14:20,859 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211420.json'
+2025-08-03 21:15:21,880 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211521.json'
+2025-08-03 21:16:22,901 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211622.json'
+2025-08-03 21:17:23,922 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211723.json'
+2025-08-03 21:18:24,943 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211824.json'
+2025-08-03 21:19:25,964 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_211925.json'
+2025-08-03 21:20:26,985 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212026.json'
+2025-08-03 21:21:28,006 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212128.json'
+2025-08-03 21:22:29,028 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212229.json'
+2025-08-03 21:23:30,049 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212330.json'
+2025-08-03 21:24:31,071 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212431.json'
+2025-08-03 21:25:32,092 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212532.json'
+2025-08-03 21:26:33,113 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212633.json'
+2025-08-03 21:27:34,134 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212734.json'
+2025-08-03 21:28:35,156 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212835.json'
+2025-08-03 21:29:36,178 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_212936.json'
+2025-08-03 21:30:37,199 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213037.json'
+2025-08-03 21:31:38,220 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213138.json'
+Disk:   19.8GB/44.1GB (45.0%)
+CPU:    100.0% (Load: 4.17)
+🚨 ALERTS:
+  🔴 CPU usage critical: 100.0%
+
+2025-08-03 20:38:44 - System Status
+Memory: 7.0GB/23.4GB (31.6%)
+Disk:   20.1GB/44.1GB (45.6%)
+CPU:    100.0% (Load: 4.88)
+🚨 ALERTS:
+  🔴 CPU usage critical: 100.0%
+
+2025-08-03 20:39:46 - System Status
+Memory: 6.6GB/23.4GB (30.3%)
+Disk:   20.2GB/44.1GB (45.9%)
+CPU:    96.3% (Load: 4.42)
+🚨 ALERTS:
+  🔴 CPU usage critical: 96.3%
+
+2025-08-03 20:40:47 - System Status
+Memory: 6.8GB/23.4GB (31.0%)
+Disk:   20.5GB/44.1GB (46.5%)
+CPU:    90.2% (Load: 4.56)
+🚨 ALERTS:
+  🔴 CPU usage critical: 90.2%
+
+2025-08-03 20:41:48 - System Status
+Memory: 6.8GB/23.4GB (30.9%)
+Disk:   20.7GB/44.1GB (47.0%)
+CPU:    99.5% (Load: 4.37)
+🚨 ALERTS:
+  🔴 CPU usage critical: 99.5%
+
+2025-08-03 20:42:49 - System Status
+Memory: 6.0GB/23.4GB (27.5%)
+Disk:   20.8GB/44.1GB (47.1%)
+CPU:    1.0% (Load: 3.25)
+✅ All systems normal
+
+2025-08-03 20:43:50 - System Status
+Memory: 5.9GB/23.4GB (27.2%)
+Disk:   20.8GB/44.1GB (47.1%)
+CPU:    5.5% (Load: 1.18)
+✅ All systems normal
+
+2025-08-03 20:44:51 - System Status
+Memory: 5.9GB/23.4GB (27.2%)
+Disk:   20.8GB/44.1GB (47.1%)
+CPU:    5.8% (Load: 0.50)
+✅ All systems normal
+
+2025-08-03 20:45:52 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.8GB/44.1GB (47.1%)
+CPU:    1.3% (Load: 0.22)
+✅ All systems normal
+
+2025-08-03 20:46:53 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.8GB/44.1GB (47.1%)
+CPU:    1.2% (Load: 0.45)
+✅ All systems normal
+
+2025-08-03 20:47:54 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.8GB/44.1GB (47.1%)
+CPU:    1.5% (Load: 0.37)
+✅ All systems normal
+
+2025-08-03 20:48:55 - System Status
+Memory: 5.4GB/23.4GB (25.2%)
+Disk:   20.8GB/44.1GB (47.1%)
+CPU:    44.7% (Load: 0.20)
+✅ All systems normal
+
+2025-08-03 20:49:56 - System Status
+Memory: 5.4GB/23.4GB (25.0%)
+Disk:   19.1GB/44.1GB (43.2%)
+CPU:    2.0% (Load: 0.14)
+✅ All systems normal
+
+2025-08-03 20:50:57 - System Status
+Memory: 6.0GB/23.4GB (27.4%)
+Disk:   19.1GB/44.1GB (43.4%)
+CPU:    96.5% (Load: 0.82)
+🚨 ALERTS:
+  🔴 CPU usage critical: 96.5%
+
+2025-08-03 20:51:58 - System Status
+Memory: 6.2GB/23.4GB (28.6%)
+Disk:   19.4GB/44.1GB (44.1%)
+CPU:    99.8% (Load: 3.48)
+🚨 ALERTS:
+  🔴 CPU usage critical: 99.8%
+
+2025-08-03 20:52:59 - System Status
+Memory: 6.0GB/23.4GB (27.7%)
+Disk:   19.8GB/44.1GB (44.9%)
+CPU:    95.5% (Load: 3.76)
+🚨 ALERTS:
+  🔴 CPU usage critical: 95.5%
+
+2025-08-03 20:54:00 - System Status
+Memory: 6.1GB/23.4GB (28.0%)
+Disk:   20.0GB/44.1GB (45.3%)
+CPU:    97.2% (Load: 4.30)
+🚨 ALERTS:
+  🔴 CPU usage critical: 97.2%
+
+2025-08-03 20:55:01 - System Status
+Memory: 6.2GB/23.4GB (28.5%)
+Disk:   20.1GB/44.1GB (45.7%)
+CPU:    91.7% (Load: 4.36)
+🚨 ALERTS:
+  🔴 CPU usage critical: 91.7%
+
+2025-08-03 20:56:02 - System Status
+Memory: 6.1GB/23.4GB (28.2%)
+Disk:   20.3GB/44.1GB (46.0%)
+CPU:    99.0% (Load: 4.10)
+🚨 ALERTS:
+  🔴 CPU usage critical: 99.0%
+
+2025-08-03 20:57:03 - System Status
+Memory: 7.6GB/23.4GB (34.5%)
+Disk:   20.4GB/44.1GB (46.4%)
+CPU:    99.7% (Load: 4.21)
+🚨 ALERTS:
+  🔴 CPU usage critical: 99.7%
+
+2025-08-03 20:58:04 - System Status
+Memory: 6.7GB/23.4GB (30.7%)
+Disk:   20.5GB/44.1GB (46.6%)
+CPU:    100.0% (Load: 4.45)
+🚨 ALERTS:
+  🔴 CPU usage critical: 100.0%
+
+2025-08-03 20:59:05 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.6GB/44.1GB (46.6%)
+CPU:    1.0% (Load: 1.85)
+✅ All systems normal
+
+2025-08-03 21:00:06 - System Status
+Memory: 5.5GB/23.4GB (25.3%)
+Disk:   20.6GB/44.1GB (46.6%)
+CPU:    2.0% (Load: 0.78)
+✅ All systems normal
+
+2025-08-03 21:01:07 - System Status
+Memory: 6.8GB/23.4GB (31.0%)
+Disk:   20.9GB/44.1GB (47.3%)
+CPU:    100.0% (Load: 2.39)
+🚨 ALERTS:
+  🔴 CPU usage critical: 100.0%
+
+2025-08-03 21:02:08 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    5.8% (Load: 1.40)
+✅ All systems normal
+
+2025-08-03 21:03:09 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    1.3% (Load: 0.66)
+✅ All systems normal
+
+2025-08-03 21:04:10 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    1.3% (Load: 0.30)
+✅ All systems normal
+
+2025-08-03 21:05:11 - System Status
+Memory: 5.5GB/23.4GB (25.7%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    17.4% (Load: 0.70)
+✅ All systems normal
+
+2025-08-03 21:06:12 - System Status
+Memory: 5.6GB/23.4GB (25.8%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    5.1% (Load: 0.48)
+✅ All systems normal
+
+2025-08-03 21:07:13 - System Status
+Memory: 5.5GB/23.4GB (25.2%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    0.8% (Load: 0.23)
+✅ All systems normal
+
+2025-08-03 21:08:14 - System Status
+Memory: 5.5GB/23.4GB (25.3%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    19.1% (Load: 0.44)
+✅ All systems normal
+
+2025-08-03 21:09:15 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    1.0% (Load: 0.30)
+✅ All systems normal
+
+2025-08-03 21:10:16 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    5.3% (Load: 0.21)
+✅ All systems normal
+
+2025-08-03 21:11:17 - System Status
+Memory: 5.4GB/23.4GB (25.0%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    1.5% (Load: 0.16)
+✅ All systems normal
+
+2025-08-03 21:12:18 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    2.0% (Load: 0.20)
+✅ All systems normal
+
+2025-08-03 21:13:19 - System Status
+Memory: 6.8GB/23.4GB (31.1%)
+Disk:   20.9GB/44.1GB (47.4%)
+CPU:    99.8% (Load: 1.89)
+🚨 ALERTS:
+  🔴 CPU usage critical: 99.8%
+
+2025-08-03 21:14:20 - System Status
+Memory: 5.5GB/23.4GB (25.4%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    3.5% (Load: 1.22)
+✅ All systems normal
+
+2025-08-03 21:15:21 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    4.5% (Load: 0.52)
+✅ All systems normal
+
+2025-08-03 21:16:22 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    2.2% (Load: 0.19)
+✅ All systems normal
+
+2025-08-03 21:17:23 - System Status
+Memory: 5.4GB/23.4GB (25.2%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    1.5% (Load: 0.07)
+✅ All systems normal
+
+2025-08-03 21:18:24 - System Status
+Memory: 5.4GB/23.4GB (25.2%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    5.3% (Load: 0.02)
+✅ All systems normal
+
+2025-08-03 21:19:25 - System Status
+Memory: 5.4GB/23.4GB (25.2%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    1.5% (Load: 0.01)
+✅ All systems normal
+
+2025-08-03 21:20:26 - System Status
+Memory: 5.4GB/23.4GB (25.2%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    1.0% (Load: 0.10)
+✅ All systems normal
+
+2025-08-03 21:21:28 - System Status
+Memory: 5.4GB/23.4GB (25.2%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    5.8% (Load: 0.08)
+✅ All systems normal
+
+2025-08-03 21:22:29 - System Status
+Memory: 5.5GB/23.4GB (25.2%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    1.5% (Load: 0.03)
+✅ All systems normal
+
+2025-08-03 21:23:30 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    1.3% (Load: 0.13)
+✅ All systems normal
+
+2025-08-03 21:24:31 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    5.8% (Load: 0.10)
+✅ All systems normal
+
+2025-08-03 21:25:32 - System Status
+Memory: 5.4GB/23.4GB (25.2%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    1.5% (Load: 0.15)
+✅ All systems normal
+
+2025-08-03 21:26:33 - System Status
+Memory: 5.4GB/23.4GB (25.2%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    1.3% (Load: 0.05)
+✅ All systems normal
+
+2025-08-03 21:27:34 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    3.0% (Load: 0.02)
+✅ All systems normal
+
+2025-08-03 21:28:35 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    1.0% (Load: 0.09)
+✅ All systems normal
+
+2025-08-03 21:29:36 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    1.0% (Load: 0.06)
+✅ All systems normal
+
+2025-08-03 21:30:37 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    5.8% (Load: 0.15)
+✅ All systems normal
+
+2025-08-03 21:31:38 - System Status
+Memory: 5.4GB/23.4GB (25.1%)
+Disk:   20.9GB/44.1GB (47.5%)
+CPU:    1.3% (Load: 0.12)
+✅ All systems normal
+
+2025-08-03 21:32:39 - System Status
+2025-08-03 21:32:39,242 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213239.json'
+2025-08-03 21:33:40,264 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213340.json'
+2025-08-03 21:34:41,286 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213441.json'
+2025-08-03 21:35:42,307 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213542.json'
+2025-08-03 21:36:43,328 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213643.json'
+2025-08-03 21:37:44,349 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213744.json'
+2025-08-03 21:38:45,370 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213845.json'
+2025-08-03 21:39:46,391 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_213946.json'
+2025-08-03 21:40:47,412 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214047.json'
+2025-08-03 21:41:48,434 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214148.json'
+2025-08-03 21:42:49,455 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214249.json'
+2025-08-03 21:43:50,477 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214350.json'
+2025-08-03 21:44:51,499 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214451.json'
+2025-08-03 21:45:52,519 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214552.json'
+2025-08-03 21:46:53,540 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214653.json'
+2025-08-03 21:47:54,562 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214754.json'
+2025-08-03 21:48:55,584 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214855.json'
+2025-08-03 21:49:56,605 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_214956.json'
+2025-08-03 21:50:57,628 - ERROR - Failed to save report: [Errno 2] No such file or directory: 'reports/system_report_20250803_215057.json'

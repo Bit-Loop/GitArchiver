@@ -1,0 +1,1 @@
+impl futures::Future<Output = Result<SecretValidator, anyhow::Error>>

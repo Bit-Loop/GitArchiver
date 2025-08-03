@@ -4,15 +4,17 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use tracing::{info, warn, error};
+use tracing::{info, warn, error, debug};
 use uuid::Uuid;
 
 use crate::bigquery::BigQueryScanner;
 use crate::github::DanglingCommitFetcher;
 use crate::secrets::{SecretScanner, SecretValidator, SecretMatch};
+#[cfg(feature = "ai")]
 use crate::ai::{AITriageAgent, TriageResult, TriageContext};
 use crate::realtime::GitHubEventMonitor;
 use crate::performance::{PerformanceEngine, SecretDatabase};
+#[cfg(feature = "gui")]
 use crate::gui::SecretsNinjaApp;
 
 /// Comprehensive GitHub secret hunting platform
@@ -21,6 +23,7 @@ pub struct GitHubSecretHunter {
     pub commit_fetcher: DanglingCommitFetcher,
     pub secret_scanner: SecretScanner,
     pub secret_validator: SecretValidator,
+    #[cfg(feature = "ai")]
     pub ai_triage_agent: Option<AITriageAgent>,
     pub event_monitor: GitHubEventMonitor,
     pub performance_engine: PerformanceEngine,
@@ -84,6 +87,7 @@ pub struct ScanningReport {
     pub scan_type: ScanType,
     pub target: String,
     pub secrets_found: Vec<SecretMatch>,
+    #[cfg(feature = "ai")]
     pub triage_results: Vec<TriageResult>,
     pub performance_metrics: crate::performance::ProcessingMetrics,
     pub recommendations: Vec<String>,
@@ -124,6 +128,7 @@ impl GitHubSecretHunter {
         let secret_validator = SecretValidator::new();
 
         // Initialize AI triage agent if configured
+        #[cfg(feature = "ai")]
         let ai_triage_agent = if config.scanning_options.enable_ai_triage {
             if let Some(model_path) = &config.ai_model_path {
                 Some(AITriageAgent::new(model_path).await?)
@@ -134,9 +139,12 @@ impl GitHubSecretHunter {
         } else {
             None
         };
+        #[cfg(not(feature = "ai"))]
+        let ai_triage_agent = None;
 
         // Initialize real-time event monitor
         let mut event_monitor = GitHubEventMonitor::new();
+        #[cfg(feature = "ai")]
         if let Some(ai_agent) = &ai_triage_agent {
             // Note: This would need proper ownership handling in practice
             // event_monitor = event_monitor.with_ai_triage(ai_agent.clone()).await;
@@ -166,6 +174,7 @@ impl GitHubSecretHunter {
             commit_fetcher,
             secret_scanner,
             secret_validator,
+            #[cfg(feature = "ai")]
             ai_triage_agent,
             event_monitor,
             performance_engine,
@@ -217,6 +226,7 @@ impl GitHubSecretHunter {
             scan_type: ScanType::BigQueryHistorical,
             target: "GitHub Archive".to_string(),
             secrets_found: Vec::new(),
+            #[cfg(feature = "ai")]
             triage_results: Vec::new(),
             performance_metrics: crate::performance::ProcessingMetrics {
                 total_processed: 0,
@@ -245,6 +255,7 @@ impl GitHubSecretHunter {
         }
 
         // Run AI triage on found secrets
+        #[cfg(feature = "ai")]
         if self.config.scanning_options.enable_ai_triage && !report.secrets_found.is_empty() {
             info!("Running AI triage on {} secrets", report.secrets_found.len());
             
@@ -260,6 +271,7 @@ impl GitHubSecretHunter {
                     };
 
                     match ai_agent.triage_secret(secret, None, &context).await {
+                        #[cfg(feature = "ai")]
                         Ok(triage) => report.triage_results.push(triage),
                         Err(e) => warn!("AI triage failed for secret {}: {}", secret.hash, e),
                     }
@@ -341,6 +353,7 @@ impl GitHubSecretHunter {
             scan_type: ScanType::ManualRepository,
             target: repository.to_string(),
             secrets_found: Vec::new(),
+            #[cfg(feature = "ai")]
             triage_results: Vec::new(),
             performance_metrics: crate::performance::ProcessingMetrics {
                 total_processed: 0,

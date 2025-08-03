@@ -1,0 +1,11 @@
+Vec<rusqlite::Connection>
+RefCell<rusqlite::inner_connection::InnerConnection>
+rusqlite::Connection
+PhantomData<rusqlite::Connection>
+alloc::raw_vec::RawVec<rusqlite::Connection>
+tokio::sync::RwLock<Vec<rusqlite::Connection>>
+Arc<tokio::sync::RwLock<Vec<rusqlite::Connection>>>
+&PerformanceEngine
+{closure@src/performance/mod.rs:401:18: 401:25}
+RefCell<hashlink::lru_cache::LruCache<Arc<str>, rusqlite::raw_statement::RawStatement>>
+rusqlite::cache::StatementCache

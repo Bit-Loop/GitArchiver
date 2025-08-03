@@ -1,0 +1,2 @@
+fn(axum::extract::State<AppState>) -> impl futures::Future<Output = Result<axum::Json<JsonValue>, axum::http::StatusCode>> {resume_scraper}
+fn(axum::extract::State<AppState>) -> impl futures::Future<Output = Result<axum::Json<JsonValue>, axum::http::StatusCode>> {resume_scraper}: Handler<_, _>

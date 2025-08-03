@@ -1,0 +1,1 @@
+Result<fancy_regex::Match<'_>, fancy_regex::Error>

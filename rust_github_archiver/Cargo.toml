@@ -88,16 +88,16 @@ redis = { version = "0.25", features = ["tokio-comp", "connection-manager"] }
 # Secret scanning
 fancy-regex = "0.13"
 
-# GUI for Secrets Ninja port
-iced = { version = "0.12", features = ["tokio", "canvas", "image", "svg"] }
+# GUI for Secrets Ninja port (temporarily disabled)
+# iced = { version = "0.12", features = ["tokio", "canvas", "image", "svg"] }
 
-# AI/LLM integration
-llm = "0.1"
-hf-hub = "0.3"
-tokenizers = "0.15"
-candle-core = "0.3"
-candle-nn = "0.3"
-candle-transformers = "0.3"
+# AI/LLM integration (temporarily disabled due to version conflicts)
+# llm = "0.1"
+# hf-hub = "0.3"
+# tokenizers = "0.15"
+# candle-core = "0.7"
+# candle-nn = "0.7"
+# candle-transformers = "0.7"
 
 # Performance and parallel processing
 rayon = "1.8"
