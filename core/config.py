@@ -154,6 +154,7 @@ class SecurityConfig:
     """Security configuration"""
     admin_password: str = field(default_factory=lambda: os.getenv('ADMIN_PASSWORD', 'admin123'))
     secret_key: str = field(default_factory=lambda: os.getenv('SECRET_KEY', ''))
+    jwt_secret: str = field(default_factory=lambda: os.getenv('JWT_SECRET', 'github-archive-scraper-jwt-secret-key'))
     session_duration_hours: int = field(default_factory=lambda: int(os.getenv('SESSION_DURATION_HOURS', '24')))
     max_failed_attempts: int = field(default_factory=lambda: int(os.getenv('MAX_FAILED_ATTEMPTS', '5')))
     lockout_duration_minutes: int = field(default_factory=lambda: int(os.getenv('LOCKOUT_DURATION_MINUTES', '30')))

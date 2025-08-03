@@ -7,11 +7,12 @@ Consolidated API with authentication, resource monitoring, and comprehensive end
 import asyncio
 import json
 import logging
+import secrets
 import time
-from datetime import datetime, timezone
+import jwt
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional
-from aiohttp import web, web_middlewares
-from aiohttp.web_middlewares import cors_handler
+from aiohttp import web
 import aiohttp_cors
 
 # Import our consolidated modules
@@ -26,37 +27,50 @@ class APIError(Exception):
     pass
 
 
-@web_middlewares.middleware
+@web.middleware
 async def auth_middleware(request: web.Request, handler):
-    """Authentication middleware for protected endpoints"""
+    """JWT-based authentication middleware"""
     # Skip auth for public endpoints
-    public_endpoints = {'/api/health', '/api/status', '/api/login', '/'}
+    public_endpoints = {'/api/health', '/api/status', '/api/login', '/api/logout', '/api/auth/status', '/api/rate-limit/status', '/'}
     if request.path in public_endpoints or request.path.startswith('/static'):
         return await handler(request)
     
-    # Check for session token
+    # Check for JWT token
     auth_header = request.headers.get('Authorization', '')
     if auth_header.startswith('Bearer '):
         token = auth_header[7:]  # Remove 'Bearer ' prefix
     else:
-        token = request.cookies.get('session_token', '')
+        token = request.cookies.get('auth_token', '')
     
     if not token:
         return web.json_response({'error': 'Authentication required'}, status=401)
     
-    # Validate session
-    auth_manager: AuthManager = request.app['auth_manager']
-    session = auth_manager.validate_session(token)
-    
-    if not session:
-        return web.json_response({'error': 'Invalid or expired session'}, status=401)
-    
-    # Store session in request for use in handlers
-    request['session'] = session
-    return await handler(request)
+    try:
+        # Validate JWT token
+        config = request.app['config']
+        jwt_secret = getattr(config.security, 'jwt_secret', 'your-secret-key')
+        payload = jwt.decode(token, jwt_secret, algorithms=['HS256'])
+        
+        # Check if token is expired
+        if datetime.utcnow() > datetime.fromtimestamp(payload['exp']):
+            return web.json_response({'error': 'Token expired'}, status=401)
+        
+        # Store user info in request
+        request['user'] = {
+            'username': payload['user'],
+            'role': payload['role'],
+            'ip': payload.get('ip', 'unknown')
+        }
+        
+        return await handler(request)
+        
+    except jwt.InvalidTokenError:
+        return web.json_response({'error': 'Invalid token'}, status=401)
+    except Exception as e:
+        return web.json_response({'error': 'Authentication error'}, status=401)
 
 
-@web_middlewares.middleware
+@web.middleware
 async def error_middleware(request: web.Request, handler):
     """Global error handling middleware"""
     try:
@@ -72,7 +86,7 @@ async def error_middleware(request: web.Request, handler):
         }, status=500)
 
 
-@web_middlewares.middleware
+@web.middleware
 async def logging_middleware(request: web.Request, handler):
     """Request logging middleware"""
     start_time = time.time()
@@ -121,6 +135,7 @@ class ProfessionalAPI:
         self.app['db'] = self.db
         self.app['auth_manager'] = self.auth
         self.app['resource_monitor'] = self.resource_monitor
+        self.app['api_instance'] = self
         
         # Setup routes and CORS
         self._setup_routes()
@@ -171,6 +186,7 @@ class ProfessionalAPI:
         # Authentication endpoints
         self.app.router.add_post('/api/login', self.login)
         self.app.router.add_post('/api/logout', self.logout)
+        self.app.router.add_get('/api/auth/status', self.auth_status)
         self.app.router.add_post('/api/change-password', self.change_password)
         
         # Data endpoints (require authentication)
@@ -220,109 +236,19 @@ class ProfessionalAPI:
     async def serve_dashboard(self, request: web.Request) -> web.Response:
         """Serve the main dashboard"""
         try:
-            # In a real implementation, this would serve an HTML file
-            return web.Response(
-                text="""
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>GitHub Archive Scraper - Professional</title>
-                    <meta charset="utf-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1">
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-                        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                        .header { text-align: center; margin-bottom: 30px; }
-                        .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-                        .status-card { padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
-                        .status-card h3 { margin-top: 0; color: #333; }
-                        .metric { display: flex; justify-content: space-between; margin: 10px 0; }
-                        .metric-label { font-weight: bold; }
-                        .metric-value { color: #007bff; }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <div class="header">
-                            <h1>🚀 GitHub Archive Scraper</h1>
-                            <p>Professional Edition - Real-time GitHub Event Processing</p>
-                        </div>
-                        
-                        <div class="status-grid" id="statusGrid">
-                            <div class="status-card">
-                                <h3>📊 System Status</h3>
-                                <div class="metric">
-                                    <span class="metric-label">Status:</span>
-                                    <span class="metric-value" id="systemStatus">Loading...</span>
-                                </div>
-                                <div class="metric">
-                                    <span class="metric-label">Uptime:</span>
-                                    <span class="metric-value" id="uptime">Loading...</span>
-                                </div>
-                            </div>
-                            
-                            <div class="status-card">
-                                <h3>💾 Database</h3>
-                                <div class="metric">
-                                    <span class="metric-label">Events:</span>
-                                    <span class="metric-value" id="totalEvents">Loading...</span>
-                                </div>
-                                <div class="metric">
-                                    <span class="metric-label">Quality Score:</span>
-                                    <span class="metric-value" id="qualityScore">Loading...</span>
-                                </div>
-                            </div>
-                            
-                            <div class="status-card">
-                                <h3>⚡ Resources</h3>
-                                <div class="metric">
-                                    <span class="metric-label">Memory:</span>
-                                    <span class="metric-value" id="memoryUsage">Loading...</span>
-                                </div>
-                                <div class="metric">
-                                    <span class="metric-label">CPU:</span>
-                                    <span class="metric-value" id="cpuUsage">Loading...</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div style="margin-top: 30px; text-align: center;">
-                            <p><strong>API Endpoints Available:</strong></p>
-                            <p>
-                                <a href="/api/health">Health Check</a> | 
-                                <a href="/api/status">System Status</a> | 
-                                <a href="/api/data-quality">Data Quality</a> |
-                                <a href="/api/resources">Resource Monitor</a>
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <script>
-                        async function updateStatus() {
-                            try {
-                                const response = await fetch('/api/status');
-                                const status = await response.json();
-                                
-                                document.getElementById('systemStatus').textContent = status.api?.status || 'Unknown';
-                                document.getElementById('uptime').textContent = status.api?.uptime || 'Unknown';
-                                document.getElementById('totalEvents').textContent = status.data_quality?.total_events?.toLocaleString() || '0';
-                                document.getElementById('qualityScore').textContent = status.data_quality?.quality_score?.toFixed(1) + '%' || 'N/A';
-                                document.getElementById('memoryUsage').textContent = status.resources?.memory?.percent + '%' || 'N/A';
-                                document.getElementById('cpuUsage').textContent = status.resources?.cpu?.percent + '%' || 'N/A';
-                            } catch (error) {
-                                console.error('Failed to update status:', error);
-                            }
-                        }
-                        
-                        // Update status every 10 seconds
-                        updateStatus();
-                        setInterval(updateStatus, 10000);
-                    </script>
-                </body>
-                </html>
-                """,
-                content_type='text/html'
-            )
+            import os
+            # Serve the actual dashboard.html file
+            dashboard_path = os.path.join(os.path.dirname(__file__), 'dashboard.html')
+            if os.path.exists(dashboard_path):
+                with open(dashboard_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                return web.Response(text=content, content_type='text/html')
+            else:
+                return web.Response(
+                    text="<h1>Dashboard not found</h1><p>dashboard.html file is missing</p>",
+                    content_type='text/html',
+                    status=404
+                )
         except Exception as e:
             return web.json_response({'error': str(e)}, status=500)
     
@@ -399,48 +325,42 @@ class ProfessionalAPI:
     
     # Authentication endpoints
     async def login(self, request: web.Request) -> web.Response:
-        """User login endpoint"""
+        """JWT-based admin login endpoint"""
         try:
             data = await request.json()
-            username = data.get('username', '')
             password = data.get('password', '')
             
-            if not username or not password:
+            if not password:
                 return web.json_response({
                     'success': False,
-                    'message': 'Username and password required'
+                    'message': 'Password required'
                 }, status=400)
             
-            # Get client info
-            ip_address = request.remote
-            user_agent = request.headers.get('User-Agent', '')
-            
-            # Authenticate user
-            session_token = self.auth.authenticate(username, password, ip_address, user_agent)
-            
-            if session_token:
-                response = web.json_response({
-                    'success': True,
-                    'message': 'Login successful',
-                    'token': session_token
-                })
-                
-                # Set secure cookie
-                response.set_cookie(
-                    'session_token', 
-                    session_token,
-                    max_age=self.config.security.session_duration_hours * 3600,
-                    httponly=True,
-                    secure=True,
-                    samesite='Strict'
-                )
-                
-                return response
-            else:
+            # Simple admin password check
+            if password != self.config.security.admin_password:
                 return web.json_response({
                     'success': False,
-                    'message': 'Invalid credentials'
+                    'message': 'Invalid password'
                 }, status=401)
+            
+            # Generate JWT token
+            jwt_secret = getattr(self.config.security, 'jwt_secret', 'your-secret-key')
+            payload = {
+                'user': 'admin',
+                'role': 'admin',
+                'iat': datetime.utcnow(),
+                'exp': datetime.utcnow() + timedelta(hours=24),
+                'ip': request.remote or 'unknown'
+            }
+            
+            token = jwt.encode(payload, jwt_secret, algorithm='HS256')
+            
+            return web.json_response({
+                'success': True,
+                'message': 'Login successful',
+                'token': token,
+                'expires_in': 24 * 3600  # 24 hours in seconds
+            })
                 
         except Exception as e:
             self.logger.error(f"Login error: {e}")
@@ -450,23 +370,55 @@ class ProfessionalAPI:
             }, status=500)
     
     async def logout(self, request: web.Request) -> web.Response:
-        """User logout endpoint"""
+        """JWT logout endpoint"""
         try:
-            session: UserSession = request.get('session')
-            if session:
-                self.auth.logout(session.session_id)
-            
+            # For JWT, we just return success since tokens are stateless
+            # In production, you might maintain a blacklist of invalidated tokens
             response = web.json_response({
                 'success': True,
                 'message': 'Logged out successfully'
             })
             
-            # Clear cookie
-            response.del_cookie('session_token')
+            # Clear cookie if present
+            response.del_cookie('auth_token')
             return response
             
         except Exception as e:
             return web.json_response({'error': str(e)}, status=500)
+    
+    async def auth_status(self, request: web.Request) -> web.Response:
+        """Check authentication status"""
+        try:
+            # Try to validate the token manually since this endpoint is public
+            auth_header = request.headers.get('Authorization', '')
+            if auth_header.startswith('Bearer '):
+                token = auth_header[7:]
+                try:
+                    jwt_secret = getattr(self.config.security, 'jwt_secret', 'your-secret-key')
+                    payload = jwt.decode(token, jwt_secret, algorithms=['HS256'])
+                    
+                    # Check if token is expired
+                    current_time = datetime.utcnow().timestamp()
+                    if current_time < payload['exp']:
+                        return web.json_response({
+                            'authenticated': True,
+                            'user': payload['user'],
+                            'role': payload['role'],
+                            'expires_at': payload['exp']
+                        })
+                except jwt.InvalidTokenError as e:
+                    self.logger.debug(f"JWT validation error: {e}")
+                except Exception as e:
+                    self.logger.error(f"JWT processing error: {e}")
+            
+            return web.json_response({
+                'authenticated': False
+            })
+        except Exception as e:
+            return web.json_response({
+                'authenticated': False,
+                'error': str(e)
+            })
     
     async def change_password(self, request: web.Request) -> web.Response:
         """Change password endpoint"""
