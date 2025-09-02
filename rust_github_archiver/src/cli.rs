@@ -1,4 +1,3 @@
-use std::env;
 use std::process;
 use clap::{Arg, Command, ArgMatches};
 use anyhow::Result;

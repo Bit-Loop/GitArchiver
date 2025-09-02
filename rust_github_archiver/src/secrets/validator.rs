@@ -1,12 +1,13 @@
 use anyhow::{anyhow, Result};
 use aws_config::BehaviorVersion;
-use aws_sdk_sts::Client as StsClient;
+// Removed unused StsClient
 use reqwest::Client as HttpClient;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::time::Duration;
-use tracing::{info, warn, error, debug};
+use tracing::{info, warn, error}; // Removed unused debug
 use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
-use crate::secrets::scanner::{SecretMatch, SecretSeverity};
+use crate::secrets::scanner::SecretMatch; // Removed SecretSeverity since it's reimported in tests
 
 /// Secret validator for verifying if secrets are active
 pub struct SecretValidator {
@@ -14,7 +15,7 @@ pub struct SecretValidator {
     aws_config: Option<aws_config::SdkConfig>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ValidationResult {
     pub secret_hash: String,
     pub is_valid: bool,
@@ -438,7 +439,7 @@ impl SecretValidator {
 
     /// Validate Twilio API key
     async fn validate_twilio_key(&self, secret_match: &SecretMatch) -> Result<ValidationResult> {
-        let api_key = &secret_match.matched_text;
+        let _api_key = &secret_match.matched_text; // Prefix with underscore to indicate intentionally unused
         
         // Note: Twilio validation would require account SID as well
         // This is a simplified check

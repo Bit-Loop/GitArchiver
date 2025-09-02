@@ -4,14 +4,14 @@ use github_archiver::{
     GitHubSecretHunter, 
     HunterConfig,
     BigQueryScanner,
-    DanglingCommitFetcher,
-    SecretScanner,
-    AITriageAgent,
     GitHubEventMonitor,
     PerformanceEngine,
     SecretDatabase,
-    SecretsNinjaApp,
 };
+#[cfg(feature = "ai")]
+use github_archiver::AITriageAgent;
+#[cfg(feature = "gui")]
+use github_archiver::SecretsNinjaApp;
 use std::path::PathBuf;
 use tracing::{info, error};
 use tracing_subscriber;
@@ -322,15 +322,30 @@ async fn run_gui(_args: GuiArgs) -> Result<()> {
 async fn run_bigquery_scan(args: BigQueryArgs) -> Result<()> {
     info!("📊 Running BigQuery historical scan");
 
-    let scanner = BigQueryScanner::new(&args.project).await?;
+    // Use default credentials if no service account key is provided
+    let scanner = BigQueryScanner::new_with_default_credentials(args.project.clone()).await?;
+    
+    // Calculate date range
+    let end_date = chrono::Utc::now().date_naive();
+    let start_date = end_date - chrono::Duration::days(args.days as i64);
+    
+    // Create filter based on organization
+    let filter = github_archiver::bigquery::RepositoryFilter {
+        organizations: args.organization.map(|org| vec![org]).unwrap_or_default(),
+        users: vec![],
+        repositories: vec![],
+    };
+    
     let events = scanner.scan_zero_commit_events(
-        args.organization.as_deref(),
-        args.days,
+        start_date,
+        end_date, 
+        &filter,
+        Some(1000), // Limit to 1000 events
     ).await?;
 
     info!("Found {} zero-commit events", events.len());
     for event in events.iter().take(10) {
-        info!("Event: {} -> {} ({})", event.repository, event.before_commit, event.created_at);
+        info!("Event: {} -> {} ({})", event.repo_name, event.before_commit, event.created_at);
     }
 
     Ok(())
@@ -339,7 +354,11 @@ async fn run_bigquery_scan(args: BigQueryArgs) -> Result<()> {
 async fn run_realtime_monitor(args: MonitorArgs) -> Result<()> {
     info!("⚡ Starting real-time GitHub event monitoring");
 
-    let monitor = GitHubEventMonitor::new();
+    // Get GitHub token from environment
+    let github_token = std::env::var("GITHUB_TOKEN")
+        .map_err(|_| anyhow::anyhow!("GITHUB_TOKEN environment variable is required"))?;
+
+    let monitor = GitHubEventMonitor::new(&github_token).await?;
     
     // Add webhook if provided
     if let Some(webhook_url) = args.webhook {
@@ -376,23 +395,34 @@ async fn run_ai_triage(args: TriageArgs) -> Result<()> {
     let secrets = database.query_secrets(&filters)?;
     info!("Found {} secrets to triage", secrets.len());
 
-    // Initialize AI agent
-    let mut ai_agent = if let Some(model_path) = args.model {
-        AITriageAgent::new(&model_path).await?
-    } else {
-        AITriageAgent::new_with_small_model().await?
-    };
-
-    // Run triage on each secret
-    let mut high_priority_count = 0;
-    for secret_record in secrets {
-        info!("Triaging secret: {}", secret_record.detector_name);
-        // Would convert SecretRecord to SecretMatch and run triage
-        // For now, just simulate
-        high_priority_count += 1;
+    #[cfg(not(feature = "ai"))]
+    {
+        if args.model.is_some() {
+            return Err(anyhow::anyhow!("AI features not enabled in this build"));
+        }
+        error!("AI triage not available - feature 'ai' not enabled");
+        return Ok(());
     }
 
-    info!("AI triage completed. {} high-priority secrets identified", high_priority_count);
+    // Initialize AI agent and run triage
+    #[cfg(feature = "ai")]
+    {
+        let mut _ai_agent = if let Some(model_path) = args.model {
+            AITriageAgent::new(&model_path).await?
+        } else {
+            AITriageAgent::new_with_small_model().await?
+        };
+
+        let mut high_priority_count = 0;
+        for secret_record in secrets {
+            info!("Triaging secret: {}", secret_record.detector_name);
+            // Would convert SecretRecord to SecretMatch and run triage
+            // For now, just simulate
+            high_priority_count += 1;
+        }
+
+        info!("AI triage completed. {} high-priority secrets identified", high_priority_count);
+    }
 
     Ok(())
 }
@@ -502,7 +532,7 @@ fn generate_test_secrets(count: usize) -> Vec<github_archiver::SecretMatch> {
             matched_text: format!("secret_value_{}", i),
             start_position: 0,
             end_position: 20,
-            line_number: Some(i as u32 + 1),
+            line_number: Some(i + 1),
             filename: Some(format!("test_{}.env", i % 5)),
             entropy: 3.5 + (i % 3) as f64,
             severity: match i % 4 {

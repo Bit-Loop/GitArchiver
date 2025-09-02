@@ -13,6 +13,7 @@ pub mod ai;
 pub mod realtime;
 pub mod performance;
 pub mod integration;
+pub mod scanning;
 
 pub use bigquery::BigQueryScanner;
 pub use github::DanglingCommitFetcher;
@@ -24,3 +25,4 @@ pub use ai::{AITriageAgent, TriageResult, TriageContext};
 pub use realtime::GitHubEventMonitor;
 pub use performance::{PerformanceEngine, SecretDatabase};
 pub use integration::{GitHubSecretHunter, HunterConfig};
+pub use scanning::ScanningService;

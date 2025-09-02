@@ -93,4 +93,62 @@ impl UserManager {
         let argon2 = Argon2::default();
         Ok(argon2.verify_password(password.as_bytes(), &parsed_hash).is_ok())
     }
+
+    /// Update user password
+    pub async fn update_password(&self, username: &str, new_password: &str) -> Result<()> {
+        let mut users = self.users.write().await;
+        if let Some(user) = users.get_mut(username) {
+            user.password_hash = Self::hash_password(new_password)?;
+            Ok(())
+        } else {
+            Err(anyhow::anyhow!("User not found"))
+        }
+    }
+
+    /// List all users
+    pub async fn list_all_users(&self) -> Result<Vec<User>> {
+        let users = self.users.read().await;
+        Ok(users.values().cloned().collect())
+    }
+
+    /// Create a new user (public version)
+    pub async fn create_user_public(&self, username: &str, password: &str, role: &str) -> Result<User> {
+        let mut users = self.users.write().await;
+        
+        // Check if user already exists
+        if users.contains_key(username) {
+            return Err(anyhow::anyhow!("User already exists"));
+        }
+        
+        let user = Self::create_user(username, password, role)?;
+        users.insert(username.to_string(), user.clone());
+        Ok(user)
+    }
+
+    /// Delete a user
+    pub async fn delete_user(&self, username: &str) -> Result<()> {
+        let mut users = self.users.write().await;
+        
+        // Don't allow deletion of admin user
+        if username == "admin" {
+            return Err(anyhow::anyhow!("Cannot delete admin user"));
+        }
+        
+        if users.remove(username).is_some() {
+            Ok(())
+        } else {
+            Err(anyhow::anyhow!("User not found"))
+        }
+    }
+
+    /// Deactivate/activate a user
+    pub async fn set_user_active(&self, username: &str, is_active: bool) -> Result<()> {
+        let mut users = self.users.write().await;
+        if let Some(user) = users.get_mut(username) {
+            user.is_active = is_active;
+            Ok(())
+        } else {
+            Err(anyhow::anyhow!("User not found"))
+        }
+    }
 }

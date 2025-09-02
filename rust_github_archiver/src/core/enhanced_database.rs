@@ -1,13 +1,13 @@
-use std::time::{Duration, Instant};
+use std::time::Duration; // Removed unused Instant
 use sqlx::{Pool, Postgres, Row};
-use serde::{Serialize, Deserialize};
+use serde::Serialize; // Removed unused Deserialize
 use anyhow::{Result, anyhow};
 use tracing::{info, warn, error, debug};
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 
 use crate::core::Config;
-use crate::scraper::{GitHubEvent, EventBatch};
+use crate::scraper::GitHubEvent; // Removed unused EventBatch
 
 #[derive(Debug, Clone, Serialize)]
 pub struct DatabaseHealth {
@@ -400,7 +400,7 @@ impl DatabaseManager {
                 connection_count: 0,
                 active_queries: 0,
                 cache_hit_ratio: 0.0,
-                error_message: Some(e.to_string()),
+                error_message: Some(format!("{:?}", e)),
             }),
         }
     }

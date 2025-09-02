@@ -452,8 +452,8 @@ impl Config {
         }
 
         // Validate web configuration
-        if self.web.port == 0 || self.web.port > 65535 {
-            errors.push("Invalid web port");
+        if self.web.port == 0 {
+            errors.push("Invalid web port - cannot be 0");
         }
 
         // Validate download configuration
@@ -484,8 +484,8 @@ impl Config {
             return false;
         }
 
-        if self.database.port == 0 || self.database.port > 65535 {
-            error!("Invalid database port: {}", self.database.port);
+        if self.database.port == 0 {
+            error!("Invalid database port: {} - cannot be 0", self.database.port);
             return false;
         }
 

@@ -1,17 +1,18 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use tokio::sync::Mutex as AsyncMutex;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
-use std::collections::HashMap;
+// Removed unused HashMap import
 use reqwest::Client;
 use tokio::time;
 use serde::{Deserialize, Serialize};
-use chrono::{DateTime, Utc};
+// Removed unused DateTime and Utc imports  
 use anyhow::{Result, anyhow};
 use flate2::read::GzDecoder;
 use std::io::Read;
 use tracing::{info, warn, error, debug};
 
 use crate::core::{Config, ResourceMonitor, ResourceLimits};
-use crate::scraper::{ScraperManager, ScraperState};
+use crate::scraper::ScraperManager; // Removed unused ScraperState
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ArchiveFile {
@@ -58,10 +59,10 @@ impl Default for ScrapingStats {
 pub struct ArchiveScraper {
     config: Config,
     client: Client,
-    stats: Arc<Mutex<ScrapingStats>>,
-    resource_monitor: Arc<Mutex<ResourceMonitor>>,
+    stats: Arc<AsyncMutex<ScrapingStats>>,
+    resource_monitor: Arc<AsyncMutex<ResourceMonitor>>,
     scraper_manager: Arc<ScraperManager>,
-    shutdown_requested: Arc<Mutex<bool>>,
+    shutdown_requested: Arc<AsyncMutex<bool>>,
 }
 
 impl ArchiveScraper {
@@ -82,15 +83,15 @@ impl ArchiveScraper {
             monitoring_interval_seconds: 30,
         };
 
-        let resource_monitor = Arc::new(Mutex::new(ResourceMonitor::new(resource_limits)));
+        let resource_monitor = Arc::new(AsyncMutex::new(ResourceMonitor::new(resource_limits)));
 
         Self {
             config,
             client,
-            stats: Arc::new(Mutex::new(ScrapingStats::default())),
+            stats: Arc::new(AsyncMutex::new(ScrapingStats::default())),
             resource_monitor,
             scraper_manager,
-            shutdown_requested: Arc::new(Mutex::new(false)),
+            shutdown_requested: Arc::new(AsyncMutex::new(false)),
         }
     }
 
@@ -199,7 +200,8 @@ impl ArchiveScraper {
                     
                     // Update stats periodically
                     if events_processed % 1000 == 0 {
-                        if let Ok(mut stats) = self.stats.lock() {
+                        {
+                            let mut stats = self.stats.lock().await;
                             stats.events_processed += 1000;
                             stats.last_activity = SystemTime::now()
                                 .duration_since(UNIX_EPOCH)
@@ -217,7 +219,8 @@ impl ArchiveScraper {
                 }
                 Err(e) => {
                     warn!("Invalid JSON in {}: {}", file_info.filename, e);
-                    if let Ok(mut stats) = self.stats.lock() {
+                    {
+                        let mut stats = self.stats.lock().await;
                         stats.errors_encountered += 1;
                     }
                     let _ = self.scraper_manager.add_error();
@@ -225,7 +228,8 @@ impl ArchiveScraper {
             }
             
             // Check for shutdown request
-            if let Ok(shutdown) = self.shutdown_requested.lock() {
+            {
+                let shutdown = self.shutdown_requested.lock().await;
                 if *shutdown {
                     info!("Shutdown requested, stopping file processing");
                     break;
@@ -234,7 +238,8 @@ impl ArchiveScraper {
         }
         
         // Update final stats
-        if let Ok(mut stats) = self.stats.lock() {
+        {
+            let mut stats = self.stats.lock().await;
             stats.files_processed += 1;
             stats.last_activity = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
@@ -261,7 +266,8 @@ impl ArchiveScraper {
         info!("Starting continuous scraping...");
         
         // Initialize stats
-        if let Ok(mut stats) = self.stats.lock() {
+        {
+            let mut stats = self.stats.lock().await;
             stats.start_time = Some(SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
@@ -278,7 +284,8 @@ impl ArchiveScraper {
             }
 
             // Check for shutdown
-            if let Ok(shutdown) = self.shutdown_requested.lock() {
+            {
+                let shutdown = self.shutdown_requested.lock().await;
                 if *shutdown {
                     info!("Shutdown requested, stopping scraping");
                     break;
@@ -286,22 +293,21 @@ impl ArchiveScraper {
             }
 
             // Check resource status
-            if let Ok(mut monitor) = self.resource_monitor.lock() {
-                match monitor.get_resource_status().await {
-                    Ok(status) => {
-                        if status.emergency_mode {
-                            warn!("Emergency mode activated: {:?}", status.emergency_conditions);
-                            if let Err(e) = monitor.emergency_cleanup().await {
-                                error!("Emergency cleanup failed: {}", e);
-                            }
-                            // Pause for a while to let system recover
-                            time::sleep(Duration::from_secs(60)).await;
-                            continue;
+            let mut monitor = self.resource_monitor.lock().await;
+            match monitor.get_resource_status().await {
+                Ok(status) => {
+                    if status.emergency_mode {
+                        warn!("Emergency mode activated: {:?}", status.emergency_conditions);
+                        if let Err(e) = monitor.emergency_cleanup().await {
+                            error!("Emergency cleanup failed: {}", e);
                         }
+                        // Pause for a while to let system recover
+                        time::sleep(Duration::from_secs(60)).await;
+                        continue;
                     }
-                    Err(e) => {
-                        error!("Resource monitoring error: {}", e);
-                    }
+                }
+                Err(e) => {
+                    error!("Resource monitoring error: {}", e);
                 }
             }
 
@@ -320,12 +326,28 @@ impl ArchiveScraper {
 
                         for file_info in batch {
                             let semaphore = Arc::clone(&semaphore);
-                            let scraper = self;
+                            let client = self.client.clone();
+                            let config = self.config.clone();
+                            let stats = Arc::clone(&self.stats);
+                            let resource_monitor = Arc::clone(&self.resource_monitor);
+                            let scraper_manager = Arc::clone(&self.scraper_manager);
+                            let shutdown_requested = Arc::clone(&self.shutdown_requested);
                             let file_info = file_info.clone();
                             
                             let task = tokio::spawn(async move {
                                 let _permit = semaphore.acquire().await.unwrap();
-                                scraper.process_file(&file_info).await
+                                
+                                // Create a temporary scraper instance for this task
+                                let temp_scraper = ArchiveScraper {
+                                    config,
+                                    client,
+                                    stats,
+                                    resource_monitor,
+                                    scraper_manager,
+                                    shutdown_requested,
+                                };
+                                
+                                temp_scraper.process_file(&file_info).await
                             });
                             
                             tasks.push(task);
@@ -365,7 +387,8 @@ impl ArchiveScraper {
                 }
                 Err(e) => {
                     error!("Failed to get available files: {}", e);
-                    if let Ok(mut stats) = self.stats.lock() {
+                    {
+                        let mut stats = self.stats.lock().await;
                         stats.errors_encountered += 1;
                     }
                 }
@@ -380,17 +403,15 @@ impl ArchiveScraper {
     }
 
     pub async fn get_stats(&self) -> Result<ScrapingStats> {
-        if let Ok(stats) = self.stats.lock() {
-            Ok(stats.clone())
-        } else {
-            Err(anyhow!("Failed to acquire stats lock"))
-        }
+        let stats = self.stats.lock().await;
+        Ok(stats.clone())
     }
 
     pub async fn shutdown(&self) -> Result<()> {
         info!("Shutting down archive scraper...");
         
-        if let Ok(mut shutdown) = self.shutdown_requested.lock() {
+        {
+            let mut shutdown = self.shutdown_requested.lock().await;
             *shutdown = true;
         }
         

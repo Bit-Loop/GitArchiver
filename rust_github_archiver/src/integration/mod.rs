@@ -1,10 +1,10 @@
-use anyhow::{anyhow, Result};
+use anyhow::Result; // Removed unused anyhow macro
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+// Removed unused HashMap
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use tracing::{info, warn, error, debug};
+use tracing::{info, warn, error, debug}; // error is used
 use uuid::Uuid;
 
 use crate::bigquery::BigQueryScanner;
@@ -25,7 +25,7 @@ pub struct GitHubSecretHunter {
     pub secret_validator: SecretValidator,
     #[cfg(feature = "ai")]
     pub ai_triage_agent: Option<AITriageAgent>,
-    pub event_monitor: GitHubEventMonitor,
+    pub event_monitor: Arc<GitHubEventMonitor>,
     pub performance_engine: PerformanceEngine,
     pub database: SecretDatabase,
     pub config: HunterConfig,
@@ -116,16 +116,26 @@ impl GitHubSecretHunter {
         info!("Initializing GitHub Secret Hunter with config: {:?}", config);
 
         // Initialize BigQuery scanner
-        let bigquery_scanner = BigQueryScanner::new(&config.gcp_project_id).await?;
+        let bigquery_scanner = if std::env::var("GOOGLE_APPLICATION_CREDENTIALS").is_ok() {
+            BigQueryScanner::new_with_default_credentials(config.gcp_project_id.clone()).await?
+        } else {
+            // Fallback to service account key path if available
+            let service_account_path = std::env::var("GCP_SERVICE_ACCOUNT_PATH")
+                .unwrap_or_else(|_| "./service-account.json".to_string());
+            BigQueryScanner::new(&service_account_path, config.gcp_project_id.clone()).await?
+        };
 
         // Initialize GitHub commit fetcher
-        let commit_fetcher = DanglingCommitFetcher::new(config.github_token.clone());
+        let commit_fetcher = DanglingCommitFetcher::new(
+            &config.github_token,
+            config.redis_url.as_deref(),
+        ).await?;
 
         // Initialize secret scanner
         let secret_scanner = SecretScanner::new();
 
         // Initialize secret validator
-        let secret_validator = SecretValidator::new();
+        let secret_validator = SecretValidator::new().await?;
 
         // Initialize AI triage agent if configured
         #[cfg(feature = "ai")]
@@ -140,10 +150,10 @@ impl GitHubSecretHunter {
             None
         };
         #[cfg(not(feature = "ai"))]
-        let ai_triage_agent = None;
+        let _ai_triage_agent: Option<()> = None; // Prefix with underscore - AI feature not implemented yet
 
         // Initialize real-time event monitor
-        let mut event_monitor = GitHubEventMonitor::new();
+        let event_monitor = Arc::new(GitHubEventMonitor::new(&config.github_token).await?);
         #[cfg(feature = "ai")]
         if let Some(ai_agent) = &ai_triage_agent {
             // Note: This would need proper ownership handling in practice
@@ -197,7 +207,7 @@ impl GitHubSecretHunter {
 
         // Start real-time monitoring if enabled
         if self.config.scanning_options.enable_realtime_monitoring {
-            let event_monitor = self.event_monitor.clone();
+            let event_monitor = Arc::clone(&self.event_monitor);
             tokio::spawn(async move {
                 if let Err(e) = event_monitor.start_monitoring().await {
                     error!("Real-time monitoring failed: {}", e);
@@ -239,11 +249,17 @@ impl GitHubSecretHunter {
             status: ScanStatus::Running,
         };
 
+        // Collect organizations to scan first to avoid borrow conflicts
+        let organizations: Vec<String> = self.config.scanning_options.organizations_to_monitor
+            .iter()
+            .cloned()
+            .collect();
+
         // Scan each organization
-        for org in &self.config.scanning_options.organizations_to_monitor {
+        for org in organizations {
             info!("Scanning organization: {}", org);
 
-            match self.scan_organization_historical(org).await {
+            match self.scan_organization_historical(&org).await {
                 Ok(mut org_secrets) => {
                     info!("Found {} secrets for organization: {}", org_secrets.len(), org);
                     report.secrets_found.append(&mut org_secrets);
@@ -302,10 +318,23 @@ impl GitHubSecretHunter {
     async fn scan_organization_historical(&mut self, organization: &str) -> Result<Vec<SecretMatch>> {
         let mut all_secrets = Vec::new();
 
+        // Calculate date range for historical scan
+        let end_date = chrono::Utc::now().date_naive();
+        let start_date = end_date - chrono::Duration::days(self.config.scanning_options.historical_days_back as i64);
+
+        // Create repository filter for the organization
+        let filter = crate::bigquery::RepositoryFilter {
+            organizations: vec![organization.to_string()],
+            users: Vec::new(),
+            repositories: Vec::new(),
+        };
+
         // Get zero-commit events from BigQuery
         let events = self.bigquery_scanner.scan_zero_commit_events(
-            Some(organization),
-            self.config.scanning_options.historical_days_back,
+            start_date,
+            end_date,
+            &filter,
+            Some(1000), // Limit to 1000 events per organization
         ).await?;
 
         info!("Found {} zero-commit events for {}", events.len(), organization);
@@ -317,21 +346,24 @@ impl GitHubSecretHunter {
 
             for event in batch {
                 // Try to fetch the dangling commit
-                match self.commit_fetcher.fetch_commit(&event.repository, &event.before_commit).await {
-                    Ok(commit_data) => {
+                match self.commit_fetcher.fetch_commit(&event.repo_name, &event.before_commit).await {
+                    Ok(Some(commit_data)) => {
                         // Scan commit for secrets
-                        match self.secret_scanner.scan_text(&commit_data).await {
-                            Ok(mut secrets) => {
-                                // Filter by entropy if configured
-                                secrets.retain(|s| s.entropy >= self.config.scanning_options.minimum_entropy_threshold);
-                                batch_secrets.extend(secrets);
-                            }
-                            Err(e) => warn!("Failed to scan commit {}: {}", event.before_commit, e),
-                        }
+                        let file_patches: Vec<String> = commit_data.files.iter()
+                            .filter_map(|f| f.patch.as_ref())
+                            .cloned()
+                            .collect();
+                        let commit_text = format!("{}\n{}", commit_data.message, file_patches.join("\n"));
+                        let mut secrets = self.secret_scanner.scan_text(&commit_text, Some(&event.repo_name));
+                        
+                        // Filter by entropy if configured
+                        secrets.retain(|s| s.entropy >= self.config.scanning_options.minimum_entropy_threshold);
+                        batch_secrets.extend(secrets);
                     }
-                    Err(e) => {
-                        debug!("Could not fetch commit {} (likely dangling): {}", event.before_commit, e);
+                    Ok(None) => {
+                        debug!("Commit {} not found or not dangling", event.before_commit);
                     }
+                    Err(e) => warn!("Failed to fetch commit {}: {}", event.before_commit, e),
                 }
             }
 
@@ -413,7 +445,8 @@ impl GitHubSecretHunter {
         let recent_secrets = self.database.query_secrets(&filters)?;
         
         // Get performance metrics
-        let performance_metrics = self.performance_engine.collect_metrics().await?;
+        let performance_report = self.performance_engine.generate_performance_report().await?;
+        let performance_metrics = performance_report.metrics;
 
         Ok(DashboardData {
             state,
@@ -425,6 +458,8 @@ impl GitHubSecretHunter {
     }
 
     /// Launch GUI application
+    #[cfg(feature = "gui")]
+    #[allow(dead_code)] // GUI feature might be disabled
     pub async fn launch_gui(&self) -> Result<()> {
         info!("Launching Secrets Ninja GUI");
         

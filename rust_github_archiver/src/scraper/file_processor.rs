@@ -5,8 +5,8 @@ use flate2::read::GzDecoder;
 use std::io::Read;
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
-use anyhow::{Result, anyhow};
-use tracing::{info, warn, error, debug};
+use anyhow::Result; // Removed unused anyhow
+use tracing::{info, debug}; // Removed unused warn and error
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProcessingConfig {

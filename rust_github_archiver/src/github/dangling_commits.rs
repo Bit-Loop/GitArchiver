@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
-use octocrab::{Octocrab, models::Repository};
-use redis::{Client as RedisClient, Connection, Commands};
+use octocrab::Octocrab; // Removed unused models::Repository
+use redis::{Client as RedisClient, Commands}; // Removed unused Connection
 use serde::{Deserialize, Serialize};
 use std::time::{Duration, Instant};
 use tokio::time::sleep;
@@ -164,76 +164,73 @@ impl DanglingCommitFetcher {
 
         info!("Fetching commit {}/{}/{}", owner, repo, commit_sha);
 
-        match self.github.repos(owner, repo).commits(commit_sha).get().await {
-            Ok(commit) => {
-                // Update rate limit info (if available in response)
-                // Note: octocrab doesn't expose rate limit headers directly,
-                // so we'll implement a conservative approach
-                self.rate_limiter.requests_remaining -= 1;
+        match self.github.repos(owner, repo).list_commits().sha(commit_sha).per_page(1).send().await {
+            Ok(page) => {
+                if let Some(commit) = page.items.first() {
+                    // Update rate limit info (if available in response)
+                    // Note: octocrab doesn't expose rate limit headers directly,
+                    // so we'll implement a conservative approach
+                    self.rate_limiter.requests_remaining -= 1;
 
-                let commit_info = CommitInfo {
-                    sha: commit.sha.clone(),
-                    repository: repository.to_string(),
-                    url: commit.url.clone(),
-                    author: commit.commit.author.as_ref().map(|a| CommitAuthor {
-                        name: a.name.clone().unwrap_or_default(),
-                        email: a.email.clone().unwrap_or_default(),
-                        date: a.date.unwrap_or_else(|| chrono::Utc::now()),
-                    }),
-                    committer: commit.commit.committer.as_ref().map(|c| CommitAuthor {
-                        name: c.name.clone().unwrap_or_default(),
-                        email: c.email.clone().unwrap_or_default(),
-                        date: c.date.unwrap_or_else(|| chrono::Utc::now()),
-                    }),
-                    message: commit.commit.message.clone(),
-                    tree_sha: commit.commit.tree.sha.clone(),
-                    parents: commit.parents.iter().map(|p| p.sha.clone()).collect(),
-                    stats: commit.stats.as_ref().map(|s| CommitStats {
-                        additions: s.additions as u32,
-                        deletions: s.deletions as u32,
-                        total: s.total as u32,
-                    }),
-                    files: commit.files.iter().map(|f| CommitFile {
-                        filename: f.filename.clone(),
-                        status: f.status.clone(),
-                        additions: f.additions as u32,
-                        deletions: f.deletions as u32,
-                        changes: f.changes as u32,
-                        patch: f.patch.clone(),
-                        raw_url: f.raw_url.clone(),
-                        blob_url: f.blob_url.clone(),
-                    }).collect(),
-                    html_url: commit.html_url.clone(),
-                    fetched_at: chrono::Utc::now(),
-                };
+                    let commit_info = CommitInfo {
+                        sha: commit.sha.clone(),
+                        message: commit.commit.message.clone(),
+                        url: commit.url.clone(),
+                        author: commit.commit.author.as_ref().map(|a| CommitAuthor {
+                            name: a.user.name.clone(),
+                            email: a.user.email.clone(),
+                            date: a.date.unwrap_or(chrono::Utc::now()),
+                        }),
+                        committer: commit.commit.committer.as_ref().map(|c| CommitAuthor {
+                            name: c.user.name.clone(),
+                            email: c.user.email.clone(),
+                            date: c.date.unwrap_or(chrono::Utc::now()),
+                        }),
+                        tree_sha: commit.commit.tree.sha.clone(),
+                        parents: commit.parents.iter().filter_map(|p| p.sha.clone()).collect(),
+                        stats: commit.stats.as_ref().map(|s| CommitStats {
+                            additions: s.additions.unwrap_or(0) as u32,
+                            deletions: s.deletions.unwrap_or(0) as u32,
+                            total: s.total.unwrap_or(0) as u32,
+                        }),
+                        files: commit.files.iter().flatten().map(|f| CommitFile {
+                            filename: f.filename.clone(),
+                            status: format!("{:?}", f.status),
+                            additions: f.additions as u32,
+                            deletions: f.deletions as u32,
+                            changes: f.changes as u32,
+                            patch: f.patch.clone(),
+                            blob_url: Some(f.blob_url.to_string()),
+                            raw_url: Some(f.raw_url.to_string()),
+                        }).collect(),
+                        html_url: commit.html_url.clone(),
+                        repository: format!("{}/{}", owner, repo),
+                        fetched_at: chrono::Utc::now(),
+                    };
 
-                // Cache the result
-                self.cache_commit(&commit_info).await?;
+                    // Cache the result
+                    self.cache_commit(&commit_info).await?;
 
-                Ok(Some(commit_info))
+                    Ok(Some(commit_info))
+                } else {
+                    debug!("Commit not found: {}/{}/{}", owner, repo, commit_sha);
+                    Ok(None)
+                }
             }
             Err(octocrab::Error::GitHub { source, .. }) => {
-                match source.status_code.as_u16() {
-                    404 => {
-                        debug!("Commit not found: {}/{}/{}", owner, repo, commit_sha);
-                        Ok(None)
-                    }
-                    403 => {
-                        warn!("Rate limited or forbidden: {}/{}/{}", owner, repo, commit_sha);
-                        // Apply exponential backoff
-                        self.rate_limiter.delay_factor *= 2.0;
-                        self.rate_limiter.requests_remaining = 0;
-                        Err(anyhow!("GitHub API rate limited or forbidden"))
-                    }
-                    429 => {
-                        warn!("Rate limited: {}/{}/{}", owner, repo, commit_sha);
-                        self.rate_limiter.requests_remaining = 0;
-                        Err(anyhow!("GitHub API rate limited"))
-                    }
-                    _ => {
-                        error!("GitHub API error {}: {}/{}/{}", source.status_code, owner, repo, commit_sha);
-                        Err(anyhow!("GitHub API error: {}", source.status_code))
-                    }
+                // The error structure has changed in newer versions
+                // For now, let's handle it more generically
+                let error_msg = source.message.clone();
+                if error_msg.contains("Not Found") || error_msg.contains("404") {
+                    debug!("Commit not found: {}/{}/{}", owner, repo, commit_sha);
+                    Ok(None)
+                } else if error_msg.contains("rate limit") || error_msg.contains("403") || error_msg.contains("429") {
+                    warn!("Rate limited or forbidden: {}/{}/{}", owner, repo, commit_sha);
+                    self.rate_limiter.requests_remaining = 0;
+                    Err(anyhow!("GitHub API rate limited or forbidden"))
+                } else {
+                    error!("GitHub API error: {}: {}/{}/{}", error_msg, owner, repo, commit_sha);
+                    Err(anyhow!("GitHub API error: {}", error_msg))
                 }
             }
             Err(e) => {
@@ -256,7 +253,8 @@ impl DanglingCommitFetcher {
         let mut errors = 0;
         
         for chunk in commit_shas.chunks(max_concurrent) {
-            let mut tasks = Vec::new();
+            // TODO: Implement concurrent commit fetching with proper task handling
+            let _tasks: Vec<tokio::task::JoinHandle<Result<Option<CommitInfo>>>> = Vec::new();
             
             for sha in chunk {
                 let repo = repository.to_string();
@@ -352,19 +350,20 @@ impl DanglingCommitFetcher {
 
         self.rate_limiter.wait_if_needed().await?;
 
-        match self.github.repos(owner, repo).commits(commit_sha).get().await {
-            Ok(_) => {
+        match self.github.repos(owner, repo).list_commits().sha(commit_sha).per_page(1).send().await {
+            Ok(page) => {
                 self.rate_limiter.requests_remaining -= 1;
-                Ok(true)
+                Ok(!page.items.is_empty())
             }
             Err(octocrab::Error::GitHub { source, .. }) => {
-                match source.status_code.as_u16() {
-                    404 => Ok(false),
-                    403 | 429 => {
-                        self.rate_limiter.requests_remaining = 0;
-                        Err(anyhow!("GitHub API rate limited"))
-                    }
-                    _ => Err(anyhow!("GitHub API error: {}", source.status_code))
+                let error_msg = source.message.clone();
+                if error_msg.contains("Not Found") || error_msg.contains("404") {
+                    Ok(false)
+                } else if error_msg.contains("rate limit") || error_msg.contains("403") || error_msg.contains("429") {
+                    self.rate_limiter.requests_remaining = 0;
+                    Err(anyhow!("GitHub API rate limited"))
+                } else {
+                    Err(anyhow!("GitHub API error: {}", error_msg))
                 }
             }
             Err(e) => Err(anyhow!("Failed to check commit existence: {}", e))

@@ -209,10 +209,12 @@ impl Downloader {
 
         for (url, path) in downloads {
             let semaphore = semaphore.clone();
-            let downloader = self;
+            let client = self.client.clone();
+            let config = self.config.clone();
             
             let task = tokio::spawn(async move {
                 let _permit = semaphore.acquire().await.unwrap();
+                let downloader = Downloader { client, config };
                 downloader.download_file(&url, &path, None).await
             });
             

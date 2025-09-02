@@ -1,14 +1,14 @@
 use std::sync::Arc;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime}; // Removed unused UNIX_EPOCH
 use tokio::time;
-use anyhow::Result;
+use anyhow::Result; // Removed unused anyhow macro since using qualified path
 use tracing::{info, warn, error, debug};
-use serde::{Serialize, Deserialize};
+use serde::Serialize; // Removed unused Deserialize
 
 use crate::core::{Config, DatabaseManager, ResourceMonitor, ResourceLimits};
 use crate::scraper::{
     ScraperManager, ArchiveScraper, FileProcessor, Downloader,
-    DownloadConfig, ProcessingConfig, ScrapingStats
+    DownloadConfig, ProcessingConfig // Removed unused ScrapingStats
 };
 
 #[derive(Debug, Clone, Serialize)]
@@ -106,7 +106,7 @@ impl MainScraper {
         info!("Starting main scraper...");
 
         // Start the scraper state
-        self.scraper_manager.start()?;
+        self.scraper_manager.start().map_err(|e| anyhow::anyhow!(e))?;
         
         // Start the main processing loop
         self.run_main_loop().await?;
@@ -118,7 +118,7 @@ impl MainScraper {
         info!("Stopping main scraper...");
 
         self.shutdown_requested = true;
-        self.scraper_manager.stop()?;
+        self.scraper_manager.stop().map_err(|e| anyhow::anyhow!(e))?;
 
         // Shutdown archive scraper
         if let Some(ref scraper) = self.archive_scraper {
@@ -136,20 +136,20 @@ impl MainScraper {
 
     pub async fn pause(&mut self) -> Result<()> {
         info!("Pausing main scraper...");
-        self.scraper_manager.pause()?;
+        self.scraper_manager.pause().map_err(|e| anyhow::anyhow!(e))?;
         Ok(())
     }
 
     pub async fn resume(&mut self) -> Result<()> {
         info!("Resuming main scraper...");
-        self.scraper_manager.resume()?;
+        self.scraper_manager.resume().map_err(|e| anyhow::anyhow!(e))?;
         Ok(())
     }
 
     pub async fn restart(&mut self) -> Result<()> {
         info!("Restarting main scraper...");
         
-        self.scraper_manager.restart()?;
+        self.scraper_manager.restart().map_err(|e| anyhow::anyhow!(e))?;
         self.start_time = Some(SystemTime::now());
         
         info!("Main scraper restarted");
@@ -157,7 +157,7 @@ impl MainScraper {
     }
 
     pub async fn get_comprehensive_status(&mut self) -> Result<MainScraperStatus> {
-        let scraper_status = self.scraper_manager.get_status()?;
+        let scraper_status = self.scraper_manager.get_status().map_err(|e| anyhow::anyhow!(e))?;
         let running = self.scraper_manager.is_running();
         
         let uptime_seconds = if let Some(start_time) = self.start_time {

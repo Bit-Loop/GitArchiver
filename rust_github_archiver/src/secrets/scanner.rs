@@ -2,8 +2,8 @@ use anyhow::{anyhow, Result};
 use fancy_regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use tracing::{info, warn, error, debug};
-use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
+use tracing::{info, warn, error}; // Removed unused debug
+// Removed unused base64 imports
 use sha2::{Sha256, Digest};
 use entropy::shannon_entropy;
 
@@ -34,6 +34,17 @@ pub enum SecretSeverity {
     Critical,
 }
 
+impl std::fmt::Display for SecretSeverity {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SecretSeverity::Low => write!(f, "Low"),
+            SecretSeverity::Medium => write!(f, "Medium"),
+            SecretSeverity::High => write!(f, "High"),
+            SecretSeverity::Critical => write!(f, "Critical"),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum SecretCategory {
     CloudProvider,
@@ -44,6 +55,21 @@ pub enum SecretCategory {
     Token,
     Webhook,
     Other,
+}
+
+impl std::fmt::Display for SecretCategory {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SecretCategory::CloudProvider => write!(f, "Cloud Provider"),
+            SecretCategory::Database => write!(f, "Database"),
+            SecretCategory::ApiKey => write!(f, "API Key"),
+            SecretCategory::Certificate => write!(f, "Certificate"),
+            SecretCategory::Password => write!(f, "Password"),
+            SecretCategory::Token => write!(f, "Token"),
+            SecretCategory::Webhook => write!(f, "Webhook"),
+            SecretCategory::Other => write!(f, "Other"),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -387,7 +413,7 @@ impl SecretScanner {
         for detector in &self.detectors {
             if let Some(regex) = self.patterns.get(&detector.name) {
                 for capture in regex.find_iter(text) {
-                    if let Ok(Some(m)) = capture {
+                    if let Ok(m) = capture {
                         let matched_text = m.as_str().to_string();
                         let start = m.start();
                         let end = m.end();
@@ -403,7 +429,7 @@ impl SecretScanner {
 
                         // Check if entropy meets threshold
                         if let Some(threshold) = detector.entropy_threshold {
-                            if entropy < threshold {
+                            if (entropy as f64) < threshold {
                                 continue;
                             }
                         }
@@ -420,7 +446,7 @@ impl SecretScanner {
                             end_position: end,
                             line_number: Some(line_number),
                             filename: filename.map(|s| s.to_string()),
-                            entropy,
+                            entropy: entropy as f64,
                             severity: detector.severity.clone(),
                             category: detector.category.clone(),
                             context,

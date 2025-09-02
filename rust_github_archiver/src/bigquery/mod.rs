@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc, NaiveDate};
 use gcp_bigquery_client::{Client, model::query_request::QueryRequest};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use tracing::{info, warn, error, debug};
+use tracing::{info, debug}; // Removed unused warn and error
 
 /// BigQuery client for scanning GitHub Archive data
 pub struct BigQueryScanner {
@@ -83,10 +83,11 @@ impl BigQueryScanner {
         debug!("BigQuery SQL: {}", query);
         
         let mut query_request = QueryRequest::new(query);
-        query_request.max_results = limit.map(|l| l as u32);
-        query_request.use_legacy_sql = Some(false);
+        query_request.max_results = limit.map(|l| l as i32);
+        query_request.use_legacy_sql = false;
         
-        let mut response = self.client
+        // Execute BigQuery request and get response
+        let response = self.client
             .job()
             .query(&self.project_id, query_request)
             .await
@@ -96,12 +97,15 @@ impl BigQueryScanner {
         let mut result_set = gcp_bigquery_client::model::query_response::ResultSet::new_from_query_response(response);
         
         while result_set.next_row() {
+            let created_at_str = result_set.get_string_by_name("created_at")?.unwrap_or_default();
+            let created_at = chrono::DateTime::parse_from_rfc3339(&created_at_str)
+                .map_err(|e| anyhow!("Failed to parse created_at: {}", e))?
+                .with_timezone(&chrono::Utc);
+            
             let event = ZeroCommitEvent {
                 id: result_set.get_string_by_name("id")?.unwrap_or_default(),
                 event_type: result_set.get_string_by_name("type")?.unwrap_or_default(),
-                created_at: result_set.get_datetime_by_name("created_at")?
-                    .ok_or_else(|| anyhow!("Missing created_at field"))?
-                    .and_utc(),
+                created_at,
                 repo_name: result_set.get_string_by_name("repo_name")?.unwrap_or_default(),
                 repo_id: result_set.get_i64_by_name("repo_id")?.unwrap_or(0),
                 actor_login: result_set.get_string_by_name("actor_login")?.unwrap_or_default(),
@@ -213,7 +217,8 @@ ORDER BY table_date DESC
         "#;
         
         let query_request = QueryRequest::new(query.to_string());
-        let mut response = self.client
+        // Execute query for available dates
+        let response = self.client
             .job()
             .query(&self.project_id, query_request)
             .await
@@ -259,7 +264,8 @@ WHERE type = 'PushEvent'
         );
         
         let query_request = QueryRequest::new(query);
-        let mut response = self.client
+        // Execute PushEvent stats query  
+        let response = self.client
             .job()
             .query(&self.project_id, query_request)
             .await
@@ -339,7 +345,7 @@ WHERE type = 'PushEvent'
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::NaiveDate;
+    // NaiveDate is already imported in the parent module
 
     #[test]
     fn test_repository_filter_default() {

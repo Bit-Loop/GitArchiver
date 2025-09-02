@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
 use axum::{
-    extract::{Query, State},
+    // Removed unused Query and State
     http::StatusCode,
     response::Json,
     routing::{get, post},
@@ -17,15 +17,16 @@ use tracing::{info, warn, error, debug};
 use uuid::Uuid;
 
 use crate::github::DanglingCommitFetcher;
+use crate::github::dangling_commits::CommitInfo;
 use crate::secrets::SecretScanner;
-use crate::ai::AITriageAgent;
+// use crate::ai::AITriageAgent;  // Temporarily disabled until AI module is implemented
 
 /// Real-time GitHub event monitor
 pub struct GitHubEventMonitor {
     client: Client,
     secret_scanner: SecretScanner,
-    commit_fetcher: DanglingCommitFetcher,
-    ai_agent: Option<AITriageAgent>,
+    commit_fetcher: Arc<tokio::sync::Mutex<DanglingCommitFetcher>>,
+    // ai_agent: Option<AITriageAgent>,  // Temporarily disabled until AI module is implemented
     last_event_id: Arc<RwLock<Option<String>>>,
     webhook_endpoints: Arc<RwLock<Vec<WebhookEndpoint>>>,
     processing_queue: Arc<RwLock<Vec<GitHubEvent>>>,
@@ -103,7 +104,7 @@ pub struct RealTimeSecretAlert {
     pub secrets_found: Vec<RealTimeSecretMatch>,
     pub alert_severity: AlertSeverity,
     pub detection_time: DateTime<Utc>,
-    pub triage_result: Option<crate::ai::TriageResult>,
+    // pub triage_result: Option<crate::ai::TriageResult>,  // Temporarily disabled until AI module is implemented
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -125,23 +126,27 @@ pub enum AlertSeverity {
 
 impl GitHubEventMonitor {
     /// Create a new real-time monitor
-    pub fn new() -> Self {
-        Self {
+    pub async fn new(github_token: &str) -> Result<Self> {
+        let commit_fetcher = DanglingCommitFetcher::new(github_token, None).await?;
+        
+        Ok(Self {
             client: Client::new(),
             secret_scanner: SecretScanner::new(),
-            commit_fetcher: DanglingCommitFetcher::new("github_token".to_string()),
-            ai_agent: None,
+            commit_fetcher: Arc::new(tokio::sync::Mutex::new(commit_fetcher)),
+            // ai_agent: None,  // Temporarily disabled until AI module is implemented
             last_event_id: Arc::new(RwLock::new(None)),
             webhook_endpoints: Arc::new(RwLock::new(Vec::new())),
             processing_queue: Arc::new(RwLock::new(Vec::new())),
-        }
+        })
     }
 
-    /// Initialize with AI triage capabilities
+    /*
+    /// Initialize with AI triage capabilities (temporarily disabled until AI module is implemented)
     pub async fn with_ai_triage(mut self, ai_agent: AITriageAgent) -> Self {
         self.ai_agent = Some(ai_agent);
         self
     }
+    */
 
     /// Start monitoring GitHub Events API
     pub async fn start_monitoring(&self) -> Result<()> {
@@ -172,7 +177,8 @@ impl GitHubEventMonitor {
     async fn poll_events(&self) -> Result<Vec<GitHubEvent>> {
         let url = "https://api.github.com/events";
         
-        let mut request_builder = self.client.get(url);
+        // Build GitHub API request
+        let request_builder = self.client.get(url);
         
         // Add conditional request based on last event ID
         if let Some(last_id) = self.last_event_id.read().await.as_ref() {
@@ -262,7 +268,7 @@ impl GitHubEventMonitor {
 
     /// Process push events for zero-commit secrets
     async fn process_push_event(&self, event: GitHubEvent) -> Result<()> {
-        let payload: PushEventPayload = serde_json::from_value(event.payload)?;
+        let payload: PushEventPayload = serde_json::from_value(event.payload.clone())?;
         
         info!("Processing PushEvent for repo: {} (before: {})", 
               event.repo.name, payload.before);
@@ -273,8 +279,13 @@ impl GitHubEventMonitor {
                 Ok(Some(commit_data)) => {
                     info!("Found dangling commit: {} in {}", payload.before, event.repo.name);
                     
-                    // Scan the commit for secrets
-                    let secrets = self.scan_commit_for_secrets(&commit_data).await?;
+                    // Scan the commit for secrets  
+                    let file_patches: Vec<String> = commit_data.files.iter()
+                        .filter_map(|f| f.patch.as_ref())
+                        .cloned()
+                        .collect();
+                    let commit_text = format!("{}\n{}", commit_data.message, file_patches.join("\n"));
+                    let secrets = self.scan_commit_for_secrets(&commit_text).await?;
                     
                     if !secrets.is_empty() {
                         let alert = self.create_secret_alert(
@@ -309,7 +320,7 @@ impl GitHubEventMonitor {
             let body = pr_data.get("body").and_then(|v| v.as_str()).unwrap_or("");
             
             let combined_text = format!("{}\n{}", title, body);
-            let secrets = self.secret_scanner.scan_text(&combined_text).await?;
+            let secrets = self.secret_scanner.scan_text(&combined_text, None);
             
             if !secrets.is_empty() {
                 info!("Found {} secrets in PR metadata", secrets.len());
@@ -331,7 +342,7 @@ impl GitHubEventMonitor {
                     secrets_found: alert_secrets,
                     alert_severity: AlertSeverity::Medium,
                     detection_time: Utc::now(),
-                    triage_result: None,
+                    // triage_result: None,  // Temporarily disabled until AI module is implemented
                 };
 
                 self.send_alert(alert).await?;
@@ -347,7 +358,7 @@ impl GitHubEventMonitor {
         
         if let Some(comment_data) = event.payload.get("comment") {
             if let Some(body) = comment_data.get("body").and_then(|v| v.as_str()) {
-                let secrets = self.secret_scanner.scan_text(body).await?;
+                let secrets = self.secret_scanner.scan_text(body, None);
                 
                 if !secrets.is_empty() {
                     info!("Found {} secrets in issue comment", secrets.len());
@@ -369,7 +380,7 @@ impl GitHubEventMonitor {
                         secrets_found: alert_secrets,
                         alert_severity: AlertSeverity::Low,
                         detection_time: Utc::now(),
-                        triage_result: None,
+                        // triage_result: None,  // Temporarily disabled until AI module is implemented
                     };
 
                     self.send_alert(alert).await?;
@@ -390,7 +401,7 @@ impl GitHubEventMonitor {
             let body = release_data.get("body").and_then(|v| v.as_str()).unwrap_or("");
             
             let combined_text = format!("{}\n{}", name, body);
-            let secrets = self.secret_scanner.scan_text(&combined_text).await?;
+            let secrets = self.secret_scanner.scan_text(&combined_text, None);
             
             if !secrets.is_empty() {
                 info!("Found {} secrets in release", secrets.len());
@@ -412,7 +423,7 @@ impl GitHubEventMonitor {
                     secrets_found: alert_secrets,
                     alert_severity: AlertSeverity::Medium,
                     detection_time: Utc::now(),
-                    triage_result: None,
+                    // triage_result: None,  // Temporarily disabled until AI module is implemented
                 };
 
                 self.send_alert(alert).await?;
@@ -423,10 +434,11 @@ impl GitHubEventMonitor {
     }
 
     /// Check if a commit is dangling (not accessible via API)
-    async fn check_for_dangling_commit(&self, repo_name: &str, commit_sha: &str) -> Result<Option<String>> {
+    async fn check_for_dangling_commit(&self, repo_name: &str, commit_sha: &str) -> Result<Option<CommitInfo>> {
         // Try to fetch the commit - if it fails with 404, it's likely dangling
-        match self.commit_fetcher.fetch_commit(repo_name, commit_sha).await {
-            Ok(commit_data) => Ok(Some(commit_data)),
+        let mut fetcher = self.commit_fetcher.lock().await;
+        match fetcher.fetch_commit(repo_name, commit_sha).await {
+            Ok(commit_data) => Ok(commit_data),
             Err(e) => {
                 if e.to_string().contains("404") {
                     // This is likely a dangling commit
@@ -441,7 +453,7 @@ impl GitHubEventMonitor {
 
     /// Scan commit data for secrets
     async fn scan_commit_for_secrets(&self, commit_data: &str) -> Result<Vec<crate::secrets::SecretMatch>> {
-        self.secret_scanner.scan_text(commit_data).await
+        Ok(self.secret_scanner.scan_text(commit_data, None))
     }
 
     /// Create a secret alert
@@ -455,7 +467,7 @@ impl GitHubEventMonitor {
             .map(|s| RealTimeSecretMatch {
                 detector_name: s.detector_name.clone(),
                 matched_text: s.matched_text.clone(),
-                line_number: s.line_number,
+                line_number: s.line_number.map(|ln| ln as u32),
                 filename: s.filename.clone().unwrap_or("UNKNOWN".to_string()),
                 severity: s.severity.clone(),
             })
@@ -472,7 +484,8 @@ impl GitHubEventMonitor {
             AlertSeverity::Low
         };
 
-        // Use AI triage if available
+        // Use AI triage if available (temporarily disabled until AI module is implemented)
+        /*
         let triage_result = if let Some(ai_agent) = &self.ai_agent {
             if let Some(secret) = secrets.first() {
                 let context = crate::ai::TriageContext {
@@ -493,6 +506,7 @@ impl GitHubEventMonitor {
         } else {
             None
         };
+        */
 
         Ok(RealTimeSecretAlert {
             event_id: event.id.clone(),
@@ -501,7 +515,7 @@ impl GitHubEventMonitor {
             secrets_found: alert_secrets,
             alert_severity,
             detection_time: Utc::now(),
-            triage_result,
+            // triage_result,  // Temporarily disabled until AI module is implemented
         })
     }
 
@@ -567,6 +581,7 @@ impl GitHubEventMonitor {
     }
 
     /// Generate webhook signature for security
+    #[allow(dead_code)] // Used for webhook validation when feature is enabled
     fn generate_webhook_signature(&self, payload: &serde_json::Value, secret: &str) -> Result<String> {
         use sha2::{Sha256, Digest};
         use hex;
@@ -651,13 +666,13 @@ mod tests {
 
     #[tokio::test]
     async fn test_event_monitor_creation() {
-        let monitor = GitHubEventMonitor::new();
+        let monitor = GitHubEventMonitor::new("fake_token").await.unwrap();
         assert_eq!(monitor.processing_queue.read().await.len(), 0);
     }
 
     #[tokio::test]
     async fn test_webhook_endpoint_management() {
-        let monitor = GitHubEventMonitor::new();
+        let monitor = GitHubEventMonitor::new("fake_token").await.unwrap();
         
         let id = monitor.add_webhook_endpoint(
             "https://example.com/webhook".to_string(),
@@ -673,7 +688,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_webhook_signature_generation() {
-        let monitor = GitHubEventMonitor::new();
+        let monitor = GitHubEventMonitor::new("fake_token").await.unwrap();
         let payload = serde_json::json!({"test": "data"});
         let secret = "my_secret";
         

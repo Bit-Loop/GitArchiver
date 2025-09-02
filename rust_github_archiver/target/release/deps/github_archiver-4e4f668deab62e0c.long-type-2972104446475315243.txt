@@ -1,2 +1,0 @@
-&[std::string::String]
-&[std::string::String]: rusqlite::Params
