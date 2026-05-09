@@ -7,6 +7,34 @@ notes.txt
 .codex
 AGENTS.md
 
+# Runtime logs
+logs/
+log/
+rust_github_archiver/logs/
+
+# Local databases, dumps, and backups
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.duckdb
+*.dump
+*.dump.sql
+*.dump.sql.gz
+*.backup.sql
+*.backup.sql.gz
+*.backup
+*.bak
+db_dumps/
+database_backups/
+backups/
+pgdata/
+postgres-data/
+postgres_data/
+rust_github_archiver/pgdata/
+rust_github_archiver/postgres-data/
+rust_github_archiver/postgres_data/
+
 # Rust/application build output
 rust_github_archiver/target/
 rust_github_archiver/tauri-app/target/
