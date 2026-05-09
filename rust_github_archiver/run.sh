@@ -13,7 +13,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-BINARY_NAME="github_archiver"
+SERVICE_BINARY_NAME="${SERVICE_BINARY_NAME:-web_server}"
+CLI_BINARY_NAME="${CLI_BINARY_NAME:-github_archiver}"
 BUILD_DIR="target/release"
 LOG_DIR="logs"
 PID_FILE="service.pid"
@@ -89,20 +90,20 @@ start_service() {
         return 0
     fi
 
-    print_status "Starting GitHub Archive Scraper..."
+    print_status "Starting GitHub Archiver service ($SERVICE_BINARY_NAME)..."
 
     # Check if binary exists
-    if [ ! -f "$BUILD_DIR/$BINARY_NAME" ]; then
-        print_error "Binary not found: $BUILD_DIR/$BINARY_NAME"
+    if [ ! -f "$BUILD_DIR/$SERVICE_BINARY_NAME" ]; then
+        print_error "Binary not found: $BUILD_DIR/$SERVICE_BINARY_NAME"
         print_status "Building application..."
-        if ! cargo build --release; then
+        if ! cargo build --release --bin "$SERVICE_BINARY_NAME"; then
             print_error "Build failed"
             exit 1
         fi
     fi
 
     # Start the service in background
-    nohup "$BUILD_DIR/$BINARY_NAME" >> "$LOG_FILE" 2>&1 &
+    nohup "$BUILD_DIR/$SERVICE_BINARY_NAME" >> "$LOG_FILE" 2>&1 &
     local pid=$!
     
     # Save PID
@@ -113,7 +114,7 @@ start_service() {
     
     # Check if it's still running
     if kill -0 "$pid" 2>/dev/null; then
-        print_success "GitHub Archive Scraper started successfully (PID: $pid)"
+        print_success "GitHub Archiver service started successfully (PID: $pid)"
         print_status "Logs: tail -f $LOG_FILE"
         return 0
     else
@@ -179,10 +180,13 @@ build_app() {
         print_success "Build completed successfully"
         
         # Show binary info
-        if [ -f "$BUILD_DIR/$BINARY_NAME" ]; then
-            local size=$(du -h "$BUILD_DIR/$BINARY_NAME" | cut -f1)
-            print_status "Binary size: $size"
-            print_status "Binary path: $BUILD_DIR/$BINARY_NAME"
+        if [ -f "$BUILD_DIR/$SERVICE_BINARY_NAME" ]; then
+            local size=$(du -h "$BUILD_DIR/$SERVICE_BINARY_NAME" | cut -f1)
+            print_status "Service binary size: $size"
+            print_status "Service binary path: $BUILD_DIR/$SERVICE_BINARY_NAME"
+        fi
+        if [ -f "$BUILD_DIR/$CLI_BINARY_NAME" ]; then
+            print_status "CLI binary path: $BUILD_DIR/$CLI_BINARY_NAME"
         fi
     else
         print_error "Build failed"
@@ -196,7 +200,7 @@ dev_run() {
     stop_service 2>/dev/null || true
     
     # Run with cargo for hot reloading
-    cargo run
+    cargo run --bin "$SERVICE_BINARY_NAME"
 }
 
 # Function to run specific commands
@@ -206,12 +210,15 @@ run_command() {
     
     print_status "Running command: $cmd"
     
-    if [ ! -f "$BUILD_DIR/$BINARY_NAME" ]; then
-        print_status "Binary not found, building..."
-        build_app
+    if [ ! -f "$BUILD_DIR/$CLI_BINARY_NAME" ]; then
+        print_status "CLI binary not found, building..."
+        if ! cargo build --release --bin "$CLI_BINARY_NAME"; then
+            print_error "Build failed"
+            exit 1
+        fi
     fi
-    
-    "$BUILD_DIR/$BINARY_NAME" "$cmd" "$@"
+
+    "$BUILD_DIR/$CLI_BINARY_NAME" "$cmd" "$@"
 }
 
 # Function to show help
@@ -221,7 +228,7 @@ show_help() {
     echo "Usage: $0 {start|stop|restart|status|build|dev|logs|help} [options]"
     echo ""
     echo "Commands:"
-    echo "  start           Start the scraper service"
+    echo "  start           Start the API service"
     echo "  stop            Stop the scraper service"
     echo "  restart         Restart the scraper service"
     echo "  status          Show service status"
@@ -231,18 +238,17 @@ show_help() {
     echo "  help            Show this help message"
     echo ""
     echo "Service Commands (passed to binary):"
-    echo "  server          Run only the API server"
-    echo "  scraper         Run only the scraper"
-    echo "  process <file>  Process a specific file"
-    echo "  download <url>  Download a specific file"
-    echo "  cleanup         Clean up old files"
+    echo "  ingest ...      Run ingestion commands"
+    echo "  scan ...        Run scan commands"
+    echo "  research ...    Run research commands"
+    echo "  triage ...      Run triage commands"
+    echo "  admin ...       Run admin commands"
     echo ""
     echo "Examples:"
     echo "  $0 start                    # Start full service"
     echo "  $0 logs -f                  # Follow logs"
     echo "  $0 logs 100                 # Show last 100 log lines"
-    echo "  $0 process 2024-01-01-0.json.gz"
-    echo "  $0 download https://data.gharchive.org/2024-01-01-0.json.gz"
+    echo "  $0 admin database repair-scan-state --dry-run"
 }
 
 # Main script logic
@@ -268,7 +274,7 @@ case "${1:-help}" in
     logs)
         show_logs "${2:-}"
         ;;
-    server|scraper|process|download|cleanup)
+    ingest|scan|research|triage|admin)
         run_command "$@"
         ;;
     help|--help|-h)

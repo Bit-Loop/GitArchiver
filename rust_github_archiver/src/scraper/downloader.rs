@@ -1,11 +1,11 @@
+use anyhow::{anyhow, Result};
+use reqwest::Client;
+use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::time::{Duration, Instant};
-use reqwest::Client;
-use tokio::fs::{File, create_dir_all};
+use tokio::fs::{create_dir_all, File};
 use tokio::io::AsyncWriteExt;
-use anyhow::{Result, anyhow};
-use serde::{Serialize, Deserialize};
-use tracing::{info, warn, error, debug};
+use tracing::{debug, error, info, warn};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DownloadConfig {
@@ -39,7 +39,7 @@ pub struct DownloadResult {
     pub retries_used: u32,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
 pub enum DownloadStatus {
     Success,
     Failed,
@@ -79,7 +79,10 @@ impl Downloader {
             if let Ok(metadata) = tokio::fs::metadata(local_path).await {
                 if let Some(expected) = expected_size {
                     if metadata.len() == expected {
-                        debug!("File already exists with correct size: {}", local_path.display());
+                        debug!(
+                            "File already exists with correct size: {}",
+                            local_path.display()
+                        );
                         return Ok(DownloadResult {
                             url: url.to_string(),
                             local_path: local_path.to_string_lossy().to_string(),
@@ -100,16 +103,24 @@ impl Downloader {
         for attempt in 0..=self.config.max_retries {
             if attempt > 0 {
                 retries_used += 1;
-                let delay = Duration::from_secs_f64(self.config.retry_delay_seconds * attempt as f64);
-                warn!("Retrying download attempt {} after {:?}: {}", attempt, delay, url);
+                let delay =
+                    Duration::from_secs_f64(self.config.retry_delay_seconds * attempt as f64);
+                warn!(
+                    "Retrying download attempt {} after {:?}: {}",
+                    attempt, delay, url
+                );
                 tokio::time::sleep(delay).await;
             }
 
             match self.download_attempt(url, local_path).await {
                 Ok(size) => {
-                    info!("Successfully downloaded {} ({} bytes) in {:.2}s", 
-                          url, size, start_time.elapsed().as_secs_f64());
-                    
+                    info!(
+                        "Successfully downloaded {} ({} bytes) in {:.2}s",
+                        url,
+                        size,
+                        start_time.elapsed().as_secs_f64()
+                    );
+
                     return Ok(DownloadResult {
                         url: url.to_string(),
                         local_path: local_path.to_string_lossy().to_string(),
@@ -123,7 +134,7 @@ impl Downloader {
                 Err(e) => {
                     error!("Download attempt {} failed for {}: {}", attempt + 1, url, e);
                     last_error = Some(e);
-                    
+
                     // Clean up partial file
                     if local_path.exists() {
                         let _ = tokio::fs::remove_file(local_path).await;
@@ -176,8 +187,12 @@ impl Downloader {
 
             // Optional: Progress reporting for large files
             if let Some(total) = content_length {
-                if total > 10_000_000 && bytes_written % 1_000_000 == 0 {
-                    debug!("Downloaded {}/{} MB", bytes_written / 1_000_000, total / 1_000_000);
+                if total > 10_000_000 && bytes_written.is_multiple_of(1_000_000) {
+                    debug!(
+                        "Downloaded {}/{} MB",
+                        bytes_written / 1_000_000,
+                        total / 1_000_000
+                    );
                 }
             }
         }
@@ -204,51 +219,49 @@ impl Downloader {
         &self,
         downloads: Vec<(String, std::path::PathBuf)>,
     ) -> Vec<DownloadResult> {
-        let semaphore = std::sync::Arc::new(tokio::sync::Semaphore::new(self.config.max_concurrent_downloads));
-        let mut tasks = Vec::new();
+        let semaphore = std::sync::Arc::new(tokio::sync::Semaphore::new(
+            self.config.max_concurrent_downloads,
+        ));
+        let download_count = downloads.len();
+        let mut tasks = Vec::with_capacity(download_count);
 
         for (url, path) in downloads {
             let semaphore = semaphore.clone();
             let client = self.client.clone();
             let config = self.config.clone();
-            
+            let result_url = url.clone();
+            let result_path = path.clone();
+
             let task = tokio::spawn(async move {
-                let _permit = semaphore.acquire().await.unwrap();
+                let Ok(_permit) = semaphore.acquire().await else {
+                    return Ok(DownloadResult {
+                        url,
+                        local_path: path.to_string_lossy().to_string(),
+                        size_bytes: 0,
+                        duration_seconds: 0.0,
+                        status: DownloadStatus::Failed,
+                        error: Some("download semaphore closed".to_string()),
+                        retries_used: 0,
+                    });
+                };
                 let downloader = Downloader { client, config };
                 downloader.download_file(&url, &path, None).await
             });
-            
-            tasks.push(task);
+
+            tasks.push((result_url, result_path, task));
         }
 
-        let mut results = Vec::new();
-        for task in tasks {
+        let mut results = Vec::with_capacity(tasks.len());
+        for (url, path, task) in tasks {
             match task.await {
                 Ok(Ok(result)) => results.push(result),
                 Ok(Err(e)) => {
                     error!("Download task error: {}", e);
-                    // Create a failed result
-                    results.push(DownloadResult {
-                        url: "unknown".to_string(),
-                        local_path: "unknown".to_string(),
-                        size_bytes: 0,
-                        duration_seconds: 0.0,
-                        status: DownloadStatus::Failed,
-                        error: Some(e.to_string()),
-                        retries_used: 0,
-                    });
+                    results.push(failed_download_result(&url, &path, e.to_string()));
                 }
                 Err(e) => {
                     error!("Task join error: {}", e);
-                    results.push(DownloadResult {
-                        url: "unknown".to_string(),
-                        local_path: "unknown".to_string(),
-                        size_bytes: 0,
-                        duration_seconds: 0.0,
-                        status: DownloadStatus::Failed,
-                        error: Some(e.to_string()),
-                        retries_used: 0,
-                    });
+                    results.push(failed_download_result(&url, &path, e.to_string()));
                 }
             }
         }
@@ -263,7 +276,7 @@ impl Downloader {
     pub async fn estimate_download_time(&self, url: &str) -> Result<Duration> {
         // Send HEAD request to get content length
         let response = self.client.head(url).send().await?;
-        
+
         if let Some(content_length) = response.content_length() {
             // Rough estimate: assume 1 MB/s download speed
             let estimated_seconds = content_length / 1_000_000;
@@ -279,5 +292,113 @@ impl Downloader {
             Ok(response) => Ok(response.status().is_success()),
             Err(_) => Ok(false),
         }
+    }
+}
+
+fn failed_download_result(url: &str, path: &Path, error: String) -> DownloadResult {
+    DownloadResult {
+        url: url.to_string(),
+        local_path: path.to_string_lossy().to_string(),
+        size_bytes: 0,
+        duration_seconds: 0.0,
+        status: DownloadStatus::Failed,
+        error: Some(error),
+        retries_used: 0,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::tempdir;
+
+    fn fast_config() -> DownloadConfig {
+        DownloadConfig {
+            max_concurrent_downloads: 2,
+            chunk_size: 64,
+            request_timeout_seconds: 1,
+            max_retries: 0,
+            retry_delay_seconds: 0.0,
+        }
+    }
+
+    #[tokio::test]
+    async fn download_file_skips_existing_file_when_expected_size_matches() {
+        let dir = tempdir().expect("tempdir");
+        let target = dir.path().join("archive.json.gz");
+        tokio::fs::write(&target, b"already here")
+            .await
+            .expect("seed file");
+        let downloader = Downloader::new(fast_config()).expect("downloader");
+
+        let result = downloader
+            .download_file("http://127.0.0.1:1/not-called", &target, Some(12))
+            .await
+            .expect("skip result");
+
+        assert_eq!(result.status, DownloadStatus::Skipped);
+        assert_eq!(result.size_bytes, 12);
+        assert_eq!(result.retries_used, 0);
+        assert!(result.error.is_none());
+    }
+
+    #[tokio::test]
+    async fn download_file_returns_failed_result_after_exhausting_retries() {
+        let dir = tempdir().expect("tempdir");
+        let target = dir.path().join("missing.json.gz");
+        let downloader = Downloader::new(fast_config()).expect("downloader");
+
+        let result = downloader
+            .download_file("http://127.0.0.1:1/unreachable", &target, None)
+            .await
+            .expect("failed result should be reported, not bubbled");
+
+        assert_eq!(result.status, DownloadStatus::Failed);
+        assert_eq!(result.size_bytes, 0);
+        assert!(result.error.is_some());
+        assert!(!target.exists(), "partial files should be removed");
+    }
+
+    #[tokio::test]
+    async fn download_multiple_preserves_empty_workload() {
+        let downloader = Downloader::new(fast_config()).expect("downloader");
+
+        let results = downloader.download_multiple(Vec::new()).await;
+
+        assert!(results.is_empty());
+    }
+
+    #[tokio::test]
+    async fn download_multiple_preserves_failed_download_identity() {
+        let dir = tempdir().expect("tempdir");
+        let target = dir.path().join("missing.json.gz");
+        let target_display = target.to_string_lossy().to_string();
+        let downloader = Downloader::new(fast_config()).expect("downloader");
+
+        let results = downloader
+            .download_multiple(vec![(
+                "http://127.0.0.1:1/unreachable".to_string(),
+                target.clone(),
+            )])
+            .await;
+
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].status, DownloadStatus::Failed);
+        assert_eq!(results[0].url, "http://127.0.0.1:1/unreachable");
+        assert_eq!(results[0].local_path, target_display);
+        assert!(results[0].error.is_some());
+        assert!(!target.exists());
+    }
+
+    #[tokio::test]
+    async fn check_url_availability_treats_transport_error_as_unavailable() {
+        let downloader = Downloader::new(fast_config()).expect("downloader");
+
+        let available = downloader
+            .check_url_availability("http://127.0.0.1:1/unreachable")
+            .await
+            .expect("availability check should not fail on transport error");
+
+        assert!(!available);
     }
 }

@@ -93,10 +93,12 @@ CREATE TABLE github_events (
 CREATE TABLE IF NOT EXISTS processed_files (
     filename VARCHAR(255) PRIMARY KEY,
     file_size BIGINT,
+    size_bytes BIGINT NOT NULL DEFAULT 0,
     etag VARCHAR(255),
     last_modified TIMESTAMP WITH TIME ZONE,
     processed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     event_count INTEGER DEFAULT 0,
+    events_count BIGINT DEFAULT 0,
     is_complete BOOLEAN DEFAULT TRUE
 );
 
@@ -124,6 +126,110 @@ CREATE TABLE IF NOT EXISTS repositories (
     last_updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Pending push events queue feeding the scanner
+CREATE TABLE IF NOT EXISTS pending_push_scans (
+    event_id BIGINT PRIMARY KEY REFERENCES github_events(event_id) ON DELETE CASCADE,
+    repository_full_name VARCHAR(255) NOT NULL,
+    repository_url TEXT,
+    before_sha VARCHAR(64) NOT NULL,
+    head_sha VARCHAR(64),
+    ref_name VARCHAR(255),
+    forced_flag BOOLEAN NOT NULL DEFAULT false,
+    commit_span INTEGER NOT NULL DEFAULT 0,
+    is_zero_commit BOOLEAN NOT NULL DEFAULT false,
+    event_payload JSONB,
+    event_created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+    attempts INTEGER NOT NULL DEFAULT 0,
+    last_attempt_at TIMESTAMP WITH TIME ZONE,
+    next_attempt_after TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    locked_by VARCHAR(128),
+    locked_at TIMESTAMP WITH TIME ZONE,
+    error_message TEXT,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    completed_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX IF NOT EXISTS idx_pending_push_scans_status
+    ON pending_push_scans (status, next_attempt_after);
+CREATE INDEX IF NOT EXISTS idx_pending_push_scans_claim_window
+    ON pending_push_scans (status, next_attempt_after, event_created_at);
+CREATE INDEX IF NOT EXISTS idx_pending_push_scans_repo
+    ON pending_push_scans (repository_full_name);
+CREATE INDEX IF NOT EXISTS idx_pending_push_scans_processing_repo_created
+    ON pending_push_scans (status, LOWER(repository_full_name), event_created_at);
+CREATE INDEX IF NOT EXISTS idx_pending_push_scans_created
+    ON pending_push_scans (event_created_at);
+
+-- Secret scan executions (manual, realtime, backfill)
+CREATE TABLE IF NOT EXISTS secret_scans (
+    id UUID PRIMARY KEY,
+    repository VARCHAR(255),
+    scan_type VARCHAR(50) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    source VARCHAR(50) NOT NULL,
+    started_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    completed_at TIMESTAMP WITH TIME ZONE,
+    duration_ms BIGINT,
+    files_scanned BIGINT,
+    secrets_found BIGINT DEFAULT 0,
+    created_by VARCHAR(255) NOT NULL,
+    metadata JSONB DEFAULT '{}'::jsonb
+);
+
+-- Individual secret detections persisted for reporting/export
+CREATE TABLE IF NOT EXISTS secret_detections (
+    detection_id UUID PRIMARY KEY,
+    scan_id UUID REFERENCES secret_scans(id) ON DELETE SET NULL,
+    event_id BIGINT,
+    repository VARCHAR(255) NOT NULL,
+    file_path TEXT,
+    detector_name VARCHAR(255) NOT NULL,
+    severity VARCHAR(50) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    matched_text_hash VARCHAR(128) NOT NULL,
+    matched_text_preview VARCHAR(255) NOT NULL,
+    line_number INTEGER,
+    verified BOOLEAN DEFAULT false,
+    detected_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    source VARCHAR(50) NOT NULL,
+    metadata JSONB DEFAULT '{}'::jsonb
+);
+
+-- Redacted local-AI triage results and provider provenance
+CREATE TABLE IF NOT EXISTS ai_triage_results (
+    id UUID PRIMARY KEY,
+    detection_id UUID REFERENCES secret_detections(detection_id) ON DELETE SET NULL,
+    secret_hash VARCHAR(128) NOT NULL,
+    provider VARCHAR(50) NOT NULL,
+    model VARCHAR(255) NOT NULL,
+    base_url TEXT NOT NULL,
+    redacted_input JSONB NOT NULL,
+    result JSONB NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    error_message TEXT,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    completed_at TIMESTAMP WITH TIME ZONE
+);
+
+-- Audited maintenance actions against scan/queue state
+CREATE TABLE IF NOT EXISTS maintenance_repair_runs (
+    id UUID PRIMARY KEY,
+    repair_type VARCHAR(80) NOT NULL,
+    dry_run BOOLEAN NOT NULL DEFAULT FALSE,
+    backup_path TEXT,
+    hard_delete_invalid_summaries BOOLEAN NOT NULL DEFAULT FALSE,
+    reset_stale_processing BOOLEAN NOT NULL DEFAULT FALSE,
+    pre_counts JSONB NOT NULL,
+    post_counts JSONB NOT NULL,
+    deleted_invalid_summaries BIGINT NOT NULL DEFAULT 0,
+    reset_stale_processing_rows BIGINT NOT NULL DEFAULT 0,
+    operator VARCHAR(255) NOT NULL,
+    executed_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    metadata JSONB DEFAULT '{}'::jsonb
+);
+
 -- Performance indexes
 CREATE INDEX IF NOT EXISTS idx_github_events_created_at ON github_events (event_created_at);
 CREATE INDEX IF NOT EXISTS idx_github_events_type ON github_events (event_type);
@@ -131,6 +237,39 @@ CREATE INDEX IF NOT EXISTS idx_github_events_actor_id ON github_events (actor_id
 CREATE INDEX IF NOT EXISTS idx_github_events_repo_id ON github_events (repo_id);
 CREATE INDEX IF NOT EXISTS idx_github_events_actor_login ON github_events (actor_login);
 CREATE INDEX IF NOT EXISTS idx_github_events_repo_name ON github_events (repo_name);
+CREATE INDEX IF NOT EXISTS idx_github_events_push_repo_created
+    ON github_events (
+        LOWER(COALESCE(repo_full_name, repo_owner_login || '/' || repo_name)),
+        event_created_at DESC
+    )
+    WHERE event_type = 'PushEvent';
 CREATE INDEX IF NOT EXISTS idx_github_events_payload ON github_events USING GIN (payload);
 CREATE INDEX IF NOT EXISTS idx_repositories_language ON repositories (language);
 CREATE INDEX IF NOT EXISTS idx_repositories_stars ON repositories (stargazers_count DESC);
+CREATE INDEX IF NOT EXISTS idx_secret_scans_status_completed
+    ON secret_scans (status, completed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_secret_scans_repository_completed
+    ON secret_scans (repository, completed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_secret_detections_timestamp ON secret_detections (detected_at DESC);
+CREATE INDEX IF NOT EXISTS idx_secret_detections_severity ON secret_detections (severity);
+CREATE INDEX IF NOT EXISTS idx_secret_detections_category ON secret_detections (category);
+CREATE INDEX IF NOT EXISTS idx_secret_detections_repo ON secret_detections (repository);
+CREATE INDEX IF NOT EXISTS idx_secret_detections_repo_detected
+    ON secret_detections (repository, detected_at DESC);
+CREATE INDEX IF NOT EXISTS idx_secret_detections_repo_trgm
+    ON secret_detections USING GIN (repository gin_trgm_ops);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_secret_detections_unique_match
+    ON secret_detections (
+        matched_text_hash,
+        repository,
+        COALESCE(file_path, ''),
+        detector_name,
+        source,
+        COALESCE(event_id, 0)
+    );
+CREATE INDEX IF NOT EXISTS idx_ai_triage_results_detection
+    ON ai_triage_results (detection_id);
+CREATE INDEX IF NOT EXISTS idx_ai_triage_results_created
+    ON ai_triage_results (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_maintenance_repair_runs_type_time
+    ON maintenance_repair_runs (repair_type, executed_at DESC);

@@ -1,8 +1,8 @@
+use crate::core::config::ResourceConfig;
+use anyhow::Result;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::time::{Duration, Instant};
-use chrono::{DateTime, Utc};
-use tokio::time;
-use anyhow::Result;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ResourceStatus {
@@ -51,16 +51,28 @@ pub struct ResourceLimits {
 
 impl Default for ResourceLimits {
     fn default() -> Self {
+        ResourceConfig::default().into()
+    }
+}
+
+impl From<&ResourceConfig> for ResourceLimits {
+    fn from(config: &ResourceConfig) -> Self {
         Self {
-            memory_limit_gb: 18.0,
-            disk_limit_gb: 40.0,
-            cpu_limit_percent: 80.0,
-            memory_warning_threshold: 0.8,
-            disk_warning_threshold: 0.8,
-            cpu_warning_threshold: 0.7,
-            emergency_cleanup_threshold: 0.9,
-            monitoring_interval_seconds: 30,
+            memory_limit_gb: config.memory_limit_gb,
+            disk_limit_gb: config.disk_limit_gb,
+            cpu_limit_percent: config.cpu_limit_percent,
+            memory_warning_threshold: config.memory_warning_threshold,
+            disk_warning_threshold: config.disk_warning_threshold,
+            cpu_warning_threshold: config.cpu_warning_threshold,
+            emergency_cleanup_threshold: config.emergency_cleanup_threshold,
+            monitoring_interval_seconds: config.monitoring_interval_seconds,
         }
+    }
+}
+
+impl From<ResourceConfig> for ResourceLimits {
+    fn from(config: ResourceConfig) -> Self {
+        Self::from(&config)
     }
 }
 
@@ -72,6 +84,11 @@ pub struct ResourceMonitor {
 
 impl ResourceMonitor {
     pub fn new(limits: ResourceLimits) -> Self {
+        tracing::info!(
+            "Resource monitor initialized: memory_limit={:.1} GB, disk_limit={:.1} GB, cpu_limit={:.0}%",
+            limits.memory_limit_gb, limits.disk_limit_gb, limits.cpu_limit_percent
+        );
+
         Self {
             limits,
             emergency_mode: false,
@@ -84,19 +101,35 @@ impl ResourceMonitor {
         let disk_status = self.get_disk_status()?;
         let cpu_status = self.get_cpu_status().await?;
 
-        let mut emergency_conditions = Vec::new();
-        
+        let mut emergency_conditions = Vec::with_capacity(3);
+
         if memory_status.percent > (self.limits.emergency_cleanup_threshold * 100.0) {
             emergency_conditions.push("memory".to_string());
         }
         if disk_status.percent > (self.limits.emergency_cleanup_threshold * 100.0) {
             emergency_conditions.push("disk".to_string());
         }
-        if cpu_status.percent > (self.limits.cpu_limit_percent * self.limits.emergency_cleanup_threshold) {
+        if cpu_status.percent
+            > (self.limits.cpu_limit_percent * self.limits.emergency_cleanup_threshold)
+        {
             emergency_conditions.push("cpu".to_string());
         }
 
         self.emergency_mode = !emergency_conditions.is_empty();
+
+        if self.emergency_mode {
+            tracing::warn!(
+                "Emergency resource thresholds exceeded: memory={:.1}% ({:.2}/{:.2} GB), disk={:.1}% ({:.2}/{:.2} GB), cpu={:.1}% (limit {}%)",
+                memory_status.percent,
+                memory_status.used_gb,
+                memory_status.limit_gb,
+                disk_status.percent,
+                disk_status.used_gb,
+                disk_status.limit_gb,
+                cpu_status.percent,
+                self.limits.cpu_limit_percent
+            );
+        }
 
         Ok(ResourceStatus {
             memory: memory_status,
@@ -110,7 +143,8 @@ impl ResourceMonitor {
 
     fn get_memory_status(&self) -> Result<MemoryStatus> {
         let memory_info = sys_info::mem_info()?;
-        let used_kb = memory_info.total - memory_info.free - memory_info.cached - memory_info.buffers;
+        let used_kb =
+            memory_info.total - memory_info.free - memory_info.cached - memory_info.buffers;
         let used_gb = used_kb as f64 / (1024.0 * 1024.0);
         let percent = (used_gb / self.limits.memory_limit_gb) * 100.0;
         let warning = percent > (self.limits.memory_warning_threshold * 100.0);
@@ -138,10 +172,10 @@ impl ResourceMonitor {
     }
 
     async fn get_cpu_status(&mut self) -> Result<CpuStatus> {
-        let cpu_percent = if let Some((last_time, _)) = self.last_cpu_measurement {
+        let cpu_percent = if let Some((last_time, last_percent)) = self.last_cpu_measurement {
             if last_time.elapsed() < Duration::from_secs(1) {
                 // Return cached value if measured recently
-                self.last_cpu_measurement.unwrap().1
+                last_percent
             } else {
                 self.measure_cpu_usage().await?
             }
@@ -149,7 +183,8 @@ impl ResourceMonitor {
             self.measure_cpu_usage().await?
         };
 
-        let warning = cpu_percent > (self.limits.cpu_limit_percent * self.limits.cpu_warning_threshold);
+        let warning =
+            cpu_percent > (self.limits.cpu_limit_percent * self.limits.cpu_warning_threshold);
 
         Ok(CpuStatus {
             percent: (cpu_percent * 10.0).round() / 10.0,
@@ -159,33 +194,18 @@ impl ResourceMonitor {
     }
 
     async fn measure_cpu_usage(&mut self) -> Result<f64> {
-        // Simple CPU usage calculation
-        let start_time = Instant::now();
-        let start_usage = self.get_cpu_time()?;
-        
-        time::sleep(Duration::from_millis(100)).await;
-        
-        let end_time = Instant::now();
-        let end_usage = self.get_cpu_time()?;
-        
-        let elapsed = end_time.duration_since(start_time).as_secs_f64();
-        let cpu_time_diff = end_usage - start_usage;
-        let cpu_percent = (cpu_time_diff / elapsed) * 100.0;
-        
-        self.last_cpu_measurement = Some((end_time, cpu_percent));
-        
-        Ok(cpu_percent.min(100.0))
-    }
+        let cpu_count = num_cpus::get().max(1) as f64;
+        let load_average = sys_info::loadavg()?.one as f64;
+        let cpu_percent = ((load_average / cpu_count) * 100.0).clamp(0.0, 100.0);
 
-    fn get_cpu_time(&self) -> Result<f64> {
-        // This is a simplified implementation
-        // In production, you'd want to use more accurate CPU time measurement
-        Ok(sys_info::loadavg()?.one as f64 * 10.0)
+        self.last_cpu_measurement = Some((Instant::now(), cpu_percent));
+
+        Ok(cpu_percent)
     }
 
     pub async fn emergency_cleanup(&self) -> Result<CleanupResult> {
         tracing::warn!("Starting emergency resource cleanup");
-        
+
         let mut cleanup_actions = Vec::new();
         let mut total_freed = 0u64;
 
@@ -202,8 +222,10 @@ impl ResourceMonitor {
         }
 
         // Clear application caches
-        self.clear_caches().await;
-        cleanup_actions.push("Cleared application caches".to_string());
+        match self.clear_caches().await {
+            Ok(cache_actions) => cleanup_actions.extend(cache_actions),
+            Err(error) => cleanup_actions.push(format!("Cache cleanup failed: {}", error)),
+        }
 
         Ok(CleanupResult {
             actions_taken: cleanup_actions,
@@ -216,7 +238,7 @@ impl ResourceMonitor {
     async fn cleanup_old_logs(&self) -> Result<u64> {
         let mut count = 0;
         let log_dir = std::path::Path::new("logs");
-        
+
         if !log_dir.exists() {
             return Ok(0);
         }
@@ -229,10 +251,9 @@ impl ResourceMonitor {
                     if let Ok(modified) = metadata.modified() {
                         if modified < cutoff_time {
                             if let Some(extension) = entry.path().extension() {
-                                if extension == "log" {
-                                    if std::fs::remove_file(entry.path()).is_ok() {
-                                        count += 1;
-                                    }
+                                if extension == "log" && std::fs::remove_file(entry.path()).is_ok()
+                                {
+                                    count += 1;
                                 }
                             }
                         }
@@ -266,9 +287,22 @@ impl ResourceMonitor {
         Ok(count)
     }
 
-    async fn clear_caches(&self) {
-        // This can be extended to clear specific application caches
-        // For now, just a placeholder
+    async fn clear_caches(&self) -> Result<Vec<String>> {
+        let cache_manager = crate::scanning::cache::CacheManager::global();
+        let retained_removed = cache_manager.enforce_retention().await?;
+        let cleared_entries = cache_manager.clear_all().await?;
+
+        let mut actions = Vec::new();
+        actions.push(format!(
+            "Pruned {} expired repository cache entries",
+            retained_removed
+        ));
+        actions.push(format!(
+            "Cleared {} repository cache entries",
+            cleared_entries
+        ));
+
+        Ok(actions)
     }
 
     pub fn is_emergency_mode(&self) -> bool {
@@ -282,4 +316,64 @@ pub struct CleanupResult {
     pub files_removed: u64,
     pub success: bool,
     pub timestamp: DateTime<Utc>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn resource_limits_from_config_preserve_threshold_contract() {
+        let config = ResourceConfig {
+            memory_limit_gb: 12.0,
+            disk_limit_gb: 50.0,
+            cpu_limit_percent: 75.0,
+            memory_warning_threshold: 0.7,
+            disk_warning_threshold: 0.8,
+            cpu_warning_threshold: 0.6,
+            emergency_cleanup_threshold: 0.95,
+            monitoring_interval_seconds: 15,
+        };
+
+        let limits = ResourceLimits::from(&config);
+
+        assert_eq!(limits.memory_limit_gb, 12.0);
+        assert_eq!(limits.disk_limit_gb, 50.0);
+        assert_eq!(limits.cpu_limit_percent, 75.0);
+        assert_eq!(limits.memory_warning_threshold, 0.7);
+        assert_eq!(limits.disk_warning_threshold, 0.8);
+        assert_eq!(limits.cpu_warning_threshold, 0.6);
+        assert_eq!(limits.emergency_cleanup_threshold, 0.95);
+        assert_eq!(limits.monitoring_interval_seconds, 15);
+    }
+
+    #[test]
+    fn resource_monitor_starts_outside_emergency_mode() {
+        let monitor = ResourceMonitor::new(ResourceLimits {
+            memory_limit_gb: 1.0,
+            disk_limit_gb: 1.0,
+            cpu_limit_percent: 1.0,
+            memory_warning_threshold: 0.5,
+            disk_warning_threshold: 0.5,
+            cpu_warning_threshold: 0.5,
+            emergency_cleanup_threshold: 0.9,
+            monitoring_interval_seconds: 1,
+        });
+
+        assert!(!monitor.is_emergency_mode());
+    }
+
+    #[tokio::test]
+    async fn cpu_measurement_is_bounded_and_cached() {
+        let mut monitor = ResourceMonitor::new(ResourceLimits::default());
+
+        let first = monitor
+            .measure_cpu_usage()
+            .await
+            .expect("measure cpu usage");
+        let status = monitor.get_cpu_status().await.expect("cached cpu status");
+
+        assert!((0.0..=100.0).contains(&first));
+        assert_eq!(status.percent, (first * 10.0).round() / 10.0);
+    }
 }

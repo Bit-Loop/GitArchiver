@@ -1,8 +1,6 @@
 # GitHub Archive Scraper - Docker Compose Configuration
 # Production-ready multi-service deployment
 
-version: '3.8'
-
 services:
   # ═══════════════════════════════════════════════════════════════════════════════
   # PostgreSQL Database

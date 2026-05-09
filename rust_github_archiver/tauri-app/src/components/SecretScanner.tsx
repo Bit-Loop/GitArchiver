@@ -48,9 +48,9 @@ export function SecretScanner({ onNotification, onStatusChange }: SecretScannerP
 
   const loadRecentScans = async () => {
     try {
-      // Load recent scan results from the backend
-      // This would be implemented as a separate Tauri command
-      onNotification('info', 'Loaded recent scan results');
+      const results = await invoke<ScanResult[]>('get_recent_scan_results', { limit: 50 });
+      setScanResults(results);
+      onNotification('info', `Loaded ${results.length} recent scan results`);
     } catch (error) {
       console.error('Failed to load recent scans:', error);
       onNotification('error', 'Failed to load recent scans');
@@ -206,7 +206,7 @@ export function SecretScanner({ onNotification, onStatusChange }: SecretScannerP
                 type="text"
                 value={newRepository}
                 onChange={(e) => setNewRepository(e.target.value)}
-                placeholder="Enter repository URL or name"
+                aria-label="Repository URL or name"
                 className="flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-lava-green focus:outline-none"
                 onKeyPress={(e) => e.key === 'Enter' && addRepository()}
               />

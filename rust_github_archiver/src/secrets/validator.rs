@@ -1,18 +1,15 @@
+use crate::secrets::scanner::SecretMatch;
 use anyhow::{anyhow, Result};
-use aws_config::BehaviorVersion;
-// Removed unused StsClient
+use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
 use reqwest::Client as HttpClient;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::time::Duration;
-use tracing::{info, warn, error}; // Removed unused debug
-use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
-use crate::secrets::scanner::SecretMatch; // Removed SecretSeverity since it's reimported in tests
+use tracing::{error, info, warn}; // Removed unused debug // Removed SecretSeverity since it's reimported in tests
 
 /// Secret validator for verifying if secrets are active
 pub struct SecretValidator {
     http_client: HttpClient,
-    aws_config: Option<aws_config::SdkConfig>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -34,15 +31,7 @@ impl SecretValidator {
             .build()
             .map_err(|e| anyhow!("Failed to create HTTP client: {}", e))?;
 
-        // Try to load AWS config (may fail if not configured)
-        let aws_config = match aws_config::load_defaults(BehaviorVersion::latest()).await {
-            config => Some(config),
-        };
-
-        Ok(Self {
-            http_client,
-            aws_config,
-        })
+        Ok(Self { http_client })
     }
 
     /// Validate a secret match
@@ -75,7 +64,10 @@ impl SecretValidator {
                 Ok(validation_result)
             }
             Err(e) => {
-                error!("Validation failed for {}: {}", secret_match.detector_name, e);
+                error!(
+                    "Validation failed for {}: {}",
+                    secret_match.detector_name, e
+                );
                 Ok(ValidationResult {
                     secret_hash: secret_match.hash.clone(),
                     is_valid: false,
@@ -89,50 +81,38 @@ impl SecretValidator {
     }
 
     /// Validate AWS credentials
-    async fn validate_aws_credentials(&self, secret_match: &SecretMatch) -> Result<ValidationResult> {
-        if let Some(_aws_config) = &self.aws_config {
-            // For AWS validation, we'd need both access key and secret key
-            // This is a simplified version - in practice, you'd extract both from context
-            
-            if secret_match.detector_name.contains("Access Key") {
-                // For access key, we can't validate without secret key
-                return Ok(ValidationResult {
-                    secret_hash: String::new(),
-                    is_valid: false,
-                    validation_method: "aws_access_key_check".to_string(),
-                    error_message: Some("Cannot validate access key without secret key".to_string()),
-                    additional_info: Some("Access key format appears valid".to_string()),
-                    validated_at: chrono::Utc::now(),
-                });
-            }
-
-            // For secret keys, we'd try STS GetCallerIdentity
-            // Note: This is dangerous in real scenarios as it could trigger alerts
-            warn!("AWS secret validation disabled for security reasons");
-            Ok(ValidationResult {
+    async fn validate_aws_credentials(
+        &self,
+        secret_match: &SecretMatch,
+    ) -> Result<ValidationResult> {
+        if secret_match.detector_name.contains("Access Key") {
+            return Ok(ValidationResult {
                 secret_hash: String::new(),
                 is_valid: false,
-                validation_method: "aws_sts_disabled".to_string(),
-                error_message: Some("AWS validation disabled for security".to_string()),
-                additional_info: None,
+                validation_method: "aws_access_key_check".to_string(),
+                error_message: Some("Cannot validate access key without secret key".to_string()),
+                additional_info: Some("Access key format appears valid".to_string()),
                 validated_at: chrono::Utc::now(),
-            })
-        } else {
-            Ok(ValidationResult {
-                secret_hash: String::new(),
-                is_valid: false,
-                validation_method: "aws_no_config".to_string(),
-                error_message: Some("AWS config not available".to_string()),
-                additional_info: None,
-                validated_at: chrono::Utc::now(),
-            })
+            });
         }
+
+        warn!("AWS secret validation skipped to avoid external STS calls");
+        Ok(ValidationResult {
+            secret_hash: String::new(),
+            is_valid: false,
+            validation_method: "aws_sts_skipped".to_string(),
+            error_message: Some(
+                "AWS validation requires explicit offline-safe credential pairing".to_string(),
+            ),
+            additional_info: None,
+            validated_at: chrono::Utc::now(),
+        })
     }
 
     /// Validate GitHub token
     async fn validate_github_token(&self, secret_match: &SecretMatch) -> Result<ValidationResult> {
         let token = &secret_match.matched_text;
-        
+
         let response = self
             .http_client
             .get("https://api.github.com/user")
@@ -190,7 +170,7 @@ impl SecretValidator {
     /// Validate Slack token
     async fn validate_slack_token(&self, secret_match: &SecretMatch) -> Result<ValidationResult> {
         let token = &secret_match.matched_text;
-        
+
         let response = self
             .http_client
             .post("https://slack.com/api/auth.test")
@@ -232,7 +212,7 @@ impl SecretValidator {
     /// Validate Discord token
     async fn validate_discord_token(&self, secret_match: &SecretMatch) -> Result<ValidationResult> {
         let token = &secret_match.matched_text;
-        
+
         let response = self
             .http_client
             .get("https://discord.com/api/v10/users/@me")
@@ -287,13 +267,19 @@ impl SecretValidator {
     }
 
     /// Validate Google API key
-    async fn validate_google_api_key(&self, secret_match: &SecretMatch) -> Result<ValidationResult> {
+    async fn validate_google_api_key(
+        &self,
+        secret_match: &SecretMatch,
+    ) -> Result<ValidationResult> {
         let api_key = &secret_match.matched_text;
-        
+
         // Use a simple API endpoint that most keys have access to
         let response = self
             .http_client
-            .get(&format!("https://www.googleapis.com/discovery/v1/apis?key={}", api_key))
+            .get(format!(
+                "https://www.googleapis.com/discovery/v1/apis?key={}",
+                api_key
+            ))
             .send()
             .await;
 
@@ -336,7 +322,7 @@ impl SecretValidator {
     /// Validate Stripe API key
     async fn validate_stripe_key(&self, secret_match: &SecretMatch) -> Result<ValidationResult> {
         let api_key = &secret_match.matched_text;
-        
+
         let response = self
             .http_client
             .get("https://api.stripe.com/v1/account")
@@ -352,7 +338,8 @@ impl SecretValidator {
                     let additional_info = match account_info {
                         Ok(account) => {
                             let country = account["country"].as_str().unwrap_or("unknown");
-                            let business_type = account["business_type"].as_str().unwrap_or("unknown");
+                            let business_type =
+                                account["business_type"].as_str().unwrap_or("unknown");
                             Some(format!("Country: {}, Type: {}", country, business_type))
                         }
                         Err(_) => None,
@@ -393,7 +380,7 @@ impl SecretValidator {
     /// Validate SendGrid API key
     async fn validate_sendgrid_key(&self, secret_match: &SecretMatch) -> Result<ValidationResult> {
         let api_key = &secret_match.matched_text;
-        
+
         let response = self
             .http_client
             .get("https://api.sendgrid.com/v3/user/account")
@@ -440,7 +427,7 @@ impl SecretValidator {
     /// Validate Twilio API key
     async fn validate_twilio_key(&self, secret_match: &SecretMatch) -> Result<ValidationResult> {
         let _api_key = &secret_match.matched_text; // Prefix with underscore to indicate intentionally unused
-        
+
         // Note: Twilio validation would require account SID as well
         // This is a simplified check
         Ok(ValidationResult {
@@ -456,7 +443,7 @@ impl SecretValidator {
     /// Validate JWT token
     async fn validate_jwt_token(&self, secret_match: &SecretMatch) -> Result<ValidationResult> {
         let token = &secret_match.matched_text;
-        
+
         // Parse JWT without verification (just structure check)
         let parts: Vec<&str> = token.split('.').collect();
         if parts.len() != 3 {
@@ -500,7 +487,11 @@ impl SecretValidator {
                             secret_hash: String::new(),
                             is_valid: !is_expired,
                             validation_method: "jwt_decode_check".to_string(),
-                            error_message: if is_expired { Some("Token is expired".to_string()) } else { None },
+                            error_message: if is_expired {
+                                Some("Token is expired".to_string())
+                            } else {
+                                None
+                            },
                             additional_info: Some(additional_info),
                             validated_at: chrono::Utc::now(),
                         })
@@ -533,10 +524,10 @@ impl SecretValidator {
         max_concurrent: usize,
     ) -> Vec<ValidationResult> {
         let mut results = Vec::new();
-        
+
         for chunk in secrets.chunks(max_concurrent) {
             let mut chunk_results = Vec::new();
-            
+
             for secret in chunk {
                 match self.validate_secret(secret).await {
                     Ok(result) => chunk_results.push(result),
@@ -552,14 +543,14 @@ impl SecretValidator {
                         });
                     }
                 }
-                
+
                 // Rate limiting
                 tokio::time::sleep(Duration::from_millis(500)).await;
             }
-            
+
             results.extend(chunk_results);
         }
-        
+
         results
     }
 }
@@ -595,14 +586,14 @@ mod tests {
     #[tokio::test]
     async fn test_jwt_validation() {
         let validator = SecretValidator::new().await.unwrap();
-        
+
         // Valid JWT structure (may be expired)
         let jwt_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
         let secret_match = create_test_secret_match("JWT Token", jwt_token);
-        
+
         let result = validator.validate_secret(&secret_match).await;
         assert!(result.is_ok());
-        
+
         let validation_result = result.unwrap();
         assert_eq!(validation_result.validation_method, "jwt_decode_check");
     }
@@ -610,13 +601,13 @@ mod tests {
     #[tokio::test]
     async fn test_invalid_jwt_validation() {
         let validator = SecretValidator::new().await.unwrap();
-        
+
         let invalid_jwt = "not.a.jwt";
         let secret_match = create_test_secret_match("JWT Token", invalid_jwt);
-        
+
         let result = validator.validate_secret(&secret_match).await;
         assert!(result.is_ok());
-        
+
         let validation_result = result.unwrap();
         assert!(!validation_result.is_valid);
         assert!(validation_result.error_message.is_some());
@@ -625,12 +616,12 @@ mod tests {
     #[tokio::test]
     async fn test_unsupported_secret_type() {
         let validator = SecretValidator::new().await.unwrap();
-        
+
         let secret_match = create_test_secret_match("Unsupported Secret", "test123");
-        
+
         let result = validator.validate_secret(&secret_match).await;
         assert!(result.is_ok());
-        
+
         let validation_result = result.unwrap();
         assert_eq!(validation_result.validation_method, "unsupported");
         assert!(!validation_result.is_valid);

@@ -18,4 +18,21 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+  build: {
+    // The 3D dashboard stack is intentionally heavy; keep app code split from
+    // dependencies without creating circular chunks between React and Three.
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("chart.js") || id.includes("react-chartjs-2")) {
+              return "charts";
+            }
+            return "vendor";
+          }
+        },
+      },
+    },
+  },
 }));

@@ -1,11 +1,11 @@
 use anyhow::{anyhow, Result};
+use chrono::{DateTime, Utc};
 use octocrab::Octocrab; // Removed unused models::Repository
 use redis::{Client as RedisClient, Commands}; // Removed unused Connection
 use serde::{Deserialize, Serialize};
 use std::time::{Duration, Instant};
 use tokio::time::sleep;
-use tracing::{info, warn, error, debug};
-use chrono::{DateTime, Utc};
+use tracing::{debug, error, info, warn};
 
 /// GitHub API client for fetching dangling commits
 pub struct DanglingCommitFetcher {
@@ -76,37 +76,42 @@ impl Default for RateLimiter {
 impl RateLimiter {
     /// Check if we can make a request and wait if necessary
     pub async fn wait_if_needed(&mut self) -> Result<()> {
-        if self.requests_remaining <= 100 { // Conservative buffer
+        if self.requests_remaining <= 100 {
+            // Conservative buffer
             let wait_time = self.reset_time.saturating_duration_since(Instant::now());
             if !wait_time.is_zero() {
-                warn!("Rate limit low ({}), waiting {:?}", self.requests_remaining, wait_time);
+                warn!(
+                    "Rate limit low ({}), waiting {:?}",
+                    self.requests_remaining, wait_time
+                );
                 sleep(wait_time).await;
                 self.requests_remaining = 5000; // Reset
                 self.reset_time = Instant::now() + Duration::from_secs(3600);
             }
         }
-        
+
         // Add exponential backoff delay
         if self.delay_factor > 1.0 {
             let delay = Duration::from_millis((1000.0 * self.delay_factor) as u64);
             debug!("Applying exponential backoff: {:?}", delay);
             sleep(delay).await;
         }
-        
+
         Ok(())
     }
-    
+
     /// Update rate limit info from GitHub response headers
     pub fn update_from_response(&mut self, remaining: Option<i32>, reset_timestamp: Option<i64>) {
         if let Some(remaining) = remaining {
             self.requests_remaining = remaining;
         }
-        
+
         if let Some(reset_ts) = reset_timestamp {
-            let reset_duration = Duration::from_secs((reset_ts - chrono::Utc::now().timestamp()) as u64);
+            let reset_duration =
+                Duration::from_secs((reset_ts - chrono::Utc::now().timestamp()) as u64);
             self.reset_time = Instant::now() + reset_duration;
         }
-        
+
         // Adjust delay factor based on remaining requests
         self.delay_factor = match self.requests_remaining {
             r if r > 1000 => 1.0,
@@ -121,19 +126,18 @@ impl DanglingCommitFetcher {
     /// Create a new fetcher with GitHub token
     pub async fn new(github_token: &str, redis_url: Option<&str>) -> Result<Self> {
         info!("Initializing dangling commit fetcher");
-        
+
         let github = Octocrab::builder()
             .personal_token(github_token.to_string())
             .build()
             .map_err(|e| anyhow!("Failed to create GitHub client: {}", e))?;
-        
+
         let redis = if let Some(url) = redis_url {
-            Some(RedisClient::open(url)
-                .map_err(|e| anyhow!("Failed to connect to Redis: {}", e))?)
+            Some(RedisClient::open(url).map_err(|e| anyhow!("Failed to connect to Redis: {}", e))?)
         } else {
             None
         };
-        
+
         Ok(Self {
             github,
             redis,
@@ -164,7 +168,15 @@ impl DanglingCommitFetcher {
 
         info!("Fetching commit {}/{}/{}", owner, repo, commit_sha);
 
-        match self.github.repos(owner, repo).list_commits().sha(commit_sha).per_page(1).send().await {
+        match self
+            .github
+            .repos(owner, repo)
+            .list_commits()
+            .sha(commit_sha)
+            .per_page(1)
+            .send()
+            .await
+        {
             Ok(page) => {
                 if let Some(commit) = page.items.first() {
                     // Update rate limit info (if available in response)
@@ -177,32 +189,41 @@ impl DanglingCommitFetcher {
                         message: commit.commit.message.clone(),
                         url: commit.url.clone(),
                         author: commit.commit.author.as_ref().map(|a| CommitAuthor {
-                            name: a.user.name.clone(),
-                            email: a.user.email.clone(),
+                            name: a.name.clone(),
+                            email: a.email.clone().unwrap_or_default(),
                             date: a.date.unwrap_or(chrono::Utc::now()),
                         }),
                         committer: commit.commit.committer.as_ref().map(|c| CommitAuthor {
-                            name: c.user.name.clone(),
-                            email: c.user.email.clone(),
+                            name: c.name.clone(),
+                            email: c.email.clone().unwrap_or_default(),
                             date: c.date.unwrap_or(chrono::Utc::now()),
                         }),
                         tree_sha: commit.commit.tree.sha.clone(),
-                        parents: commit.parents.iter().filter_map(|p| p.sha.clone()).collect(),
+                        parents: commit
+                            .parents
+                            .iter()
+                            .filter_map(|p| p.sha.clone())
+                            .collect(),
                         stats: commit.stats.as_ref().map(|s| CommitStats {
                             additions: s.additions.unwrap_or(0) as u32,
                             deletions: s.deletions.unwrap_or(0) as u32,
                             total: s.total.unwrap_or(0) as u32,
                         }),
-                        files: commit.files.iter().flatten().map(|f| CommitFile {
-                            filename: f.filename.clone(),
-                            status: format!("{:?}", f.status),
-                            additions: f.additions as u32,
-                            deletions: f.deletions as u32,
-                            changes: f.changes as u32,
-                            patch: f.patch.clone(),
-                            blob_url: Some(f.blob_url.to_string()),
-                            raw_url: Some(f.raw_url.to_string()),
-                        }).collect(),
+                        files: commit
+                            .files
+                            .iter()
+                            .flatten()
+                            .map(|f| CommitFile {
+                                filename: f.filename.clone(),
+                                status: format!("{:?}", f.status),
+                                additions: f.additions as u32,
+                                deletions: f.deletions as u32,
+                                changes: f.changes as u32,
+                                patch: f.patch.clone(),
+                                blob_url: f.blob_url.clone(),
+                                raw_url: f.raw_url.clone(),
+                            })
+                            .collect(),
                         html_url: commit.html_url.clone(),
                         repository: format!("{}/{}", owner, repo),
                         fetched_at: chrono::Utc::now(),
@@ -224,17 +245,29 @@ impl DanglingCommitFetcher {
                 if error_msg.contains("Not Found") || error_msg.contains("404") {
                     debug!("Commit not found: {}/{}/{}", owner, repo, commit_sha);
                     Ok(None)
-                } else if error_msg.contains("rate limit") || error_msg.contains("403") || error_msg.contains("429") {
-                    warn!("Rate limited or forbidden: {}/{}/{}", owner, repo, commit_sha);
+                } else if error_msg.contains("rate limit")
+                    || error_msg.contains("403")
+                    || error_msg.contains("429")
+                {
+                    warn!(
+                        "Rate limited or forbidden: {}/{}/{}",
+                        owner, repo, commit_sha
+                    );
                     self.rate_limiter.requests_remaining = 0;
                     Err(anyhow!("GitHub API rate limited or forbidden"))
                 } else {
-                    error!("GitHub API error: {}: {}/{}/{}", error_msg, owner, repo, commit_sha);
+                    error!(
+                        "GitHub API error: {}: {}/{}/{}",
+                        error_msg, owner, repo, commit_sha
+                    );
                     Err(anyhow!("GitHub API error: {}", error_msg))
                 }
             }
             Err(e) => {
-                error!("Failed to fetch commit {}/{}/{}: {}", owner, repo, commit_sha, e);
+                error!(
+                    "Failed to fetch commit {}/{}/{}: {}",
+                    owner, repo, commit_sha, e
+                );
                 Err(anyhow!("Failed to fetch commit: {}", e))
             }
         }
@@ -248,20 +281,14 @@ impl DanglingCommitFetcher {
         max_concurrent: usize,
     ) -> Result<Vec<CommitInfo>> {
         info!("Fetching {} commits from {}", commit_shas.len(), repository);
-        
+
         let mut results = Vec::new();
         let mut errors = 0;
-        
+
         for chunk in commit_shas.chunks(max_concurrent) {
-            // TODO: Implement concurrent commit fetching with proper task handling
-            let _tasks: Vec<tokio::task::JoinHandle<Result<Option<CommitInfo>>>> = Vec::new();
-            
             for sha in chunk {
                 let repo = repository.to_string();
                 let commit_sha = sha.clone();
-                
-                // Clone self for async task (note: this is a simplified approach)
-                // In practice, you'd want to use Arc<Mutex<Self>> or similar
                 match self.fetch_commit(&repo, &commit_sha).await {
                     Ok(Some(commit)) => {
                         results.push(commit);
@@ -270,22 +297,29 @@ impl DanglingCommitFetcher {
                         debug!("Commit not found: {}/{}", repository, commit_sha);
                     }
                     Err(e) => {
-                        error!("Failed to fetch commit {}/{}: {}", repository, commit_sha, e);
+                        error!(
+                            "Failed to fetch commit {}/{}: {}",
+                            repository, commit_sha, e
+                        );
                         errors += 1;
-                        
+
                         // If too many errors, stop
                         if errors > chunk.len() / 2 {
                             return Err(anyhow!("Too many errors fetching commits"));
                         }
                     }
                 }
-                
+
                 // Small delay between requests
                 tokio::time::sleep(Duration::from_millis(100)).await;
             }
         }
-        
-        info!("Successfully fetched {} commits, {} errors", results.len(), errors);
+
+        info!(
+            "Successfully fetched {} commits, {} errors",
+            results.len(),
+            errors
+        );
         Ok(results)
     }
 
@@ -296,13 +330,15 @@ impl DanglingCommitFetcher {
         commit_sha: &str,
     ) -> Result<Option<CommitInfo>> {
         if let Some(redis_client) = &self.redis {
-            let mut conn = redis_client.get_connection()
+            let mut conn = redis_client
+                .get_connection()
                 .map_err(|e| anyhow!("Redis connection failed: {}", e))?;
-            
+
             let key = format!("commit:{}:{}", repository, commit_sha);
-            let cached: Option<String> = conn.get(&key)
+            let cached: Option<String> = conn
+                .get(&key)
                 .map_err(|e| anyhow!("Redis get failed: {}", e))?;
-            
+
             if let Some(json) = cached {
                 match serde_json::from_str::<CommitInfo>(&json) {
                     Ok(commit) => return Ok(Some(commit)),
@@ -314,34 +350,32 @@ impl DanglingCommitFetcher {
                 }
             }
         }
-        
+
         Ok(None)
     }
 
     /// Cache commit information
     async fn cache_commit(&self, commit: &CommitInfo) -> Result<()> {
         if let Some(redis_client) = &self.redis {
-            let mut conn = redis_client.get_connection()
+            let mut conn = redis_client
+                .get_connection()
                 .map_err(|e| anyhow!("Redis connection failed: {}", e))?;
-            
+
             let key = format!("commit:{}:{}", commit.repository, commit.sha);
             let json = serde_json::to_string(commit)
                 .map_err(|e| anyhow!("Failed to serialize commit: {}", e))?;
-            
+
             // Cache for 24 hours
-            let _: () = conn.set_ex(&key, json, 86400)
+            let _: () = conn
+                .set_ex(&key, json, 86400)
                 .map_err(|e| anyhow!("Redis set failed: {}", e))?;
         }
-        
+
         Ok(())
     }
 
     /// Check if a commit exists without fetching full data
-    pub async fn commit_exists(
-        &mut self,
-        repository: &str,
-        commit_sha: &str,
-    ) -> Result<bool> {
+    pub async fn commit_exists(&mut self, repository: &str, commit_sha: &str) -> Result<bool> {
         let parts: Vec<&str> = repository.split('/').collect();
         if parts.len() != 2 {
             return Err(anyhow!("Invalid repository format: {}", repository));
@@ -350,7 +384,15 @@ impl DanglingCommitFetcher {
 
         self.rate_limiter.wait_if_needed().await?;
 
-        match self.github.repos(owner, repo).list_commits().sha(commit_sha).per_page(1).send().await {
+        match self
+            .github
+            .repos(owner, repo)
+            .list_commits()
+            .sha(commit_sha)
+            .per_page(1)
+            .send()
+            .await
+        {
             Ok(page) => {
                 self.rate_limiter.requests_remaining -= 1;
                 Ok(!page.items.is_empty())
@@ -359,20 +401,26 @@ impl DanglingCommitFetcher {
                 let error_msg = source.message.clone();
                 if error_msg.contains("Not Found") || error_msg.contains("404") {
                     Ok(false)
-                } else if error_msg.contains("rate limit") || error_msg.contains("403") || error_msg.contains("429") {
+                } else if error_msg.contains("rate limit")
+                    || error_msg.contains("403")
+                    || error_msg.contains("429")
+                {
                     self.rate_limiter.requests_remaining = 0;
                     Err(anyhow!("GitHub API rate limited"))
                 } else {
                     Err(anyhow!("GitHub API error: {}", error_msg))
                 }
             }
-            Err(e) => Err(anyhow!("Failed to check commit existence: {}", e))
+            Err(e) => Err(anyhow!("Failed to check commit existence: {}", e)),
         }
     }
 
     /// Get current rate limit status
     pub fn get_rate_limit_status(&self) -> (i32, Duration) {
-        let remaining_time = self.rate_limiter.reset_time.saturating_duration_since(Instant::now());
+        let remaining_time = self
+            .rate_limiter
+            .reset_time
+            .saturating_duration_since(Instant::now());
         (self.rate_limiter.requests_remaining, remaining_time)
     }
 
@@ -386,45 +434,51 @@ impl DanglingCommitFetcher {
             return Err(anyhow!("Partial hash must be 4-39 characters long"));
         }
 
-        info!("Brute forcing partial hash {} in {}", partial_hash, repository);
-        
+        info!(
+            "Brute forcing partial hash {} in {}",
+            partial_hash, repository
+        );
+
         let mut found_hashes = Vec::new();
-        let hex_chars = "0123456789abcdef";
-        
+        let hex_chars = b"0123456789abcdef";
+
         // For practical reasons, only brute force up to 7-8 character hashes
         if partial_hash.len() > 8 {
             return Err(anyhow!("Partial hash too long for brute force"));
         }
-        
+
         let missing_chars = 40 - partial_hash.len();
         let max_combinations = 16_u64.pow(missing_chars as u32);
-        
+
         if max_combinations > 1_000_000 {
             return Err(anyhow!("Too many combinations to brute force"));
         }
-        
+
         for i in 0..max_combinations {
             let mut full_hash = partial_hash.to_string();
             let mut remaining = i;
-            
+
             for _ in 0..missing_chars {
                 let char_index = (remaining % 16) as usize;
-                full_hash.push(hex_chars.chars().nth(char_index).unwrap());
+                full_hash.push(char::from(hex_chars[char_index]));
                 remaining /= 16;
             }
-            
+
             if self.commit_exists(repository, &full_hash).await? {
+                info!("Found matching commit: {}", full_hash);
                 found_hashes.push(full_hash);
-                info!("Found matching commit: {}", found_hashes.last().unwrap());
             }
-            
+
             // Rate limiting
             if i % 10 == 0 {
                 tokio::time::sleep(Duration::from_millis(50)).await;
             }
         }
-        
-        info!("Brute force completed, found {} matches", found_hashes.len());
+
+        info!(
+            "Brute force completed, found {} matches",
+            found_hashes.len()
+        );
         Ok(found_hashes)
     }
 }
@@ -443,16 +497,16 @@ mod tests {
     #[test]
     fn test_rate_limiter_delay_factor() {
         let mut limiter = RateLimiter::default();
-        
+
         limiter.update_from_response(Some(1500), None);
         assert_eq!(limiter.delay_factor, 1.0);
-        
+
         limiter.update_from_response(Some(800), None);
         assert_eq!(limiter.delay_factor, 1.5);
-        
+
         limiter.update_from_response(Some(300), None);
         assert_eq!(limiter.delay_factor, 2.0);
-        
+
         limiter.update_from_response(Some(50), None);
         assert_eq!(limiter.delay_factor, 3.0);
     }
@@ -484,7 +538,7 @@ mod tests {
 
         let json = serde_json::to_string(&commit).unwrap();
         let deserialized: CommitInfo = serde_json::from_str(&json).unwrap();
-        
+
         assert_eq!(commit.sha, deserialized.sha);
         assert_eq!(commit.repository, deserialized.repository);
         assert_eq!(commit.message, deserialized.message);

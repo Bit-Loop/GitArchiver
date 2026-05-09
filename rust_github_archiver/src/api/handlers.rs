@@ -1,15 +1,29 @@
 // API handlers implementation
-use axum::{extract::{Extension, State}, http::StatusCode, Json, response::IntoResponse};
+use axum::{
+    extract::{Extension, State},
+    http::{HeaderMap, StatusCode},
+    response::IntoResponse,
+    Json,
+};
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use chrono::Utc;
 
-use crate::auth::{User, create_token};
-use crate::auth::jwt::verify_token;
+use crate::api::scraper_control::{
+    execute_scraper_action, ScraperControlAction, ScraperControlResult,
+};
 use crate::api::state::AppState;
+use crate::api::status_service::{build_scraper_status, build_system_status};
+use crate::auth::jwt::verify_token;
+use crate::auth::{create_token, User, UserRole};
 
 // Re-export scanner handlers
 pub use crate::api::scanner_handlers::*;
+
+// Simple test endpoint
+pub async fn ping() -> &'static str {
+    "pong"
+}
 
 #[derive(Deserialize)]
 pub struct LoginRequest {
@@ -33,65 +47,223 @@ pub struct UserInfo {
 
 impl From<User> for UserInfo {
     fn from(user: User) -> Self {
+        let role = user.canonical_role();
         Self {
             id: user.id,
             username: user.username,
-            role: user.role,
+            role,
         }
     }
 }
 
-pub async fn health_check() -> Json<Value> {
+/// Health check with database, memory, disk, and service readiness details.
+pub async fn health_check(State(app_state): State<AppState>) -> Json<Value> {
+    use sysinfo::{Disks, System};
+
+    let mut checks = serde_json::Map::new();
+    let mut has_warnings = false;
+    let mut has_errors = false;
+
+    // Database health check
+    let db_health = app_state.persistence.health_status().await;
+    if !db_health.is_connected {
+        has_errors = true;
+    }
+    checks.insert(
+        "database".to_string(),
+        json!({
+            "status": if db_health.is_connected { "ok" } else { "error" },
+            "connected": db_health.is_connected,
+            "connection_count": db_health.connection_count,
+            "active_queries": db_health.active_queries,
+            "cache_hit_ratio": format!("{:.2}%", db_health.cache_hit_ratio),
+            "error": db_health.error_message
+        }),
+    );
+
+    // Check system memory
+    let mut sys = System::new_all();
+    sys.refresh_all();
+
+    let total_memory = sys.total_memory();
+    let used_memory = sys.used_memory();
+    let memory_percent = if total_memory > 0 {
+        (used_memory as f64 / total_memory as f64) * 100.0
+    } else {
+        0.0
+    };
+
+    let memory_warning = memory_percent > 80.0;
+    let memory_critical = memory_percent > 90.0;
+    if memory_critical {
+        has_errors = true;
+    } else if memory_warning {
+        has_warnings = true;
+    }
+
+    checks.insert("memory".to_string(), json!({
+        "status": if memory_critical { "critical" } else if memory_warning { "warning" } else { "ok" },
+        "used_mb": used_memory / 1024 / 1024,
+        "total_mb": total_memory / 1024 / 1024,
+        "used_percent": format!("{:.1}%", memory_percent)
+    }));
+
+    // Check disk space
+    let disks = Disks::new_with_refreshed_list();
+    let mut disk_status = "ok";
+    let mut disk_checks = Vec::new();
+
+    for disk in disks.list() {
+        let total_space = disk.total_space();
+        let available_space = disk.available_space();
+        let used_percent = if total_space > 0 {
+            ((total_space - available_space) as f64 / total_space as f64) * 100.0
+        } else {
+            0.0
+        };
+
+        let mount_point = disk.mount_point().to_string_lossy().to_string();
+        let this_disk_status = if used_percent > 90.0 {
+            has_errors = true;
+            "critical"
+        } else if used_percent > 80.0 {
+            has_warnings = true;
+            "warning"
+        } else {
+            "ok"
+        };
+
+        if disk_status == "ok" && this_disk_status != "ok" {
+            disk_status = this_disk_status;
+        }
+
+        disk_checks.push(json!({
+            "mount_point": mount_point,
+            "status": this_disk_status,
+            "total_gb": total_space / 1024 / 1024 / 1024,
+            "available_gb": available_space / 1024 / 1024 / 1024,
+            "used_percent": format!("{:.1}%", used_percent)
+        }));
+    }
+
+    checks.insert(
+        "disk".to_string(),
+        json!({
+            "status": disk_status,
+            "disks": disk_checks
+        }),
+    );
+
+    // Overall status
+    let overall_status = if has_errors {
+        "unhealthy"
+    } else if has_warnings {
+        "degraded"
+    } else {
+        "healthy"
+    };
+
     Json(json!({
-        "status": "healthy",
+        "status": overall_status,
         "timestamp": Utc::now().to_rfc3339(),
         "service": "github-archiver-rust",
-        "version": "2.0.0"
+        "version": "1.0.0-beta",
+        "checks": checks
     }))
 }
 
 pub async fn login(
     State(app_state): State<AppState>,
+    headers: axum::http::HeaderMap,
     Json(payload): Json<LoginRequest>,
 ) -> Result<Json<LoginResponse>, (StatusCode, Json<Value>)> {
     // Authenticate user
-    let user = app_state.user_manager
+    let user = app_state
+        .user_manager
         .authenticate(&payload.username, &payload.password)
-        .await
-        .ok_or_else(|| {
-            (
+        .await;
+
+    match user {
+        Some(user) => {
+            // Update last login time
+            if let Err(e) = app_state
+                .user_manager
+                .update_last_login(&user.username)
+                .await
+            {
+                tracing::warn!("Failed to update last login for {}: {}", user.username, e);
+            }
+
+            // Create JWT token
+            let token = create_token(&user.username).map_err(|_| {
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(json!({
+                        "error": "Token creation failed",
+                        "message": "Failed to create authentication token"
+                    })),
+                )
+            })?;
+
+            // Calculate expiration time (24 hours from now)
+            let expires_at = (Utc::now() + chrono::Duration::hours(24)).to_rfc3339();
+
+            // Audit log: successful login
+            let mut details = std::collections::HashMap::new();
+            details.insert(
+                "ip_address".to_string(),
+                serde_json::json!(crate::audit::extract_ip_from_headers(&headers)
+                    .unwrap_or_else(|| "unknown".to_string())),
+            );
+            let _ = crate::audit_helpers::log_success(
+                &app_state.audit_logger,
+                None, // user_id is String in this codebase, not i64
+                &user.username,
+                crate::audit::AuditAction::LoginSuccess,
+                crate::audit::ResourceType::User,
+                Some(user.id.clone()),
+                &headers,
+                details,
+            )
+            .await;
+
+            Ok(Json(LoginResponse {
+                token,
+                user: user.into(),
+                expires_at,
+            }))
+        }
+        None => {
+            // Audit log: failed login
+            let mut details = std::collections::HashMap::new();
+            details.insert("username".to_string(), serde_json::json!(payload.username));
+            details.insert(
+                "ip_address".to_string(),
+                serde_json::json!(crate::audit::extract_ip_from_headers(&headers)
+                    .unwrap_or_else(|| "unknown".to_string())),
+            );
+            let _ = crate::audit_helpers::log_failure(
+                &app_state.audit_logger,
+                None,
+                &payload.username,
+                crate::audit::AuditAction::LoginFailure,
+                crate::audit::ResourceType::User,
+                None,
+                &headers,
+                "Invalid username or password",
+                details,
+            )
+            .await;
+
+            Err((
                 StatusCode::UNAUTHORIZED,
                 Json(json!({
                     "error": "Authentication failed",
                     "message": "Invalid username or password"
                 })),
-            )
-        })?;
-
-    // Update last login time
-    if let Err(e) = app_state.user_manager.update_last_login(&user.username).await {
-        tracing::warn!("Failed to update last login for {}: {}", user.username, e);
+            ))
+        }
     }
-
-    // Create JWT token
-    let token = create_token(&user.username).map_err(|_| {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({
-                "error": "Token creation failed",
-                "message": "Failed to create authentication token"
-            })),
-        )
-    })?;
-
-    // Calculate expiration time (24 hours from now)
-    let expires_at = (Utc::now() + chrono::Duration::hours(24)).to_rfc3339();
-
-    Ok(Json(LoginResponse {
-        token,
-        user: user.into(),
-        expires_at,
-    }))
 }
 
 #[derive(Serialize)]
@@ -114,9 +286,31 @@ pub async fn auth_status(user: Option<Extension<User>>) -> Json<AuthStatusRespon
     }
 }
 
-pub async fn logout() -> Json<Value> {
+pub async fn logout(
+    State(app_state): State<AppState>,
+    headers: HeaderMap,
+    user: Option<Extension<User>>,
+) -> Json<Value> {
     // In a stateless JWT system, logout is handled client-side by discarding the token
     // Server-side logout would require token blacklisting, which we're not implementing here
+
+    // Log logout for audit trail
+    let username = user
+        .as_ref()
+        .map(|u| u.username.clone())
+        .unwrap_or_else(|| "unknown".to_string());
+    let _ = crate::audit_helpers::log_success(
+        &app_state.audit_logger,
+        None,
+        &username,
+        crate::audit::AuditAction::LogoutSuccess,
+        crate::audit::ResourceType::User,
+        None,
+        &headers,
+        std::collections::HashMap::new(),
+    )
+    .await;
+
     Json(json!({
         "message": "Logged out successfully",
         "timestamp": Utc::now().to_rfc3339()
@@ -127,263 +321,366 @@ pub async fn user_info(Extension(user): Extension<User>) -> Json<UserInfo> {
     Json(user.into())
 }
 
+fn scraper_action_success_response(result: &ScraperControlResult) -> Json<Value> {
+    Json(json!({
+        "status": result.status,
+        "message": result.message,
+        "scraper_running": result.scraper_running,
+        "timestamp": Utc::now().to_rfc3339()
+    }))
+}
+
+fn scraper_action_error_message(action: ScraperControlAction, error: &str) -> String {
+    if error.starts_with("Failed to initialize scraper runtime:") {
+        error.to_string()
+    } else {
+        format!("Failed to {} scraper: {}", action.failure_prefix(), error)
+    }
+}
+
+fn github_token_preview(token: &str) -> String {
+    if token.is_empty() {
+        String::new()
+    } else if token.len() >= 8 {
+        format!("{}...{}", &token[..4], &token[token.len() - 4..])
+    } else {
+        "****".to_string()
+    }
+}
+
+fn scraper_action_error_response(
+    action: ScraperControlAction,
+    error: &str,
+    scraper_running: bool,
+) -> Json<Value> {
+    Json(json!({
+        "status": "error",
+        "message": scraper_action_error_message(action, error),
+        "scraper_running": scraper_running,
+        "timestamp": Utc::now().to_rfc3339()
+    }))
+}
+
+async fn audited_scraper_action(
+    app_state: &AppState,
+    headers: &HeaderMap,
+    user: Option<&Extension<User>>,
+    action: ScraperControlAction,
+) -> Json<Value> {
+    let username = user
+        .map(|u| u.username.clone())
+        .unwrap_or_else(|| "system".to_string());
+
+    match execute_scraper_action(app_state, action).await {
+        Ok(result) => {
+            let mut details = std::collections::HashMap::new();
+            details.insert("scraper_running".to_string(), json!(result.scraper_running));
+            let _ = crate::audit_helpers::log_success(
+                &app_state.audit_logger,
+                None,
+                &username,
+                action.audit_action(),
+                crate::audit::ResourceType::Scraper,
+                None,
+                headers,
+                details,
+            )
+            .await;
+
+            scraper_action_success_response(&result)
+        }
+        Err(error) => {
+            let _ = crate::audit_helpers::log_failure(
+                &app_state.audit_logger,
+                None,
+                &username,
+                action.audit_action(),
+                crate::audit::ResourceType::Scraper,
+                None,
+                headers,
+                &error,
+                std::collections::HashMap::new(),
+            )
+            .await;
+
+            scraper_action_error_response(action, &error, app_state.scraper_manager.is_running())
+        }
+    }
+}
+
+async fn execute_scraper_action_response(
+    app_state: &AppState,
+    action: ScraperControlAction,
+) -> Json<Value> {
+    match execute_scraper_action(app_state, action).await {
+        Ok(result) => scraper_action_success_response(&result),
+        Err(error) => {
+            scraper_action_error_response(action, &error, app_state.scraper_manager.is_running())
+        }
+    }
+}
+
 // Scraper control handlers
-pub async fn start_scraper(State(app_state): State<AppState>) -> Json<Value> {
-    match app_state.scraper_manager.start() {
-        Ok(()) => {
-            // Initialize main scraper if available
-            if let Err(e) = app_state.initialize_main_scraper().await {
-                tracing::warn!("Failed to initialize main scraper: {}", e);
-            }
-            
-            Json(json!({
-                "status": "success",
-                "message": "Scraper started successfully",
-                "scraper_running": app_state.scraper_manager.is_running(),
-                "timestamp": Utc::now().to_rfc3339()
-            }))
-        }
-        Err(e) => {
-            Json(json!({
+pub async fn start_scraper(
+    State(app_state): State<AppState>,
+    headers: HeaderMap,
+    user: Option<Extension<User>>,
+) -> Json<Value> {
+    audited_scraper_action(
+        &app_state,
+        &headers,
+        user.as_ref(),
+        ScraperControlAction::Start,
+    )
+    .await
+}
+
+pub async fn stop_scraper(
+    State(app_state): State<AppState>,
+    headers: HeaderMap,
+    user: Option<Extension<User>>,
+) -> Json<Value> {
+    audited_scraper_action(
+        &app_state,
+        &headers,
+        user.as_ref(),
+        ScraperControlAction::Stop,
+    )
+    .await
+}
+
+pub async fn pause_scraper(
+    State(app_state): State<AppState>,
+    headers: HeaderMap,
+    user: Option<Extension<User>>,
+) -> Json<Value> {
+    audited_scraper_action(
+        &app_state,
+        &headers,
+        user.as_ref(),
+        ScraperControlAction::Pause,
+    )
+    .await
+}
+
+pub async fn resume_scraper(
+    State(app_state): State<AppState>,
+    headers: HeaderMap,
+    user: Option<Extension<User>>,
+) -> Json<Value> {
+    audited_scraper_action(
+        &app_state,
+        &headers,
+        user.as_ref(),
+        ScraperControlAction::Resume,
+    )
+    .await
+}
+
+pub async fn restart_scraper(
+    State(app_state): State<AppState>,
+    headers: HeaderMap,
+    user: Option<Extension<User>>,
+) -> Json<Value> {
+    audited_scraper_action(
+        &app_state,
+        &headers,
+        user.as_ref(),
+        ScraperControlAction::Restart,
+    )
+    .await
+}
+
+pub async fn system_status_simple(State(app_state): State<AppState>) -> Json<Value> {
+    match build_system_status(&app_state).await {
+        Ok(status) => Json(json!(status)),
+        Err(error) => Json(json!({
+            "status": "error",
+            "timestamp": Utc::now().to_rfc3339(),
+            "error": error.to_string(),
+            "ready": false
+        })),
+    }
+}
+
+// Scraper status with real data from AppState
+pub async fn scraper_status_simple(State(app_state): State<AppState>) -> Json<Value> {
+    match app_state.get_comprehensive_status().await {
+        Ok(comprehensive_status) => match build_scraper_status(&app_state, &comprehensive_status) {
+            Ok(status) => Json(json!(status)),
+            Err(error) => Json(json!({
                 "status": "error",
-                "message": format!("Failed to start scraper: {}", e),
-                "scraper_running": app_state.scraper_manager.is_running(),
-                "timestamp": Utc::now().to_rfc3339()
-            }))
-        }
-    }
-}
-
-pub async fn stop_scraper(State(app_state): State<AppState>) -> Json<Value> {
-    match app_state.scraper_manager.stop() {
-        Ok(()) => Json(json!({
-            "status": "success",
-            "message": "Scraper stopped successfully",
-            "scraper_running": app_state.scraper_manager.is_running(),
-            "timestamp": Utc::now().to_rfc3339()
+                "message": error.to_string(),
+                "is_running": false,
+                "ready": false,
+                "last_updated": Utc::now().to_rfc3339()
+            })),
+        },
+        Err(error) => Json(json!({
+            "status": "error",
+            "message": error.to_string(),
+            "is_running": false,
+            "ready": false,
+            "last_updated": Utc::now().to_rfc3339()
         })),
-        Err(e) => Json(json!({
-            "status": "error",
-            "message": format!("Failed to stop scraper: {}", e),
-            "scraper_running": app_state.scraper_manager.is_running(),
-            "timestamp": Utc::now().to_rfc3339()
-        }))
     }
-}
-
-pub async fn pause_scraper(State(app_state): State<AppState>) -> Json<Value> {
-    match app_state.scraper_manager.pause() {
-        Ok(()) => Json(json!({
-            "status": "success",
-            "message": "Scraper paused successfully",
-            "scraper_running": app_state.scraper_manager.is_running(),
-            "timestamp": Utc::now().to_rfc3339()
-        })),
-        Err(e) => Json(json!({
-            "status": "error",
-            "message": format!("Failed to pause scraper: {}", e),
-            "scraper_running": app_state.scraper_manager.is_running(),
-            "timestamp": Utc::now().to_rfc3339()
-        }))
-    }
-}
-
-pub async fn resume_scraper(State(app_state): State<AppState>) -> Json<Value> {
-    match app_state.scraper_manager.resume() {
-        Ok(()) => Json(json!({
-            "status": "success",
-            "message": "Scraper resumed successfully",
-            "scraper_running": app_state.scraper_manager.is_running(),
-            "timestamp": Utc::now().to_rfc3339()
-        })),
-        Err(e) => Json(json!({
-            "status": "error",
-            "message": format!("Failed to resume scraper: {}", e),
-            "scraper_running": app_state.scraper_manager.is_running(),
-            "timestamp": Utc::now().to_rfc3339()
-        }))
-    }
-}
-
-pub async fn restart_scraper(State(app_state): State<AppState>) -> Json<Value> {
-    match app_state.scraper_manager.restart() {
-        Ok(()) => {
-            // Re-initialize main scraper if available
-            if let Err(e) = app_state.initialize_main_scraper().await {
-                tracing::warn!("Failed to re-initialize main scraper: {}", e);
-            }
-            
-            Json(json!({
-                "status": "success",
-                "message": "Scraper restarted successfully",
-                "scraper_running": app_state.scraper_manager.is_running(),
-                "timestamp": Utc::now().to_rfc3339()
-            }))
-        }
-        Err(e) => Json(json!({
-            "status": "error",
-            "message": format!("Failed to restart scraper: {}", e),
-            "scraper_running": app_state.scraper_manager.is_running(),
-            "timestamp": Utc::now().to_rfc3339()
-        }))
-    }
-}
-
-// Simple system status that doesn't require State
-pub async fn system_status_simple() -> Json<Value> {
-    Json(json!({
-        "status": "healthy",
-        "timestamp": Utc::now().to_rfc3339(),
-        "hostname": sys_info::hostname().unwrap_or_else(|_| "unknown".to_string()),
-        "platform": format!("{} {}", 
-            sys_info::os_type().unwrap_or_else(|_| "unknown".to_string()),
-            sys_info::os_release().unwrap_or_else(|_| "unknown".to_string())
-        ),
-        "load_average": sys_info::loadavg().map(|la| la.one).unwrap_or(0.0)
-    }))
-}
-
-// Simple scraper status that doesn't require State
-pub async fn scraper_status_simple() -> Json<Value> {
-    Json(json!({
-        "status": "running",
-        "repos_processed": 42,
-        "current_repo": "example/repo",
-        "last_updated": Utc::now().to_rfc3339()
-    }))
 }
 
 pub async fn system_metrics() -> Json<Value> {
+    // Get actual system metrics using sys_info
+    let mem_info = sys_info::mem_info().unwrap_or(sys_info::MemInfo {
+        total: 0,
+        free: 0,
+        avail: 0,
+        buffers: 0,
+        cached: 0,
+        swap_total: 0,
+        swap_free: 0,
+    });
+
+    let disk_info = sys_info::disk_info().unwrap_or(sys_info::DiskInfo { total: 0, free: 0 });
+
+    let load = sys_info::loadavg().unwrap_or(sys_info::LoadAvg {
+        one: 0.0,
+        five: 0.0,
+        fifteen: 0.0,
+    });
+
+    let memory_usage = if mem_info.total > 0 {
+        ((mem_info.total - mem_info.avail) as f64 / mem_info.total as f64) * 100.0
+    } else {
+        0.0
+    };
+
+    let disk_usage = if disk_info.total > 0 {
+        ((disk_info.total - disk_info.free) as f64 / disk_info.total as f64) * 100.0
+    } else {
+        0.0
+    };
+
     Json(json!({
-        "cpu_usage": 25.5,
-        "memory_usage": 45.2,
-        "disk_usage": 67.8,
-        "network_io": {
-            "bytes_sent": 1024000,
-            "bytes_received": 2048000
+        "cpu_usage": (load.one * 100.0 / num_cpus::get() as f64).min(100.0),
+        "memory_usage": memory_usage,
+        "disk_usage": disk_usage,
+        "load_average": {
+            "one": load.one,
+            "five": load.five,
+            "fifteen": load.fifteen
+        },
+        "memory_info": {
+            "total_mb": mem_info.total / 1024,
+            "available_mb": mem_info.avail / 1024,
+            "used_mb": (mem_info.total - mem_info.avail) / 1024
+        },
+        "disk_info": {
+            "total_gb": disk_info.total / (1024 * 1024),
+            "free_gb": disk_info.free / (1024 * 1024),
+            "used_gb": (disk_info.total - disk_info.free) / (1024 * 1024)
         }
     }))
 }
 
 pub async fn database_status(State(app_state): State<AppState>) -> Json<Value> {
-    use crate::core::Database;
-    
-    // Try to get real database status
-    let status_result = async {
-        let database = Database::new(app_state.config.clone()).await?;
-        let health = database.health_check().await;
-        
-        Ok::<_, anyhow::Error>(health)
-    }.await;
-    
-    match status_result {
-        Ok(health) => {
-            Json(json!({
-                "status": if health.is_connected { "connected" } else { "disconnected" },
-                "is_connected": health.is_connected,
-                "connection_count": health.connection_count,
-                "active_queries": health.active_queries,
-                "cache_hit_ratio": health.cache_hit_ratio,
-                "error_message": health.error_message,
-                "timestamp": Utc::now().to_rfc3339()
-            }))
-        }
-        Err(e) => {
-            tracing::error!("Failed to get database status: {}", e);
-            Json(json!({
-                "status": "error",
-                "is_connected": false,
-                "connection_count": 0,
-                "active_queries": 0,
-                "cache_hit_ratio": 0.0,
-                "error_message": format!("Failed to check database status: {}", e),
-                "timestamp": Utc::now().to_rfc3339()
-            }))
-        }
-    }
+    // Use the existing database connection from app_state
+    let health = app_state.persistence.health_status().await;
+
+    Json(json!({
+        "status": if health.is_connected { "connected" } else { "disconnected" },
+        "is_connected": health.is_connected,
+        "connection_count": health.connection_count,
+        "active_queries": health.active_queries,
+        "cache_hit_ratio": health.cache_hit_ratio,
+        "error_message": health.error_message,
+        "timestamp": Utc::now().to_rfc3339()
+    }))
 }
 
-pub async fn scraper_control(Json(payload): Json<Value>) -> Json<Value> {
+pub async fn scraper_control(
+    State(app_state): State<AppState>,
+    Json(payload): Json<Value>,
+) -> Json<Value> {
     let action = payload.get("action").and_then(|v| v.as_str()).unwrap_or("");
-    
-    match action {
-        "start" => Json(json!({"status": "started", "message": "Scraper started successfully"})),
-        "stop" => Json(json!({"status": "stopped", "message": "Scraper stopped successfully"})),
-        "restart" => Json(json!({"status": "restarted", "message": "Scraper restarted successfully"})),
-        _ => Json(json!({"error": "Invalid action. Use start, stop, or restart"}))
+
+    match ScraperControlAction::from_api_action(action) {
+        Some(action) => execute_scraper_action_response(&app_state, action).await,
+        None => Json(json!({
+            "error": "Invalid action. Use start, stop, restart, pause, or resume",
+            "timestamp": Utc::now().to_rfc3339()
+        })),
     }
 }
 
-pub async fn auth_verify(headers: axum::http::HeaderMap) -> Result<Json<Value>, StatusCode> {
+pub async fn auth_verify(
+    State(app_state): State<AppState>,
+    headers: axum::http::HeaderMap,
+) -> Result<Json<Value>, StatusCode> {
     if let Some(auth_header) = headers.get("authorization") {
         if let Ok(auth_str) = auth_header.to_str() {
-            if auth_str.starts_with("Bearer ") {
-                return Ok(Json(json!({
-                    "valid": true,
-                    "user": "admin",
-                    "role": "administrator"
-                })));
+            if let Some(token) = auth_str.strip_prefix("Bearer ") {
+                if let Ok(claims) = verify_token(token) {
+                    if let Some(user) = app_state.user_manager.get_user(&claims.sub).await {
+                        return Ok(Json(json!({
+                            "valid": true,
+                            "user": user.username,
+                            "role": user.canonical_role()
+                        })));
+                    }
+                }
             }
         }
     }
-    
+
+    // Log unauthorized access attempt
+    let _ = crate::audit_helpers::log_security_event(
+        &app_state.audit_logger,
+        "unknown",
+        crate::audit::AuditAction::InvalidToken,
+        &headers,
+        "Unauthorized access attempt - missing or invalid token",
+    )
+    .await;
+
     Err(StatusCode::UNAUTHORIZED)
 }
 
 // New endpoint for secrets statistics
 pub async fn secrets_stats(State(app_state): State<AppState>) -> Json<Value> {
-    let comprehensive_status = match app_state.get_comprehensive_status().await {
-        Ok(status) => status,
-        Err(e) => {
-            tracing::error!("Failed to get comprehensive status: {}", e);
-            return Json(json!({
-                "success": false,
-                "error": "Failed to get secrets stats",
-                "timestamp": Utc::now().to_rfc3339()
-            }));
-        }
-    };
-
-    if let Some(quality_metrics) = comprehensive_status.quality_metrics {
-        Json(json!({
+    match app_state.persistence.secret_overview_metrics().await {
+        Ok(metrics) => Json(json!({
             "success": true,
-            "total_secrets": quality_metrics.total_events,
-            "high_risk": quality_metrics.integrity_issues.values().sum::<u64>(), // Using integrity issues as proxy for high risk
-            "repos_scanned": quality_metrics.unique_repos,
-            "last_scan": "Recent", // Not available in current QualityMetrics
-            "secret_types": {
-                "api_keys": quality_metrics.total_events / 6, // Mock distribution
-                "tokens": quality_metrics.total_events / 5,
-                "passwords": quality_metrics.total_events / 8,
-                "certificates": quality_metrics.total_events / 10,
-                "private_keys": quality_metrics.total_events / 12,
-                "database_urls": quality_metrics.total_events / 15
-            },
-            "performance": {
-                "scan_rate": quality_metrics.total_events / 100, // Mock rate calculation
-                "avg_scan_time": "50ms",
-                "success_rate": format!("{}%", (quality_metrics.quality_score * 100.0).round())
-            },
+            "total_secrets": metrics.total_secrets,
+            "severity_counts": metrics.severity_counts,
+            "category_counts": metrics.category_counts,
+            "verified_secrets": metrics.verified_secrets,
+            "false_positives": metrics.false_positives,
+            "repositories_scanned": metrics.repositories_scanned,
+            "files_scanned": metrics.files_scanned,
+            "total_scans": metrics.total_scans,
+            "active_scans": metrics.active_scans,
+            "failed_scans": metrics.failed_scans,
+            "avg_scan_duration_ms": metrics.avg_scan_duration_ms,
+            "last_scan_time": metrics.last_scan_time,
+            "scan_success_rate": metrics.scan_success_rate,
+            "scan_rate_per_minute": metrics.scan_rate_per_minute,
+            "repos_per_minute": metrics.repos_per_minute,
             "timestamp": Utc::now().to_rfc3339()
-        }))
-    } else {
-        Json(json!({
-            "success": false,
-            "error": "Quality metrics not available",
-            "timestamp": Utc::now().to_rfc3339()
-        }))
+        })),
+        Err(e) => {
+            tracing::error!("Failed to load secret overview metrics: {}", e);
+            Json(json!({
+                "success": false,
+                "error": "Failed to load secrets stats",
+                "timestamp": Utc::now().to_rfc3339()
+            }))
+        }
     }
 }
 
 // New endpoint for auth verification
-pub async fn verify_auth(
-    headers: axum::http::HeaderMap,
-) -> Json<Value> {
+pub async fn verify_auth(headers: axum::http::HeaderMap) -> Json<Value> {
     if let Some(auth_header) = headers.get("Authorization") {
         if let Ok(auth_str) = auth_header.to_str() {
-            if auth_str.starts_with("Bearer ") {
-                let token = &auth_str[7..];
-                
+            if let Some(token) = auth_str.strip_prefix("Bearer ") {
                 // Verify JWT token
                 match verify_token(token) {
                     Ok(claims) => {
@@ -400,7 +697,7 @@ pub async fn verify_auth(
             }
         }
     }
-    
+
     Json(json!({
         "valid": false,
         "timestamp": Utc::now().to_rfc3339()
@@ -408,7 +705,11 @@ pub async fn verify_auth(
 }
 
 // Emergency cleanup endpoint
-pub async fn emergency_cleanup(State(app_state): State<AppState>) -> Json<Value> {
+pub async fn emergency_cleanup(
+    State(app_state): State<AppState>,
+    headers: HeaderMap,
+    user: Option<Extension<User>>,
+) -> Json<Value> {
     let comprehensive_status = match app_state.get_comprehensive_status().await {
         Ok(status) => status,
         Err(e) => {
@@ -425,17 +726,58 @@ pub async fn emergency_cleanup(State(app_state): State<AppState>) -> Json<Value>
         if resource_status.emergency_mode {
             // Perform cleanup through app state
             match app_state.perform_emergency_cleanup().await {
-                Ok(()) => Json(json!({
-                    "success": true,
-                    "message": "Emergency cleanup performed",
-                    "emergency_conditions": resource_status.emergency_conditions,
-                    "timestamp": Utc::now().to_rfc3339()
-                })),
-                Err(e) => Json(json!({
-                    "success": false,
-                    "error": format!("Cleanup failed: {}", e),
-                    "timestamp": Utc::now().to_rfc3339()
-                }))
+                Ok(()) => {
+                    // Log successful emergency cleanup
+                    let username = user
+                        .as_ref()
+                        .map(|u| u.username.clone())
+                        .unwrap_or_else(|| "system".to_string());
+                    let mut details = std::collections::HashMap::new();
+                    details.insert(
+                        "emergency_conditions".to_string(),
+                        json!(resource_status.emergency_conditions),
+                    );
+                    let _ = crate::audit_helpers::log_security_event(
+                        &app_state.audit_logger,
+                        &username,
+                        crate::audit::AuditAction::SystemCleanup,
+                        &headers,
+                        "Emergency cleanup performed due to system resource constraints",
+                    )
+                    .await;
+
+                    Json(json!({
+                        "success": true,
+                        "message": "Emergency cleanup performed",
+                        "emergency_conditions": resource_status.emergency_conditions,
+                        "timestamp": Utc::now().to_rfc3339()
+                    }))
+                }
+                Err(e) => {
+                    // Log failure
+                    let username = user
+                        .as_ref()
+                        .map(|u| u.username.clone())
+                        .unwrap_or_else(|| "system".to_string());
+                    let _ = crate::audit_helpers::log_failure(
+                        &app_state.audit_logger,
+                        None,
+                        &username,
+                        crate::audit::AuditAction::SystemCleanup,
+                        crate::audit::ResourceType::System,
+                        None,
+                        &headers,
+                        &e.to_string(),
+                        std::collections::HashMap::new(),
+                    )
+                    .await;
+
+                    Json(json!({
+                        "success": false,
+                        "error": format!("Cleanup failed: {}", e),
+                        "timestamp": Utc::now().to_rfc3339()
+                    }))
+                }
             }
         } else {
             Json(json!({
@@ -478,15 +820,35 @@ pub struct TableInfo {
 
 pub async fn database_start(
     State(app_state): State<AppState>,
+    headers: HeaderMap,
+    user: Option<Extension<User>>,
     Json(request): Json<DatabaseControlRequest>,
 ) -> impl IntoResponse {
-    use crate::core::Database;
-    
     // Check if database is already running by attempting a connection
-    let connection_result = Database::new(app_state.config.clone()).await;
-    
+    let connection_result = crate::core::database::Database::new(&app_state.config).await;
+
     match connection_result {
         Ok(_) => {
+            // Log database already running
+            let username = user
+                .as_ref()
+                .map(|u| u.username.clone())
+                .unwrap_or_else(|| "system".to_string());
+            let mut details = std::collections::HashMap::new();
+            details.insert("status".to_string(), json!("already_running"));
+            details.insert("force".to_string(), json!(request.force.unwrap_or(false)));
+            let _ = crate::audit_helpers::log_success(
+                &app_state.audit_logger,
+                None,
+                &username,
+                crate::audit::AuditAction::DatabaseStarted,
+                crate::audit::ResourceType::Database,
+                None,
+                &headers,
+                details,
+            )
+            .await;
+
             Json(json!({
                 "success": true,
                 "message": "Database is already running and accessible",
@@ -496,6 +858,24 @@ pub async fn database_start(
             }))
         }
         Err(e) => {
+            // Log database connection failure
+            let username = user
+                .as_ref()
+                .map(|u| u.username.clone())
+                .unwrap_or_else(|| "system".to_string());
+            let _ = crate::audit_helpers::log_failure(
+                &app_state.audit_logger,
+                None,
+                &username,
+                crate::audit::AuditAction::DatabaseStarted,
+                crate::audit::ResourceType::Database,
+                None,
+                &headers,
+                &format!("Connection failed: {}", e),
+                std::collections::HashMap::new(),
+            )
+            .await;
+
             tracing::warn!("Database connection failed: {}", e);
             Json(json!({
                 "success": false,
@@ -510,9 +890,28 @@ pub async fn database_start(
 }
 
 pub async fn database_stop(
-    State(_app_state): State<AppState>,
+    State(app_state): State<AppState>,
+    headers: HeaderMap,
+    user: Option<Extension<User>>,
     Json(request): Json<DatabaseControlRequest>,
 ) -> impl IntoResponse {
+    // Log database stop attempt (not allowed via API)
+    let username = user
+        .as_ref()
+        .map(|u| u.username.clone())
+        .unwrap_or_else(|| "system".to_string());
+    let mut details = std::collections::HashMap::new();
+    details.insert("operation".to_string(), json!("stop"));
+    details.insert("result".to_string(), json!("not_supported"));
+    let _ = crate::audit_helpers::log_security_event(
+        &app_state.audit_logger,
+        &username,
+        crate::audit::AuditAction::SuspiciousActivity,
+        &headers,
+        "Attempted database stop via API (operation not supported for safety)",
+    )
+    .await;
+
     // Database stop requires system-level privileges and is not recommended via API
     Json(json!({
         "success": false,
@@ -539,18 +938,14 @@ pub async fn database_restart(
     }))
 }
 
-pub async fn database_stats(
-    State(app_state): State<AppState>,
-) -> impl IntoResponse {
-    use crate::core::Database;
-    
-    // Create a temporary database connection for stats
+pub async fn database_stats(State(app_state): State<AppState>) -> impl IntoResponse {
+    // Use the existing database connection from app_state instead of creating a new one
     let stats_result = async {
-        let database = Database::new(app_state.config.clone()).await?;
-        let db_stats = database.get_database_statistics().await?;
-        
+        let db_stats = app_state.persistence.database_statistics().await?;
+
         // Convert to our response format
-        let tables: Vec<TableInfo> = db_stats.tables
+        let tables: Vec<TableInfo> = db_stats
+            .tables
             .iter()
             .map(|(name, row_count, size)| TableInfo {
                 name: name.clone(),
@@ -568,103 +963,31 @@ pub async fn database_stats(
         };
 
         Ok::<DatabaseStatsResponse, anyhow::Error>(stats)
-    }.await;
+    }
+    .await;
 
     match stats_result {
-        Ok(mut stats) => {
-            // If the database is empty but connected, show sample data to demonstrate functionality
-            if stats.total_events == 0 && stats.table_count == 0 {
-                stats = DatabaseStatsResponse {
-                    total_events: 12847,
-                    database_size: "45.2 MB".to_string(),
-                    table_count: 6,
-                    tables: vec![
-                        TableInfo {
-                            name: "github_events".to_string(),
-                            row_count: 12847,
-                            size: "38.1 MB".to_string(),
-                        },
-                        TableInfo {
-                            name: "repositories".to_string(),
-                            row_count: 3421,
-                            size: "4.8 MB".to_string(),
-                        },
-                        TableInfo {
-                            name: "actors".to_string(),
-                            row_count: 1893,
-                            size: "1.2 MB".to_string(),
-                        },
-                        TableInfo {
-                            name: "secrets_scan_results".to_string(),
-                            row_count: 156,
-                            size: "890 kB".to_string(),
-                        },
-                        TableInfo {
-                            name: "scan_sessions".to_string(),
-                            row_count: 24,
-                            size: "128 kB".to_string(),
-                        },
-                        TableInfo {
-                            name: "api_keys".to_string(),
-                            row_count: 3,
-                            size: "32 kB".to_string(),
-                        },
-                    ],
-                    last_updated: Utc::now().to_rfc3339(),
-                };
-            }
-            
+        Ok(stats) => (
+            StatusCode::OK,
             Json(json!({
                 "success": true,
+                "status": if stats.total_events == 0 { "empty" } else { "ready" },
                 "data": stats,
-                "timestamp": Utc::now().to_rfc3339(),
-                "note": if stats.total_events == 12847 { Some("Showing sample data - database is ready but empty") } else { None }
-            }))
-        }
+                "timestamp": Utc::now().to_rfc3339()
+            })),
+        ),
         Err(e) => {
             tracing::error!("Failed to get database stats: {}", e);
-            // Fallback to simulated data if database query fails
-            let fallback_stats = DatabaseStatsResponse {
-                total_events: 8532,
-                database_size: "Demo Mode".to_string(),
-                table_count: 5,
-                tables: vec![
-                    TableInfo {
-                        name: "github_events".to_string(),
-                        row_count: 8532,
-                        size: "25.4 MB".to_string(),
-                    },
-                    TableInfo {
-                        name: "repositories".to_string(),
-                        row_count: 2156,
-                        size: "3.2 MB".to_string(),
-                    },
-                    TableInfo {
-                        name: "actors".to_string(),
-                        row_count: 1247,
-                        size: "890 kB".to_string(),
-                    },
-                    TableInfo {
-                        name: "secrets_scan_results".to_string(),
-                        row_count: 89,
-                        size: "445 kB".to_string(),
-                    },
-                    TableInfo {
-                        name: "scan_sessions".to_string(),
-                        row_count: 12,
-                        size: "64 kB".to_string(),
-                    },
-                ],
-                last_updated: Utc::now().to_rfc3339(),
-            };
-            
-            Json(json!({
-                "success": false,
-                "error": "Database connection failed - showing demo data",
-                "data": fallback_stats,
-                "timestamp": Utc::now().to_rfc3339(),
-                "note": "Demo mode - database connection unavailable"
-            }))
+            (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(json!({
+                    "success": false,
+                    "status": "unavailable",
+                    "error": "Failed to load database statistics",
+                    "details": e.to_string(),
+                    "timestamp": Utc::now().to_rfc3339()
+                })),
+            )
         }
     }
 }
@@ -695,66 +1018,109 @@ pub struct UserListResponse {
 
 pub async fn change_password(
     State(app_state): State<AppState>,
+    Extension(current_user): Extension<User>,
     Json(request): Json<ChangePasswordRequest>,
 ) -> impl IntoResponse {
     let user_manager = &app_state.user_manager;
-    
+
+    let current_role = match current_user.parsed_role() {
+        Ok(role) => role,
+        Err(error) => {
+            tracing::warn!(
+                username = %current_user.username,
+                error = %error,
+                "User with invalid role attempted password change"
+            );
+            return (
+                StatusCode::FORBIDDEN,
+                Json(json!({
+                    "success": false,
+                    "error": "User account has an unsupported role assignment",
+                    "timestamp": Utc::now().to_rfc3339()
+                })),
+            );
+        }
+    };
+
+    if current_role != UserRole::Admin && request.username != current_user.username {
+        return (
+            StatusCode::FORBIDDEN,
+            Json(json!({
+                "success": false,
+                "error": "Only administrators can change another user's password",
+                "timestamp": Utc::now().to_rfc3339()
+            })),
+        );
+    }
+
     // Verify user exists
     if user_manager.get_user(&request.username).await.is_none() {
-        return (StatusCode::NOT_FOUND, Json(json!({
-            "success": false,
-            "error": "User not found",
-            "timestamp": Utc::now().to_rfc3339()
-        })));
+        return (
+            StatusCode::NOT_FOUND,
+            Json(json!({
+                "success": false,
+                "error": "User not found",
+                "timestamp": Utc::now().to_rfc3339()
+            })),
+        );
     }
-    
+
     // Validate password strength
     if request.new_password.len() < 8 {
-        return (StatusCode::BAD_REQUEST, Json(json!({
-            "success": false,
-            "error": "Password must be at least 8 characters long",
-            "timestamp": Utc::now().to_rfc3339()
-        })));
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(json!({
+                "success": false,
+                "error": "Password must be at least 8 characters long",
+                "timestamp": Utc::now().to_rfc3339()
+            })),
+        );
     }
-    
+
     // Update user's password in the UserManager
-    match user_manager.update_password(&request.username, &request.new_password).await {
-        Ok(()) => {
-            (StatusCode::OK, Json(json!({
+    match user_manager
+        .update_password(&request.username, &request.new_password)
+        .await
+    {
+        Ok(()) => (
+            StatusCode::OK,
+            Json(json!({
                 "success": true,
                 "message": format!("Password updated for user: {}", request.username),
                 "timestamp": Utc::now().to_rfc3339()
-            })))
-        }
+            })),
+        ),
         Err(e) => {
             tracing::error!("Failed to update password for {}: {}", request.username, e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({
-                "success": false,
-                "error": "Failed to update password",
-                "timestamp": Utc::now().to_rfc3339()
-            })))
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({
+                    "success": false,
+                    "error": "Failed to update password",
+                    "timestamp": Utc::now().to_rfc3339()
+                })),
+            )
         }
     }
 }
 
-pub async fn list_users(
-    State(app_state): State<AppState>,
-) -> impl IntoResponse {
+pub async fn list_users(State(app_state): State<AppState>) -> impl IntoResponse {
     let user_manager = &app_state.user_manager;
-    
+
     // Get all users from the UserManager
     match user_manager.list_all_users().await {
         Ok(users) => {
-            let user_responses: Vec<UserListResponse> = users.into_iter().map(|user| {
-                UserListResponse {
+            let user_responses: Vec<UserListResponse> = users
+                .into_iter()
+                .map(|user| UserListResponse {
                     id: user.id.clone(),
                     username: user.username.clone(),
-                    role: user.role.clone(),
+                    role: user.canonical_role(),
                     created_at: user.created_at.to_rfc3339(),
                     last_login: user.last_login.map(|dt| dt.to_rfc3339()),
-                }
-            }).collect();
-            
+                })
+                .collect();
+
             Json(json!({
                 "success": true,
                 "users": user_responses,
@@ -778,39 +1144,53 @@ pub async fn create_user(
     Json(request): Json<CreateUserRequest>,
 ) -> impl IntoResponse {
     let user_manager = &app_state.user_manager;
-    
+
     // Validate username
     if request.username.trim().is_empty() {
-        return (StatusCode::BAD_REQUEST, Json(json!({
-            "success": false,
-            "error": "Username cannot be empty",
-            "timestamp": Utc::now().to_rfc3339()
-        })));
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(json!({
+                "success": false,
+                "error": "Username cannot be empty",
+                "timestamp": Utc::now().to_rfc3339()
+            })),
+        );
     }
-    
+
     // Validate password
     if request.password.len() < 6 {
-        return (StatusCode::BAD_REQUEST, Json(json!({
-            "success": false,
-            "error": "Password must be at least 6 characters long",
-            "timestamp": Utc::now().to_rfc3339()
-        })));
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(json!({
+                "success": false,
+                "error": "Password must be at least 6 characters long",
+                "timestamp": Utc::now().to_rfc3339()
+            })),
+        );
     }
-    
-    // Validate role
-    let valid_roles = ["admin", "user", "viewer"];
-    if !valid_roles.contains(&request.role.as_str()) {
-        return (StatusCode::BAD_REQUEST, Json(json!({
-            "success": false,
-            "error": "Invalid role. Must be one of: admin, user, viewer",
-            "timestamp": Utc::now().to_rfc3339()
-        })));
-    }
-    
+
+    let normalized_role = match UserRole::normalize(&request.role) {
+        Ok(role) => role.to_string(),
+        Err(error) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({
+                    "success": false,
+                    "error": error.to_string(),
+                    "timestamp": Utc::now().to_rfc3339()
+                })),
+            );
+        }
+    };
+
     // Create user using UserManager
-    match user_manager.create_user_public(&request.username, &request.password, &request.role).await {
-        Ok(user) => {
-            (StatusCode::CREATED, Json(json!({
+    match user_manager
+        .create_user_public(&request.username, &request.password, &normalized_role)
+        .await
+    {
+        Ok(user) => (
+            StatusCode::CREATED,
+            Json(json!({
                 "success": true,
                 "message": format!("User '{}' created successfully", request.username),
                 "user": {
@@ -820,15 +1200,18 @@ pub async fn create_user(
                     "created_at": user.created_at.to_rfc3339(),
                 },
                 "timestamp": Utc::now().to_rfc3339()
-            })))
-        }
+            })),
+        ),
         Err(e) => {
             tracing::error!("Failed to create user: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({
-                "success": false,
-                "error": format!("Failed to create user: {}", e),
-                "timestamp": Utc::now().to_rfc3339()
-            })))
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({
+                    "success": false,
+                    "error": format!("Failed to create user: {}", e),
+                    "timestamp": Utc::now().to_rfc3339()
+                })),
+            )
         }
     }
 }
@@ -838,32 +1221,122 @@ pub async fn delete_user(
     axum::extract::Path(username): axum::extract::Path<String>,
 ) -> impl IntoResponse {
     let user_manager = &app_state.user_manager;
-    
+
     // Prevent deletion of admin user
     if username == "admin" {
-        return (StatusCode::FORBIDDEN, Json(json!({
-            "success": false,
-            "error": "Cannot delete admin user",
-            "timestamp": Utc::now().to_rfc3339()
-        })));
+        return (
+            StatusCode::FORBIDDEN,
+            Json(json!({
+                "success": false,
+                "error": "Cannot delete user",
+                "timestamp": Utc::now().to_rfc3339()
+            })),
+        );
     }
-    
+
     // Delete user using UserManager
     match user_manager.delete_user(&username).await {
-        Ok(()) => {
-            (StatusCode::OK, Json(json!({
+        Ok(()) => (
+            StatusCode::OK,
+            Json(json!({
                 "success": true,
                 "message": format!("User '{}' deleted successfully", username),
                 "timestamp": Utc::now().to_rfc3339()
-            })))
-        }
+            })),
+        ),
         Err(e) => {
             tracing::error!("Failed to delete user: {}", e);
-            (StatusCode::NOT_FOUND, Json(json!({
-                "success": false,
-                "error": format!("Failed to delete user: {}", e),
-                "timestamp": Utc::now().to_rfc3339()
-            })))
+            (
+                StatusCode::NOT_FOUND,
+                Json(json!({
+                    "success": false,
+                    "error": format!("Failed to delete user: {}", e),
+                    "timestamp": Utc::now().to_rfc3339()
+                })),
+            )
         }
+    }
+}
+
+/// Get application configuration - SECURITY: Never exposes full token
+/// Returns masked preview only; backend uses stored token for API calls
+pub async fn get_app_config(State(app_state): State<AppState>) -> Json<Value> {
+    let github_token = app_state.config.github.token.clone();
+    let has_token = !github_token.is_empty();
+
+    Json(json!({
+        "github": {
+            "has_token": has_token,
+            "token_preview": github_token_preview(&github_token),
+            "rate_limit": if has_token { 5000 } else { 60 }
+        },
+        "web": {
+            "port": app_state.config.web.port,
+            "host": app_state.config.web.host
+        }
+    }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::Utc;
+
+    fn user(username: &str, role: &str) -> User {
+        User {
+            id: format!("{username}-id"),
+            username: username.to_string(),
+            password_hash: "not-used".to_string(),
+            role: role.to_string(),
+            created_at: Utc::now(),
+            last_login: None,
+            is_active: true,
+        }
+    }
+
+    #[tokio::test]
+    async fn auth_status_reports_authenticated_user() {
+        let Json(response) = auth_status(Some(Extension(user("analyst", "operator")))).await;
+
+        assert!(response.authenticated);
+        assert_eq!(response.user.as_deref(), Some("analyst"));
+    }
+
+    #[tokio::test]
+    async fn auth_status_reports_anonymous_request() {
+        let Json(response) = auth_status(None).await;
+
+        assert!(!response.authenticated);
+        assert!(response.user.is_none());
+    }
+
+    #[tokio::test]
+    async fn user_info_normalizes_legacy_role_names() {
+        let Json(response) = user_info(Extension(user("legacy-user", "user"))).await;
+
+        assert_eq!(response.username, "legacy-user");
+        assert_eq!(response.role, "operator");
+    }
+
+    #[test]
+    fn scraper_action_error_messages_are_stable_for_operator_flows() {
+        assert_eq!(
+            scraper_action_error_message(ScraperControlAction::Pause, "not running"),
+            "Failed to pause scraper: not running"
+        );
+        assert_eq!(
+            scraper_action_error_message(
+                ScraperControlAction::Start,
+                "Failed to initialize scraper runtime: missing db"
+            ),
+            "Failed to initialize scraper runtime: missing db"
+        );
+    }
+
+    #[test]
+    fn github_token_preview_never_returns_full_secret() {
+        assert_eq!(github_token_preview(""), "");
+        assert_eq!(github_token_preview("short"), "****");
+        assert_eq!(github_token_preview("ghp_REDACTED_EXAMPLE"), "ghp_...cdef");
     }
 }

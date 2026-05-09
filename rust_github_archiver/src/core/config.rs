@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use config::{Config as ConfigBuilder, Environment, File};
+use config::{Config as ConfigBuilder, Environment, File, FileFormat};
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::path::PathBuf;
@@ -26,9 +26,11 @@ impl Default for DatabaseConfig {
                 .unwrap_or_else(|_| "5432".to_string())
                 .parse()
                 .unwrap_or(5432),
-            name: env::var("DB_NAME").unwrap_or_else(|_| "gharchive".to_string()),
-            user: env::var("DB_USER").unwrap_or_else(|_| "gharchive".to_string()),
-            password: env::var("DB_PASSWORD").unwrap_or_else(|_| "gharchive_password".to_string()),
+            // Align defaults with docker-compose service definitions
+            name: env::var("DB_NAME").unwrap_or_else(|_| "github_archiver".to_string()),
+            user: env::var("DB_USER").unwrap_or_else(|_| "github_archiver".to_string()),
+            password: env::var("DB_PASSWORD")
+                .unwrap_or_else(|_| "github_archiver_password".to_string()),
             min_connections: env::var("DB_MIN_CONNECTIONS")
                 .unwrap_or_else(|_| "5".to_string())
                 .parse()
@@ -109,6 +111,10 @@ pub struct DownloadConfig {
     pub max_retries: u32,
     pub retry_delay: f64,
     pub batch_size: u32,
+    /// Limit how many recent hours of GHArchive files to consider (None = all)
+    pub recent_hours: Option<u32>,
+    /// Cap files processed per scraping cycle (None = no cap)
+    pub max_files_per_cycle: Option<u32>,
 }
 
 impl Default for DownloadConfig {
@@ -150,6 +156,14 @@ impl Default for DownloadConfig {
                 .unwrap_or_else(|_| "500".to_string())
                 .parse()
                 .unwrap_or(500),
+            recent_hours: env::var("RECENT_HOURS")
+                .ok()
+                .and_then(|v| v.parse::<u32>().ok())
+                .filter(|v| *v > 0),
+            max_files_per_cycle: env::var("MAX_FILES_PER_CYCLE")
+                .ok()
+                .and_then(|v| v.parse::<u32>().ok())
+                .filter(|v| *v > 0),
         }
     }
 }
@@ -170,18 +184,13 @@ pub struct ResourceConfig {
 impl Default for ResourceConfig {
     fn default() -> Self {
         Self {
-            memory_limit_gb: env::var("MEMORY_LIMIT_GB")
-                .unwrap_or_else(|_| "18.0".to_string())
-                .parse()
+            memory_limit_gb: Self::parse_limit_env("MEMORY_LIMIT_GB")
+                .or_else(Self::detected_memory_limit_gb)
                 .unwrap_or(18.0),
-            disk_limit_gb: env::var("DISK_LIMIT_GB")
-                .unwrap_or_else(|_| "40.0".to_string())
-                .parse()
+            disk_limit_gb: Self::parse_limit_env("DISK_LIMIT_GB")
+                .or_else(Self::detected_disk_limit_gb)
                 .unwrap_or(40.0),
-            cpu_limit_percent: env::var("CPU_LIMIT_PERCENT")
-                .unwrap_or_else(|_| "80.0".to_string())
-                .parse()
-                .unwrap_or(80.0),
+            cpu_limit_percent: Self::parse_limit_env("CPU_LIMIT_PERCENT").unwrap_or(80.0),
             memory_warning_threshold: 0.8,
             disk_warning_threshold: 0.8,
             cpu_warning_threshold: 0.7,
@@ -192,6 +201,17 @@ impl Default for ResourceConfig {
 }
 
 impl ResourceConfig {
+    fn parse_limit_env(var: &str) -> Option<f64> {
+        env::var(var).ok().and_then(|value| {
+            let trimmed = value.trim();
+            if trimmed.is_empty() || trimmed.eq_ignore_ascii_case("auto") {
+                None
+            } else {
+                trimmed.parse::<f64>().ok().filter(|val| *val > 0.0)
+            }
+        })
+    }
+
     /// Get memory limit in bytes
     pub fn memory_limit_bytes(&self) -> u64 {
         (self.memory_limit_gb * 1024.0 * 1024.0 * 1024.0) as u64
@@ -215,6 +235,20 @@ impl ResourceConfig {
     /// Get CPU warning threshold in percent
     pub fn cpu_warning_percent(&self) -> f64 {
         self.cpu_limit_percent * self.cpu_warning_threshold
+    }
+
+    fn detected_memory_limit_gb() -> Option<f64> {
+        sys_info::mem_info().ok().map(|info| {
+            let total_gb = info.total as f64 / (1024.0 * 1024.0);
+            (total_gb * 0.9).max(4.0)
+        })
+    }
+
+    fn detected_disk_limit_gb() -> Option<f64> {
+        sys_info::disk_info().ok().map(|info| {
+            let total_gb = info.total as f64 / (1024.0 * 1024.0 * 1024.0);
+            (total_gb * 0.85).max(20.0)
+        })
     }
 }
 
@@ -290,9 +324,9 @@ impl Default for WebConfig {
         Self {
             host: env::var("WEB_HOST").unwrap_or_else(|_| "0.0.0.0".to_string()),
             port: env::var("WEB_PORT")
-                .unwrap_or_else(|_| "8081".to_string())
+                .unwrap_or_else(|_| "3000".to_string())
                 .parse()
-                .unwrap_or(8081),
+                .unwrap_or(3000),
             debug: env::var("WEB_DEBUG")
                 .unwrap_or_else(|_| "false".to_string())
                 .to_lowercase()
@@ -334,10 +368,8 @@ impl Default for SecurityConfig {
         use uuid::Uuid;
 
         Self {
-            admin_password: env::var("ADMIN_PASSWORD")
-                .unwrap_or_else(|_| "admin123".to_string()),
-            secret_key: env::var("SECRET_KEY")
-                .unwrap_or_else(|_| Uuid::new_v4().to_string()),
+            admin_password: env::var("ADMIN_PASSWORD").unwrap_or_else(|_| "admin123".to_string()),
+            secret_key: env::var("SECRET_KEY").unwrap_or_else(|_| Uuid::new_v4().to_string()),
             jwt_secret: env::var("JWT_SECRET")
                 .unwrap_or_else(|_| "github-archive-scraper-jwt-secret-key".to_string()),
             session_duration_hours: env::var("SESSION_DURATION_HOURS")
@@ -370,18 +402,29 @@ pub struct Config {
     pub logging: LoggingConfig,
     pub web: WebConfig,
     pub security: SecurityConfig,
+    /// Direct access to GitHub token for convenience
+    #[serde(skip)]
+    pub github_token: Option<String>,
 }
 
 impl Default for Config {
     fn default() -> Self {
+        let github = GitHubConfig::default();
+        let github_token = if github.token.is_empty() {
+            None
+        } else {
+            Some(github.token.clone())
+        };
+
         Self {
             database: DatabaseConfig::default(),
-            github: GitHubConfig::default(),
+            github,
             download: DownloadConfig::default(),
             resources: ResourceConfig::default(),
             logging: LoggingConfig::default(),
             web: WebConfig::default(),
             security: SecurityConfig::default(),
+            github_token,
         }
     }
 }
@@ -405,15 +448,24 @@ impl Config {
 
     /// Load configuration from JSON file
     pub fn load_from_file(self, config_file: &str) -> Result<Self> {
+        let contents = std::fs::read_to_string(config_file)
+            .with_context(|| format!("Failed to read configuration file: {}", config_file))?;
+
         let builder = ConfigBuilder::builder()
-            .add_source(File::with_name(config_file).required(false))
+            .add_source(File::from_str(&contents, FileFormat::Json))
             .add_source(Environment::with_prefix(""))
             .build()
             .context("Failed to build configuration")?;
 
-        let config: Config = builder
+        let mut config: Config = builder
             .try_deserialize()
             .context("Failed to deserialize configuration")?;
+
+        config.github_token = if config.github.token.is_empty() {
+            None
+        } else {
+            Some(config.github.token.clone())
+        };
 
         info!("Configuration loaded from file: {}", config_file);
         Ok(config)
@@ -421,11 +473,10 @@ impl Config {
 
     /// Save current configuration to JSON file
     pub fn save_to_file(&self, config_file: &str) -> Result<()> {
-        let config_json = serde_json::to_string_pretty(self)
-            .context("Failed to serialize configuration")?;
+        let config_json =
+            serde_json::to_string_pretty(self).context("Failed to serialize configuration")?;
 
-        std::fs::write(config_file, config_json)
-            .context("Failed to write configuration file")?;
+        std::fs::write(config_file, config_json).context("Failed to write configuration file")?;
 
         info!("Configuration saved to: {}", config_file);
         Ok(())
@@ -485,7 +536,10 @@ impl Config {
         }
 
         if self.database.port == 0 {
-            error!("Invalid database port: {} - cannot be 0", self.database.port);
+            error!(
+                "Invalid database port: {} - cannot be 0",
+                self.database.port
+            );
             return false;
         }
 
@@ -495,12 +549,27 @@ impl Config {
     /// Get resource limits for monitoring
     pub fn get_resource_limits(&self) -> std::collections::HashMap<String, f64> {
         let mut limits = std::collections::HashMap::new();
-        limits.insert("memory_bytes".to_string(), self.resources.memory_limit_bytes() as f64);
-        limits.insert("disk_bytes".to_string(), self.resources.disk_limit_bytes() as f64);
+        limits.insert(
+            "memory_bytes".to_string(),
+            self.resources.memory_limit_bytes() as f64,
+        );
+        limits.insert(
+            "disk_bytes".to_string(),
+            self.resources.disk_limit_bytes() as f64,
+        );
         limits.insert("cpu_percent".to_string(), self.resources.cpu_limit_percent);
-        limits.insert("memory_warning_bytes".to_string(), self.resources.memory_warning_bytes() as f64);
-        limits.insert("disk_warning_bytes".to_string(), self.resources.disk_warning_bytes() as f64);
-        limits.insert("cpu_warning_percent".to_string(), self.resources.cpu_warning_percent());
+        limits.insert(
+            "memory_warning_bytes".to_string(),
+            self.resources.memory_warning_bytes() as f64,
+        );
+        limits.insert(
+            "disk_warning_bytes".to_string(),
+            self.resources.disk_warning_bytes() as f64,
+        );
+        limits.insert(
+            "cpu_warning_percent".to_string(),
+            self.resources.cpu_warning_percent(),
+        );
         limits
     }
 }
@@ -514,7 +583,7 @@ mod tests {
     fn test_config_creation() {
         let config = Config::default();
         assert_eq!(config.database.host, "localhost");
-        assert_eq!(config.web.port, 8081);
+        assert_eq!(config.web.port, 3000);
     }
 
     #[test]
@@ -522,7 +591,7 @@ mod tests {
         let config = DatabaseConfig::default();
         let conn_str = config.connection_string();
         assert!(conn_str.contains("postgresql://"));
-        assert!(conn_str.contains("gharchive"));
+        assert!(conn_str.contains(&config.name));
     }
 
     #[test]

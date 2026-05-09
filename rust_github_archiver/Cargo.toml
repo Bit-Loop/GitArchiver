@@ -9,20 +9,24 @@ authors = ["Your Name <isaiah.fpga@gmail.com>"]
 default = []
 ai = []
 gui = []
+db-tests = []
+experimental = []
 
 [dependencies]
 # Async runtime
 tokio = { version = "1.35", features = ["full"] }
 futures = "0.3"
+tokio-util = "0.7"
 
 # HTTP client and server
-reqwest = { version = "0.11", features = ["json", "gzip", "stream"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "gzip", "stream"] }
 axum = { version = "0.7", features = ["ws", "multipart", "query"] }
-tower = { version = "0.4", features = ["util"] }
-tower-http = { version = "0.5", features = ["fs", "cors", "trace", "compression-gzip"] }
+tower = { version = "0.5", features = ["util"] }
+tower-http = { version = "0.6", features = ["fs", "cors", "trace", "compression-gzip"] }
+async-compression = { version = "0.4", features = ["tokio", "gzip"] }
 
 # Database
-sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid", "json"] }
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid", "json"] }
 
 # Serialization
 serde = { version = "1.0", features = ["derive"] }
@@ -33,19 +37,20 @@ chrono = { version = "0.4", features = ["serde"] }
 
 # Configuration
 config = "0.14"
-dotenv = "0.15"
+dotenv = { package = "dotenvy", version = "0.15" }
 
 # Logging
 tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3.20", features = ["env-filter", "json"] }
 
 # Authentication
 jsonwebtoken = "9.2"
 argon2 = "0.5"
 
-# System monitoring
+# System monitoring and metrics
 sysinfo = "0.30"
 sys-info = "0.9"
+prometheus = "0.14"
 
 # Compression
 flate2 = "1.0"
@@ -53,6 +58,10 @@ flate2 = "1.0"
 # Additional dependencies for YAML support
 serde_yaml = "0.9"
 uuid = { version = "1.6", features = ["v4", "serde"] }
+tempfile = "3.8"
+
+# Security - sensitive data protection
+secrecy = { version = "0.8", features = ["serde"] }
 
 # Environment variables
 envy = "0.4"
@@ -61,31 +70,27 @@ envy = "0.4"
 anyhow = "1.0"
 thiserror = "1.0"
 
+# Lazy initialization
+once_cell = "1.19"
+
 # Async utilities
 async-trait = "0.1"
 
 # CLI
 clap = { version = "4.4", features = ["derive"] }
 
-# Validation
-validator = { version = "0.18", features = ["derive"] }
-
 # Rate limiting
 governor = "0.6"
 
 # Regex
 regex = "1.10"
-
-# Metrics
-metrics = "0.22"
-metrics-exporter-prometheus = "0.13"
+url = "2.5"
 
 # BigQuery client for GH Archive scanning
-gcp-bigquery-client = "0.26"
-yup-oauth2 = "8.0"
+gcp-bigquery-client = "0.28"
 
 # GitHub API client
-octocrab = "0.35"
+octocrab = "0.50"
 
 # Redis caching
 redis = { version = "0.25", features = ["tokio-comp", "connection-manager"] }
@@ -93,25 +98,14 @@ redis = { version = "0.25", features = ["tokio-comp", "connection-manager"] }
 # Secret scanning
 fancy-regex = "0.13"
 
-# GUI for Secrets Ninja port (temporarily disabled)
-# iced = { version = "0.12", features = ["tokio", "canvas", "image", "svg"] }
-
-# AI/LLM integration (temporarily disabled due to version conflicts)
-# llm = "0.1"
-# hf-hub = "0.3"
-# tokenizers = "0.15"
-# candle-core = "0.7"
-# candle-nn = "0.7"
-# candle-transformers = "0.7"
+# Static initialization
+lazy_static = "1.4"
 
 # Performance and parallel processing
 rayon = "1.8"
-lru = "0.12"
-rusqlite = { version = "0.30", features = ["bundled"] }
+lru = "0.18"
+rusqlite = { version = "0.32", features = ["bundled"] }
 num_cpus = "1.16"
-
-# PDF generation for reports
-printpdf = "0.6"
 
 # CSV handling
 csv = "1.3"
@@ -123,22 +117,7 @@ base64 = "0.21"
 sha2 = "0.10"
 hex = "0.4"
 md5 = "0.7"
-
-# HTML parsing
-scraper = "0.18"
-html5ever = "0.26"
-
-# Git operations
-git2 = "0.18"
-
-# AWS SDK for secret validation
-aws-config = "1.0"
-aws-sdk-sts = "1.0"
-aws-sdk-s3 = "1.0"
-
-# Webhook server enhancements
-actix-web = "4.4"
-actix-cors = "0.7"
+hmac = "0.12"
 
 # Additional security
 entropy = "0.4"

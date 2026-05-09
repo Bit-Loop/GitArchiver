@@ -1,0 +1,315 @@
+# Kubernetes Deployment Manifests for GitHub Archiver
+# Apply with: kubectl apply -f k8s-deployment.yaml
+
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: github-archiver
+
+---
+# ConfigMap for application configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: archiver-config
+  namespace: github-archiver
+data:
+  SERVER_PORT: "8081"
+  SERVER_HOST: "0.0.0.0"
+  RUST_LOG: "info"
+  POSTGRES_DB: "github_archive"
+
+---
+# Secret for sensitive data
+apiVersion: v1
+kind: Secret
+metadata:
+  name: archiver-secrets
+  namespace: github-archiver
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: "changeme-in-production"
+  JWT_SECRET: "your-jwt-secret-change-in-production"
+  ADMIN_PASSWORD: "admin-password-change-in-production"
+  GITHUB_TOKEN: ""
+
+---
+# PostgreSQL StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: github-archiver
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: archiver-config
+              key: POSTGRES_DB
+        - name: POSTGRES_USER
+          value: "archiver"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: archiver-secrets
+              key: POSTGRES_PASSWORD
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - archiver
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - archiver
+          initialDelaySeconds: 5
+          periodSeconds: 5
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
+
+---
+# PostgreSQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: github-archiver
+spec:
+  selector:
+    app: postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+  clusterIP: None
+
+---
+# Application Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-archiver
+  namespace: github-archiver
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: github-archiver
+  template:
+    metadata:
+      labels:
+        app: github-archiver
+    spec:
+      containers:
+      - name: archiver
+        image: github-archiver:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8081
+          name: http
+        env:
+        - name: DATABASE_URL
+          value: "postgres://archiver:$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
+        - name: SERVER_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: archiver-config
+              key: SERVER_PORT
+        - name: SERVER_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: archiver-config
+              key: SERVER_HOST
+        - name: RUST_LOG
+          valueFrom:
+            configMapKeyRef:
+              name: archiver-config
+              key: RUST_LOG
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: archiver-secrets
+              key: JWT_SECRET
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: archiver-secrets
+              key: ADMIN_PASSWORD
+        - name: GITHUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: archiver-secrets
+              key: GITHUB_TOKEN
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: archiver-secrets
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: archiver-config
+              key: POSTGRES_DB
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+        - name: logs
+          mountPath: /app/logs
+        - name: data
+          mountPath: /app/gharchive_data
+      volumes:
+      - name: logs
+        emptyDir: {}
+      - name: data
+        emptyDir: {}
+
+---
+# Application Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: github-archiver
+  namespace: github-archiver
+spec:
+  selector:
+    app: github-archiver
+  ports:
+  - port: 80
+    targetPort: 8081
+    protocol: TCP
+  type: LoadBalancer
+
+---
+# Horizontal Pod Autoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: github-archiver-hpa
+  namespace: github-archiver
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: github-archiver
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
+      - type: Pods
+        value: 2
+        periodSeconds: 30
+      selectPolicy: Max
+
+---
+# Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: github-archiver-ingress
+  namespace: github-archiver
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - archiver.example.com
+    secretName: archiver-tls
+  rules:
+  - host: archiver.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: github-archiver
+            port:
+              number: 80

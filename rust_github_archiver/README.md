@@ -86,6 +86,13 @@ Username: admin
 Password: admin123 (change in .env)
 ```
 
+### 5. Operator Roles
+- `admin`: user management, API keys, database control, token/webhook mutation, and audit access
+- `operator`: scraper lifecycle, scan launch/scheduling, realtime monitor control, and operational token/webhook read access
+- `read_only`: dashboard/log/finding access, exports, and self-service password changes
+
+Legacy `user` and `viewer` values are still accepted for compatibility and normalize to `operator` and `read_only`.
+
 ## 🔧 Configuration
 
 ### Environment Variables
@@ -110,11 +117,16 @@ REQUEST_TIMEOUT=180                 # HTTP timeout (seconds)
 MAX_RETRIES=3                       # Retry attempts
 ```
 
-#### Resource Limits (Oracle Cloud Optimized)
+#### Resource Limits (Auto-Detected by Default)
 ```bash
-MEMORY_LIMIT_GB=18.0               # Memory limit
-DISK_LIMIT_GB=40.0                 # Disk limit
+MEMORY_LIMIT_GB=auto               # Use ~90% of host RAM (override with a number to cap)
+DISK_LIMIT_GB=auto                 # Use ~85% of host disk (override with a number)
 CPU_LIMIT_PERCENT=80.0             # CPU usage limit
+REPO_CACHE_MAX_BYTES=10737418240   # Repository clone cache ceiling (10GB default)
+REPO_CACHE_RETENTION_HOURS=24      # Retain cached clones for this many hours
+REPO_CACHE_COOLDOWN_SECS=900       # Cooldown after repeated clone/rate-limit failures
+PERFORMANCE_CACHE_MAX_ENTRIES=10000 # In-memory research cache entry cap
+PERFORMANCE_CACHE_TTL_HOURS=24     # In-memory research cache TTL
 ```
 
 #### Security Configuration
@@ -127,7 +139,7 @@ WEB_PORT=8081                     # Web server port
 
 #### GitHub API (Optional)
 ```bash
-GITHUB_TOKEN=ghp_xxxxxxxxxxxx     # GitHub personal access token
+GITHUB_TOKEN=ghp_REDACTED_EXAMPLE     # GitHub personal access token
 GITHUB_USERNAME=your-username     # GitHub username
 ```
 
@@ -179,13 +191,14 @@ GITHUB_USERNAME=your-username     # GitHub username
 # Build application
 cargo build --release
 
-# Run with specific command
-cargo run --release -- server
-cargo run --release -- scraper
-cargo run --release -- process /path/to/file.json.gz
-cargo run --release -- download 2024-01-01
-cargo run --release -- status
-cargo run --release -- cleanup
+# Run the web server directly
+cargo run --release --bin web_server
+
+# Run the grouped operator CLI
+cargo run --release -- scan hunt --organizations org1
+cargo run --release -- scan repository owner/repo --scan-type repository --output json
+cargo run --release -- ingest monitor --organizations org1
+cargo run --release -- admin database init secrets.db
 ```
 
 ### Web Interface
@@ -330,7 +343,7 @@ cargo fmt
 ```
 src/
 ├── main.rs                 # Application entry point
-├── cli.rs                  # Command-line interface
+├── cli.rs                  # Legacy CLI module (compiled only with `--features experimental`)
 ├── core/
 │   ├── mod.rs              # Core module exports
 │   ├── config.rs           # Configuration management
@@ -343,11 +356,15 @@ src/
 │   ├── downloader.rs       # Download management
 │   ├── file_processor.rs   # File processing
 │   └── main_scraper.rs     # Orchestration
-└── web/
-    ├── mod.rs              # Web module exports
-    ├── server.rs           # Web server
-    ├── api.rs              # API endpoints
-    └── auth.rs             # Authentication
+├── api/
+│   ├── server.rs           # Web server bootstrap
+│   ├── routes.rs           # Route registration
+│   └── handlers.rs         # HTTP boundary handlers
+└── dashboard_assets/
+    ├── scanner-contract.js # Typed scanner contract for the dashboard
+    ├── scanner-metrics.js  # Scanner metrics module
+    ├── scanner-runtime.js  # Runtime control module
+    └── scanner-export.js   # Export workflow module
 ```
 
 ### Adding Features
@@ -458,7 +475,7 @@ MEMORY_LIMIT_GB=32.0
 ### Network Security
 ```bash
 # Firewall rules (example)
-sudo ufw allow 8081/tcp     # Web interface
+sudo ufw allow 3000/tcp     # Web interface
 sudo ufw allow 5432/tcp     # PostgreSQL (if remote)
 sudo ufw enable
 ```
@@ -468,6 +485,8 @@ sudo ufw enable
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🤝 Contributing
+
+For contributor workflow, see `AGENTS.md` (Repository Guidelines) for structure, commands, and PR expectations.
 
 1. Fork the repository
 2. Create a feature branch

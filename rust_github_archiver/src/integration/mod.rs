@@ -1,29 +1,25 @@
-use anyhow::Result; // Removed unused anyhow macro
+use anyhow::Result;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-// Removed unused HashMap
+use std::fmt;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use tracing::{info, warn, error, debug}; // error is used
+use tracing::{debug, error, info, warn};
 use uuid::Uuid;
 
+use crate::ai::{AITriageAgent, TriageContext, TriageResult};
 use crate::bigquery::BigQueryScanner;
 use crate::github::DanglingCommitFetcher;
-use crate::secrets::{SecretScanner, SecretValidator, SecretMatch};
-#[cfg(feature = "ai")]
-use crate::ai::{AITriageAgent, TriageResult, TriageContext};
-use crate::realtime::GitHubEventMonitor;
 use crate::performance::{PerformanceEngine, SecretDatabase};
-#[cfg(feature = "gui")]
-use crate::gui::SecretsNinjaApp;
+use crate::realtime::GitHubEventMonitor;
+use crate::secrets::{SecretMatch, SecretScanner, SecretValidator};
 
 /// Comprehensive GitHub secret hunting platform
 pub struct GitHubSecretHunter {
-    pub bigquery_scanner: BigQueryScanner,
+    pub bigquery_scanner: Option<BigQueryScanner>,
     pub commit_fetcher: DanglingCommitFetcher,
     pub secret_scanner: SecretScanner,
     pub secret_validator: SecretValidator,
-    #[cfg(feature = "ai")]
     pub ai_triage_agent: Option<AITriageAgent>,
     pub event_monitor: Arc<GitHubEventMonitor>,
     pub performance_engine: PerformanceEngine,
@@ -32,7 +28,7 @@ pub struct GitHubSecretHunter {
     pub state: Arc<RwLock<HunterState>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct HunterConfig {
     pub gcp_project_id: String,
     pub github_token: String,
@@ -42,6 +38,32 @@ pub struct HunterConfig {
     pub webhook_endpoints: Vec<String>,
     pub scanning_options: ScanningOptions,
     pub performance_options: PerformanceOptions,
+}
+
+impl fmt::Debug for HunterConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let github_token = if self.github_token.is_empty() {
+            "<empty>"
+        } else {
+            "<redacted>"
+        };
+        let redis_url = if self.redis_url.is_some() {
+            Some("<redacted>")
+        } else {
+            None
+        };
+
+        f.debug_struct("HunterConfig")
+            .field("gcp_project_id", &self.gcp_project_id)
+            .field("github_token", &github_token)
+            .field("redis_url", &redis_url)
+            .field("database_path", &self.database_path)
+            .field("ai_model_path", &self.ai_model_path)
+            .field("webhook_endpoints_count", &self.webhook_endpoints.len())
+            .field("scanning_options", &self.scanning_options)
+            .field("performance_options", &self.performance_options)
+            .finish()
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -87,7 +109,6 @@ pub struct ScanningReport {
     pub scan_type: ScanType,
     pub target: String,
     pub secrets_found: Vec<SecretMatch>,
-    #[cfg(feature = "ai")]
     pub triage_results: Vec<TriageResult>,
     pub performance_metrics: crate::performance::ProcessingMetrics,
     pub recommendations: Vec<String>,
@@ -113,23 +134,24 @@ pub enum ScanStatus {
 impl GitHubSecretHunter {
     /// Create a new comprehensive secret hunter
     pub async fn new(config: HunterConfig) -> Result<Self> {
-        info!("Initializing GitHub Secret Hunter with config: {:?}", config);
+        info!(
+            bigquery_enabled = config.scanning_options.enable_bigquery_scanning,
+            realtime_enabled = config.scanning_options.enable_realtime_monitoring,
+            ai_triage_enabled = config.scanning_options.enable_ai_triage,
+            monitored_organizations = config.scanning_options.organizations_to_monitor.len(),
+            "Initializing GitHub Secret Hunter"
+        );
 
-        // Initialize BigQuery scanner
-        let bigquery_scanner = if std::env::var("GOOGLE_APPLICATION_CREDENTIALS").is_ok() {
-            BigQueryScanner::new_with_default_credentials(config.gcp_project_id.clone()).await?
+        let bigquery_scanner = if config.scanning_options.enable_bigquery_scanning {
+            Some(Self::initialize_bigquery_scanner(&config).await?)
         } else {
-            // Fallback to service account key path if available
-            let service_account_path = std::env::var("GCP_SERVICE_ACCOUNT_PATH")
-                .unwrap_or_else(|_| "./service-account.json".to_string());
-            BigQueryScanner::new(&service_account_path, config.gcp_project_id.clone()).await?
+            info!("BigQuery historical scanning disabled; skipping BigQuery client initialization");
+            None
         };
 
         // Initialize GitHub commit fetcher
-        let commit_fetcher = DanglingCommitFetcher::new(
-            &config.github_token,
-            config.redis_url.as_deref(),
-        ).await?;
+        let commit_fetcher =
+            DanglingCommitFetcher::new(&config.github_token, config.redis_url.as_deref()).await?;
 
         // Initialize secret scanner
         let secret_scanner = SecretScanner::new();
@@ -138,28 +160,19 @@ impl GitHubSecretHunter {
         let secret_validator = SecretValidator::new().await?;
 
         // Initialize AI triage agent if configured
-        #[cfg(feature = "ai")]
         let ai_triage_agent = if config.scanning_options.enable_ai_triage {
             if let Some(model_path) = &config.ai_model_path {
                 Some(AITriageAgent::new(model_path).await?)
             } else {
-                info!("AI triage enabled but no model path provided, using small model");
+                info!("AI triage enabled without a model path; using heuristic triage");
                 Some(AITriageAgent::new_with_small_model().await?)
             }
         } else {
             None
         };
-        #[cfg(not(feature = "ai"))]
-        let _ai_triage_agent: Option<()> = None; // Prefix with underscore - AI feature not implemented yet
 
         // Initialize real-time event monitor
         let event_monitor = Arc::new(GitHubEventMonitor::new(&config.github_token).await?);
-        #[cfg(feature = "ai")]
-        if let Some(ai_agent) = &ai_triage_agent {
-            // Note: This would need proper ownership handling in practice
-            // event_monitor = event_monitor.with_ai_triage(ai_agent.clone()).await;
-        }
-
         // Initialize performance engine
         let performance_engine = PerformanceEngine::new();
 
@@ -184,7 +197,6 @@ impl GitHubSecretHunter {
             commit_fetcher,
             secret_scanner,
             secret_validator,
-            #[cfg(feature = "ai")]
             ai_triage_agent,
             event_monitor,
             performance_engine,
@@ -192,6 +204,27 @@ impl GitHubSecretHunter {
             config,
             state,
         })
+    }
+
+    async fn initialize_bigquery_scanner(config: &HunterConfig) -> Result<BigQueryScanner> {
+        if config.gcp_project_id.trim().is_empty() {
+            anyhow::bail!(
+                "BigQuery scanning is enabled but GCP_PROJECT_ID is not set; configure it or disable BigQuery scanning"
+            );
+        }
+
+        if std::env::var_os("GOOGLE_APPLICATION_CREDENTIALS").is_some() {
+            return BigQueryScanner::new_with_default_credentials(config.gcp_project_id.clone())
+                .await;
+        }
+
+        let service_account_path = std::env::var("GCP_SERVICE_ACCOUNT_PATH").map_err(|_| {
+            anyhow::anyhow!(
+                "BigQuery scanning is enabled but neither GOOGLE_APPLICATION_CREDENTIALS nor GCP_SERVICE_ACCOUNT_PATH is set"
+            )
+        })?;
+
+        BigQueryScanner::new(&service_account_path, config.gcp_project_id.clone()).await
     }
 
     /// Start comprehensive secret hunting
@@ -236,7 +269,6 @@ impl GitHubSecretHunter {
             scan_type: ScanType::BigQueryHistorical,
             target: "GitHub Archive".to_string(),
             secrets_found: Vec::new(),
-            #[cfg(feature = "ai")]
             triage_results: Vec::new(),
             performance_metrics: crate::performance::ProcessingMetrics {
                 total_processed: 0,
@@ -250,10 +282,11 @@ impl GitHubSecretHunter {
         };
 
         // Collect organizations to scan first to avoid borrow conflicts
-        let organizations: Vec<String> = self.config.scanning_options.organizations_to_monitor
-            .iter()
-            .cloned()
-            .collect();
+        let organizations = self
+            .config
+            .scanning_options
+            .organizations_to_monitor
+            .to_vec();
 
         // Scan each organization
         for org in organizations {
@@ -261,7 +294,11 @@ impl GitHubSecretHunter {
 
             match self.scan_organization_historical(&org).await {
                 Ok(mut org_secrets) => {
-                    info!("Found {} secrets for organization: {}", org_secrets.len(), org);
+                    info!(
+                        "Found {} secrets for organization: {}",
+                        org_secrets.len(),
+                        org
+                    );
                     report.secrets_found.append(&mut org_secrets);
                 }
                 Err(e) => {
@@ -271,10 +308,12 @@ impl GitHubSecretHunter {
         }
 
         // Run AI triage on found secrets
-        #[cfg(feature = "ai")]
         if self.config.scanning_options.enable_ai_triage && !report.secrets_found.is_empty() {
-            info!("Running AI triage on {} secrets", report.secrets_found.len());
-            
+            info!(
+                "Running AI triage on {} secrets",
+                report.secrets_found.len()
+            );
+
             if let Some(ai_agent) = &mut self.ai_triage_agent {
                 for secret in &report.secrets_found {
                     let context = TriageContext {
@@ -287,7 +326,6 @@ impl GitHubSecretHunter {
                     };
 
                     match ai_agent.triage_secret(secret, None, &context).await {
-                        #[cfg(feature = "ai")]
                         Ok(triage) => report.triage_results.push(triage),
                         Err(e) => warn!("AI triage failed for secret {}: {}", secret.hash, e),
                     }
@@ -310,17 +348,24 @@ impl GitHubSecretHunter {
         report.completed_at = Some(Utc::now());
         report.status = ScanStatus::Completed;
 
-        info!("BigQuery scan completed. Found {} secrets", report.secrets_found.len());
+        info!(
+            "BigQuery scan completed. Found {} secrets",
+            report.secrets_found.len()
+        );
         Ok(report)
     }
 
     /// Scan a specific organization's historical data
-    async fn scan_organization_historical(&mut self, organization: &str) -> Result<Vec<SecretMatch>> {
+    async fn scan_organization_historical(
+        &mut self,
+        organization: &str,
+    ) -> Result<Vec<SecretMatch>> {
         let mut all_secrets = Vec::new();
 
         // Calculate date range for historical scan
         let end_date = chrono::Utc::now().date_naive();
-        let start_date = end_date - chrono::Duration::days(self.config.scanning_options.historical_days_back as i64);
+        let start_date = end_date
+            - chrono::Duration::days(self.config.scanning_options.historical_days_back as i64);
 
         // Create repository filter for the organization
         let filter = crate::bigquery::RepositoryFilter {
@@ -330,14 +375,28 @@ impl GitHubSecretHunter {
         };
 
         // Get zero-commit events from BigQuery
-        let events = self.bigquery_scanner.scan_zero_commit_events(
-            start_date,
-            end_date,
-            &filter,
-            Some(1000), // Limit to 1000 events per organization
-        ).await?;
+        let events = {
+            let scanner = self.bigquery_scanner.as_ref().ok_or_else(|| {
+                anyhow::anyhow!(
+                    "BigQuery scan requested but the BigQuery scanner was not initialized"
+                )
+            })?;
 
-        info!("Found {} zero-commit events for {}", events.len(), organization);
+            scanner
+                .scan_zero_commit_events(
+                    start_date,
+                    end_date,
+                    &filter,
+                    Some(1000), // Limit to 1000 events per organization
+                )
+                .await?
+        };
+
+        info!(
+            "Found {} zero-commit events for {}",
+            events.len(),
+            organization
+        );
 
         // Process events in batches for performance
         let batch_size = self.config.performance_options.batch_size;
@@ -346,18 +405,29 @@ impl GitHubSecretHunter {
 
             for event in batch {
                 // Try to fetch the dangling commit
-                match self.commit_fetcher.fetch_commit(&event.repo_name, &event.before_commit).await {
+                match self
+                    .commit_fetcher
+                    .fetch_commit(&event.repo_name, &event.before_commit)
+                    .await
+                {
                     Ok(Some(commit_data)) => {
                         // Scan commit for secrets
-                        let file_patches: Vec<String> = commit_data.files.iter()
+                        let file_patches: Vec<String> = commit_data
+                            .files
+                            .iter()
                             .filter_map(|f| f.patch.as_ref())
                             .cloned()
                             .collect();
-                        let commit_text = format!("{}\n{}", commit_data.message, file_patches.join("\n"));
-                        let mut secrets = self.secret_scanner.scan_text(&commit_text, Some(&event.repo_name));
-                        
+                        let commit_text =
+                            format!("{}\n{}", commit_data.message, file_patches.join("\n"));
+                        let mut secrets = self
+                            .secret_scanner
+                            .scan_text(&commit_text, Some(&event.repo_name));
+
                         // Filter by entropy if configured
-                        secrets.retain(|s| s.entropy >= self.config.scanning_options.minimum_entropy_threshold);
+                        secrets.retain(|s| {
+                            s.entropy >= self.config.scanning_options.minimum_entropy_threshold
+                        });
                         batch_secrets.extend(secrets);
                     }
                     Ok(None) => {
@@ -376,35 +446,15 @@ impl GitHubSecretHunter {
     /// Scan a specific repository manually
     pub async fn scan_repository(&mut self, repository: &str) -> Result<ScanningReport> {
         let scan_id = Uuid::new_v4();
-        info!("Starting manual repository scan: {} (ID: {})", repository, scan_id);
+        info!(
+            "Starting manual repository scan: {} (ID: {})",
+            repository, scan_id
+        );
 
-        let mut report = ScanningReport {
-            scan_id,
-            started_at: Utc::now(),
-            completed_at: None,
-            scan_type: ScanType::ManualRepository,
-            target: repository.to_string(),
-            secrets_found: Vec::new(),
-            #[cfg(feature = "ai")]
-            triage_results: Vec::new(),
-            performance_metrics: crate::performance::ProcessingMetrics {
-                total_processed: 0,
-                cache_hit_rate: 0.0,
-                average_processing_time_ms: 0.0,
-                throughput_per_second: 0.0,
-                memory_usage_mb: 0.0,
-            },
-            recommendations: Vec::new(),
-            status: ScanStatus::Running,
-        };
-
-        // Implementation would scan the specific repository
-        // For now, return empty results
-        
-        report.completed_at = Some(Utc::now());
-        report.status = ScanStatus::Completed;
-
-        Ok(report)
+        Err(anyhow::anyhow!(
+            "GitHubSecretHunter::scan_repository is not part of the active operator path; use the grouped CLI command `scan repository` instead (request id: {})",
+            scan_id
+        ))
     }
 
     /// Get current hunting status
@@ -432,7 +482,7 @@ impl GitHubSecretHunter {
     /// Get comprehensive dashboard data
     pub async fn get_dashboard_data(&self) -> Result<DashboardData> {
         let state = self.state.read().await.clone();
-        
+
         // Query recent secrets from database
         let filters = crate::performance::SecretQueryFilters {
             min_severity: Some(crate::secrets::SecretSeverity::Medium),
@@ -441,11 +491,14 @@ impl GitHubSecretHunter {
             last_n_days: Some(7),
             limit: Some(100),
         };
-        
+
         let recent_secrets = self.database.query_secrets(&filters)?;
-        
+
         // Get performance metrics
-        let performance_report = self.performance_engine.generate_performance_report().await?;
+        let performance_report = self
+            .performance_engine
+            .generate_performance_report()
+            .await?;
         let performance_metrics = performance_report.metrics;
 
         Ok(DashboardData {
@@ -462,10 +515,8 @@ impl GitHubSecretHunter {
     #[allow(dead_code)] // GUI feature might be disabled
     pub async fn launch_gui(&self) -> Result<()> {
         info!("Launching Secrets Ninja GUI");
-        
-        // This would launch the Iced GUI application
-        // For now, just log the action
-        
+        crate::gui::launch_secrets_ninja()
+            .map_err(|error| anyhow::anyhow!("Failed to launch GUI: {}", error))?;
         Ok(())
     }
 }
@@ -490,7 +541,7 @@ impl Default for HunterConfig {
             ai_model_path: None,
             webhook_endpoints: Vec::new(),
             scanning_options: ScanningOptions {
-                enable_bigquery_scanning: true,
+                enable_bigquery_scanning: false,
                 enable_realtime_monitoring: true,
                 enable_ai_triage: true,
                 enable_secret_validation: true,
@@ -518,11 +569,9 @@ mod tests {
     #[tokio::test]
     async fn test_hunter_creation() {
         let config = HunterConfig::default();
-        
-        // This would require proper credentials to work
-        // For now, just test the configuration
+
         assert!(!config.gcp_project_id.is_empty());
-        assert!(config.scanning_options.enable_bigquery_scanning);
+        assert!(!config.scanning_options.enable_bigquery_scanning);
     }
 
     #[test]
@@ -531,6 +580,51 @@ mod tests {
         assert_eq!(config.scanning_options.historical_days_back, 30);
         assert!(config.performance_options.enable_caching);
         assert!(!config.scanning_options.organizations_to_monitor.is_empty());
+    }
+
+    #[test]
+    fn test_hunter_config_debug_redacts_sensitive_values() {
+        let token = format!("ghp_{}", "A".repeat(36));
+        let config = HunterConfig {
+            github_token: token.clone(),
+            redis_url: Some("redis://:password@localhost:6379".to_string()),
+            webhook_endpoints: vec!["https://example.com/webhook?token=secret".to_string()],
+            ..HunterConfig::default()
+        };
+
+        let debug_output = format!("{:?}", config);
+
+        assert!(debug_output.contains("<redacted>"));
+        assert!(!debug_output.contains(&token));
+        assert!(!debug_output.contains("password"));
+        assert!(!debug_output.contains("webhook?token"));
+    }
+
+    #[tokio::test]
+    async fn test_hunter_creation_skips_bigquery_when_disabled() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let scanning_options = ScanningOptions {
+            enable_bigquery_scanning: false,
+            enable_realtime_monitoring: false,
+            enable_ai_triage: false,
+            ..HunterConfig::default().scanning_options
+        };
+        let config = HunterConfig {
+            gcp_project_id: String::new(),
+            github_token: String::new(),
+            redis_url: None,
+            database_path: temp_dir
+                .path()
+                .join("secrets.db")
+                .to_string_lossy()
+                .to_string(),
+            scanning_options,
+            ..HunterConfig::default()
+        };
+
+        let hunter = GitHubSecretHunter::new(config).await.unwrap();
+
+        assert!(hunter.bigquery_scanner.is_none());
     }
 
     #[tokio::test]

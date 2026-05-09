@@ -165,16 +165,16 @@ check_dependencies() {
         dep_health=$((dep_health + 1))
     fi
     
-    # Check if binary exists
-    if [ -f "$PROJECT_ROOT/target/release/github_archiver" ]; then
-        echo -e "✅ Release binary found"
-        log "✅ Release binary found"
-    elif [ -f "$PROJECT_ROOT/target/debug/github_archiver" ]; then
-        echo -e "⚠️  Debug binary found (consider building release version)"
-        log "⚠️  Debug binary found (consider building release version)"
+    # Check if service binary exists
+    if [ -f "$PROJECT_ROOT/target/release/web_server" ]; then
+        echo -e "✅ Release service binary found"
+        log "✅ Release service binary found"
+    elif [ -f "$PROJECT_ROOT/target/debug/web_server" ]; then
+        echo -e "⚠️  Debug service binary found (consider building release version)"
+        log "⚠️  Debug service binary found (consider building release version)"
     else
-        echo -e "❌ No binary found - run 'cargo build --release'"
-        log "❌ No binary found - run 'cargo build --release'"
+        echo -e "❌ No service binary found - run 'cargo build --release --bin web_server'"
+        log "❌ No service binary found - run 'cargo build --release --bin web_server'"
         dep_health=$((dep_health + 1))
     fi
     

@@ -1,0 +1,174 @@
+# Alert Rules for GitHub Archiver
+
+groups:
+  - name: application_alerts
+    interval: 30s
+    rules:
+      # High error rate
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} over the last 5 minutes"
+
+      # Service down
+      - alert: ServiceDown
+        expr: up{job="github-archiver"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "GitHub Archiver service is down"
+          description: "Service {{ $labels.instance }} has been down for more than 1 minute"
+
+      # High response time
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s"
+
+      # Database connection issues
+      - alert: DatabaseConnectionFailure
+        expr: db_connections_failed_total > 10
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database connection failures"
+          description: "{{ $value }} database connection failures in the last 5 minutes"
+
+  - name: resource_alerts
+    interval: 30s
+    rules:
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: (process_resident_memory_bytes / node_memory_MemTotal_bytes) > 0.90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanizePercentage }}"
+
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) > 0.90
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value | humanizePercentage }}"
+
+      # Disk space low
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.15
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low disk space"
+          description: "Only {{ $value | humanizePercentage }} disk space remaining"
+
+      # Disk space critical
+      - alert: DiskSpaceCritical
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.05
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical disk space"
+          description: "Only {{ $value | humanizePercentage }} disk space remaining"
+
+  - name: database_alerts
+    interval: 30s
+    rules:
+      # Slow queries
+      - alert: SlowQueries
+        expr: rate(pg_stat_activity_max_tx_duration[5m]) > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow database queries detected"
+          description: "Queries are taking {{ $value }}s on average"
+
+      # Database down
+      - alert: DatabaseDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database is down"
+          description: "PostgreSQL database has been down for more than 1 minute"
+
+      # Too many connections
+      - alert: TooManyConnections
+        expr: pg_stat_database_numbackends > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Too many database connections"
+          description: "{{ $value }} active connections to database"
+
+      # Replication lag
+      - alert: ReplicationLag
+        expr: pg_replication_lag > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Database replication lag"
+          description: "Replication lag is {{ $value }}s"
+
+  - name: business_alerts
+    interval: 1m
+    rules:
+      # Event processing stopped
+      - alert: EventProcessingStopped
+        expr: rate(events_processed_total[5m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Event processing has stopped"
+          description: "No events processed in the last 10 minutes"
+
+      # Secret detection stopped
+      - alert: SecretDetectionStopped
+        expr: rate(secrets_detected_total[5m]) == 0
+        for: 15m
+        labels:
+          severity: info
+        annotations:
+          summary: "Secret detection inactive"
+          description: "No secrets detected in the last 15 minutes (may be normal)"
+
+      # High secret detection rate (potential issue)
+      - alert: UnusualSecretDetectionRate
+        expr: rate(secrets_detected_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "Unusually high secret detection rate"
+          description: "Detecting {{ $value }} secrets per second"
+
+      # Webhook delivery failures
+      - alert: WebhookDeliveryFailures
+        expr: rate(webhook_delivery_failed_total[5m]) > 0.20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High webhook delivery failure rate"
+          description: "{{ $value | humanizePercentage }} webhook deliveries are failing"

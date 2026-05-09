@@ -1,28 +1,26 @@
-use anyhow::Result; // Removed unused anyhow macro
+use anyhow::Result;
 use chrono::{DateTime, Utc};
 use lru::LruCache;
 use md5;
 use rayon::prelude::*;
-use rusqlite::{Connection, params};
+use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet; // Removed unused HashMap
+use std::collections::HashSet;
 use std::num::NonZeroUsize;
 use std::sync::{Arc, Mutex};
 use tokio::sync::RwLock;
-use tracing::info; // Removed unused warn, error, debug
+use tracing::info;
 use uuid::Uuid;
 
-use crate::secrets::{SecretMatch, SecretSeverity}; // Removed SecretCategory, imported in tests
-// use crate::ai::TriageResult;  // Temporarily disabled until AI module is implemented
+use crate::secrets::{SecretMatch, SecretSeverity};
 
 /// High-performance secret processing engine with parallel processing
 #[derive(Clone)]
 pub struct PerformanceEngine {
     cache: Arc<Mutex<LruCache<String, CacheEntry>>>,
-    #[allow(dead_code)] // Database pool for future persistence features
-    db_pool: Arc<RwLock<Vec<Connection>>>,
     deduplication_store: Arc<RwLock<HashSet<String>>>,
     metrics_collector: MetricsCollector,
+    cache_policy: CachePolicy,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -30,6 +28,29 @@ pub struct CacheEntry {
     pub data: String,
     pub expiry: chrono::DateTime<chrono::Utc>,
     pub access_count: u64,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct CachePolicy {
+    max_entries: usize,
+    ttl_hours: i64,
+}
+
+impl Default for CachePolicy {
+    fn default() -> Self {
+        Self {
+            max_entries: std::env::var("PERFORMANCE_CACHE_MAX_ENTRIES")
+                .ok()
+                .and_then(|value| value.parse::<usize>().ok())
+                .filter(|value| *value > 0)
+                .unwrap_or(10_000),
+            ttl_hours: std::env::var("PERFORMANCE_CACHE_TTL_HOURS")
+                .ok()
+                .and_then(|value| value.parse::<i64>().ok())
+                .filter(|value| *value > 0)
+                .unwrap_or(24),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -85,7 +106,6 @@ pub struct ProcessedSecret {
     pub file_path: String,
     pub detection_time: DateTime<Utc>,
     pub validation_result: Option<crate::secrets::ValidationResult>,
-    // pub triage_result: Option<TriageResult>,  // Temporarily disabled until AI module is implemented
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -123,10 +143,7 @@ impl SecretDatabase {
                 actor_login TEXT NOT NULL,
                 created_at DATETIME NOT NULL,
                 payload_hash TEXT NOT NULL,
-                processed BOOLEAN DEFAULT FALSE,
-                INDEX(repository_name, created_at),
-                INDEX(event_type, created_at),
-                INDEX(processed, created_at)
+                processed BOOLEAN DEFAULT FALSE
             )",
             [],
         )?;
@@ -144,10 +161,7 @@ impl SecretDatabase {
                 is_dangling BOOLEAN DEFAULT FALSE,
                 created_at DATETIME NOT NULL,
                 processed_at DATETIME,
-                FOREIGN KEY(event_id) REFERENCES events(id),
-                INDEX(repository_name, created_at),
-                INDEX(is_dangling, created_at),
-                INDEX(commit_sha)
+                FOREIGN KEY(event_id) REFERENCES events(id)
             )",
             [],
         )?;
@@ -171,12 +185,7 @@ impl SecretDatabase {
                 validation_method TEXT,
                 created_at DATETIME NOT NULL,
                 updated_at DATETIME,
-                FOREIGN KEY(commit_id) REFERENCES commits(id),
-                INDEX(detector_name, severity),
-                INDEX(repository_name, created_at),
-                INDEX(verified, validation_status),
-                INDEX(secret_hash),
-                INDEX(matched_text_hash)
+                FOREIGN KEY(commit_id) REFERENCES commits(id)
             )",
             [],
         )?;
@@ -194,10 +203,7 @@ impl SecretDatabase {
                 risk_factors TEXT,      -- JSON array
                 confidence REAL NOT NULL,
                 created_at DATETIME NOT NULL,
-                FOREIGN KEY(secret_id) REFERENCES secrets(id),
-                INDEX(impact_score DESC),
-                INDEX(bounty_potential DESC),
-                INDEX(revocation_priority, created_at)
+                FOREIGN KEY(secret_id) REFERENCES secrets(id)
             )",
             [],
         )?;
@@ -214,13 +220,12 @@ impl SecretDatabase {
                 last_activity DATETIME,
                 risk_score REAL,
                 created_at DATETIME NOT NULL,
-                updated_at DATETIME,
-                INDEX(organization, name),
-                INDEX(risk_score DESC),
-                INDEX(last_activity DESC)
+                updated_at DATETIME
             )",
             [],
         )?;
+
+        self.create_indexes()?;
 
         // Performance optimization: Create materialized views
         self.connection.execute(
@@ -245,16 +250,48 @@ impl SecretDatabase {
         Ok(())
     }
 
+    fn create_indexes(&self) -> Result<()> {
+        let statements = [
+            // Events
+            "CREATE INDEX IF NOT EXISTS idx_events_repository_created_at ON events(repository_name, created_at)",
+            "CREATE INDEX IF NOT EXISTS idx_events_type_created_at ON events(event_type, created_at)",
+            "CREATE INDEX IF NOT EXISTS idx_events_processed_created_at ON events(processed, created_at)",
+            // Commits
+            "CREATE INDEX IF NOT EXISTS idx_commits_repository_created_at ON commits(repository_name, created_at)",
+            "CREATE INDEX IF NOT EXISTS idx_commits_is_dangling_created_at ON commits(is_dangling, created_at)",
+            "CREATE INDEX IF NOT EXISTS idx_commits_sha ON commits(commit_sha)",
+            // Secrets
+            "CREATE INDEX IF NOT EXISTS idx_secrets_detector_severity ON secrets(detector_name, severity)",
+            "CREATE INDEX IF NOT EXISTS idx_secrets_verified_status ON secrets(verified, validation_status)",
+            "CREATE INDEX IF NOT EXISTS idx_secrets_hash ON secrets(secret_hash)",
+            "CREATE INDEX IF NOT EXISTS idx_secrets_matched_text_hash ON secrets(matched_text_hash)",
+            // Triage results
+            "CREATE INDEX IF NOT EXISTS idx_triage_impact_score ON triage_results(impact_score DESC)",
+            "CREATE INDEX IF NOT EXISTS idx_triage_bounty_potential ON triage_results(bounty_potential DESC)",
+            "CREATE INDEX IF NOT EXISTS idx_triage_revocation_priority ON triage_results(revocation_priority, created_at)",
+            // Repository metadata
+            "CREATE INDEX IF NOT EXISTS idx_repositories_organization_name ON repositories(organization, name)",
+            "CREATE INDEX IF NOT EXISTS idx_repositories_risk_score ON repositories(risk_score DESC)",
+            "CREATE INDEX IF NOT EXISTS idx_repositories_last_activity ON repositories(last_activity DESC)",
+        ];
+
+        for stmt in statements {
+            self.connection.execute(stmt, [])?;
+        }
+
+        Ok(())
+    }
+
     /// Bulk insert secrets with optimized performance
     pub fn bulk_insert_secrets(&self, secrets: &[SecretMatch]) -> Result<()> {
         let tx = self.connection.unchecked_transaction()?;
-        
+
         {
             let mut stmt = tx.prepare(
                 "INSERT OR REPLACE INTO secrets 
                 (secret_hash, detector_name, matched_text_hash, filename, line_number, 
                  entropy, severity, category, context_hash, verified, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))"
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))",
             )?;
 
             for secret in secrets {
@@ -318,7 +355,8 @@ impl SecretDatabase {
         }
 
         let mut stmt = self.connection.prepare(&query)?;
-        let params_refs: Vec<&dyn rusqlite::ToSql> = params.iter().map(|s| s as &dyn rusqlite::ToSql).collect();
+        let params_refs: Vec<&dyn rusqlite::ToSql> =
+            params.iter().map(|s| s as &dyn rusqlite::ToSql).collect();
         let rows = stmt.query_map(params_refs.as_slice(), |row| {
             Ok(SecretRecord {
                 id: row.get(0)?,
@@ -369,20 +407,26 @@ pub struct SecretRecord {
 impl PerformanceEngine {
     /// Create new performance engine
     pub fn new() -> Self {
+        let cache_policy = CachePolicy::default();
+        let cache_size =
+            NonZeroUsize::new(cache_policy.max_entries).expect("Cache size must be non-zero");
         Self {
-            cache: Arc::new(Mutex::new(LruCache::new(NonZeroUsize::new(10000).unwrap()))),
-            db_pool: Arc::new(RwLock::new(Vec::new())),
+            cache: Arc::new(Mutex::new(LruCache::new(cache_size))),
             deduplication_store: Arc::new(RwLock::new(HashSet::new())),
             metrics_collector: MetricsCollector::new(),
+            cache_policy,
         }
     }
 
     /// Process secrets in parallel batches
-    pub async fn process_secrets_parallel(&self, request: BatchProcessingRequest) -> Result<BatchProcessingResult> {
+    pub async fn process_secrets_parallel(
+        &self,
+        request: BatchProcessingRequest,
+    ) -> Result<BatchProcessingResult> {
         let start_time = std::time::Instant::now();
         let request_id = request.id;
         let original_count = request.secrets.len();
-        
+
         info!("Starting parallel processing of {} secrets", original_count);
 
         // Deduplicate if requested
@@ -395,8 +439,10 @@ impl PerformanceEngine {
         let duplicates_removed = original_count - secrets.len();
 
         // Determine number of workers
-        let num_workers = request.processing_options.parallel_workers
-            .unwrap_or_else(|| num_cpus::get());
+        let num_workers = request
+            .processing_options
+            .parallel_workers
+            .unwrap_or_else(num_cpus::get);
 
         // Split work into chunks for parallel processing
         let chunk_size = (secrets.len() / num_workers).max(1);
@@ -410,24 +456,28 @@ impl PerformanceEngine {
             .into_par_iter()
             .map(|chunk| {
                 let mut results = Vec::new();
-                
+
                 for secret in chunk {
-                    let _start_time = std::time::Instant::now(); // Prefix with underscore - timing measurement not implemented yet
-                    
                     // Simple processing without database or cache for parallel execution
                     let processed_secret = ProcessedSecret {
                         secret_hash: secret.hash.clone(),
                         secret_type: secret.category.to_string(),
                         severity: secret.severity.to_string(),
-                        repository: secret.filename.clone().unwrap_or_else(|| "unknown".to_string()),
-                        file_path: secret.filename.clone().unwrap_or_else(|| "unknown".to_string()),
+                        repository: secret
+                            .filename
+                            .clone()
+                            .unwrap_or_else(|| "unknown".to_string()),
+                        file_path: secret
+                            .filename
+                            .clone()
+                            .unwrap_or_else(|| "unknown".to_string()),
                         detection_time: chrono::Utc::now(),
                         validation_result: None, // Skip validation in parallel mode
                     };
-                    
+
                     results.push(processed_secret);
                 }
-                
+
                 Ok(results)
             })
             .collect();
@@ -435,19 +485,28 @@ impl PerformanceEngine {
         let results = results?;
 
         // Flatten results
-        let processed_secrets: Vec<ProcessedSecret> = results
-            .into_iter()
-            .flatten()
-            .collect();
+        let processed_secrets: Vec<ProcessedSecret> = results.into_iter().flatten().collect();
 
         let processing_time = start_time.elapsed().as_millis() as u64;
 
         // Update metrics
-        let mut processed_count = self.metrics_collector.secrets_processed.lock().unwrap();
-        *processed_count += processed_secrets.len() as u64;
+        {
+            let mut processed_count = self
+                .metrics_collector
+                .secrets_processed
+                .lock()
+                .expect("Failed to lock secrets_processed mutex");
+            *processed_count += processed_secrets.len() as u64;
+        }
 
-        let mut processing_times = self.metrics_collector.processing_time_ms.lock().unwrap();
-        processing_times.push(processing_time);
+        {
+            let mut processing_times = self
+                .metrics_collector
+                .processing_time_ms
+                .lock()
+                .expect("Failed to lock processing_time_ms mutex");
+            processing_times.push(processing_time);
+        }
 
         let metrics = self.collect_metrics().await?;
 
@@ -455,7 +514,8 @@ impl PerformanceEngine {
             request_id,
             processed_count: processed_secrets.len(),
             duplicates_removed,
-            secrets_validated: processed_secrets.iter()
+            secrets_validated: processed_secrets
+                .iter()
                 .filter(|s| s.validation_result.is_some())
                 .count(),
             processing_time_ms: processing_time,
@@ -466,12 +526,16 @@ impl PerformanceEngine {
 
     /// Process a chunk of secrets (single-threaded)
     #[allow(dead_code)] // Used in specific processing scenarios
-    fn process_secret_chunk(&self, secrets: Vec<SecretMatch>, options: &ProcessingOptions) -> Result<Vec<ProcessedSecret>> {
+    fn process_secret_chunk(
+        &self,
+        secrets: Vec<SecretMatch>,
+        options: &ProcessingOptions,
+    ) -> Result<Vec<ProcessedSecret>> {
         let mut results = Vec::new();
 
         for secret in secrets {
             let start_time = std::time::Instant::now();
-            
+
             // Check cache first
             let cache_key = format!("secret_{}", secret.hash);
             let cached_result = if options.cache_results {
@@ -484,7 +548,7 @@ impl PerformanceEngine {
                 // Cache hit
                 let mut cache_hits = self.metrics_collector.cache_hits.lock().unwrap();
                 *cache_hits += 1;
-                
+
                 // Deserialize cached result
                 serde_json::from_str(&cached.data)?
             } else {
@@ -492,28 +556,9 @@ impl PerformanceEngine {
                 let mut cache_misses = self.metrics_collector.cache_misses.lock().unwrap();
                 *cache_misses += 1;
 
-                let validation_result = if options.validate_secrets {
-                    // This would call the secret validator
-                    // For now, simulate validation
-                    Some(crate::secrets::ValidationResult {
-                        secret_hash: format!("{:x}", md5::compute(&secret.matched_text)),
-                        is_valid: false,
-                        validation_method: "simulated".to_string(),
-                        error_message: None,
-                        additional_info: Some("Simulated validation".to_string()),
-                        validated_at: Utc::now(),
-                    })
-                } else {
-                    None
-                };
-
-                let _triage_result: Option<()> = if options.ai_triage {
-                    // This would call the AI triage agent
-                    // For now, simulate triage
-                    None
-                } else {
-                    None
-                };
+                let _validation_requested = options.validate_secrets;
+                let _triage_requested = options.ai_triage;
+                let validation_result = None;
 
                 let _processing_time = start_time.elapsed().as_millis() as u64;
 
@@ -522,7 +567,10 @@ impl PerformanceEngine {
                     secret_type: secret.detector_name.clone(),
                     severity: format!("{:?}", secret.severity),
                     repository: "unknown".to_string(),
-                    file_path: secret.filename.clone().unwrap_or_else(|| "unknown".to_string()),
+                    file_path: secret
+                        .filename
+                        .clone()
+                        .unwrap_or_else(|| "unknown".to_string()),
                     detection_time: Utc::now(),
                     validation_result,
                 };
@@ -545,12 +593,14 @@ impl PerformanceEngine {
     /// Process a chunk of secrets (thread-safe version for parallel processing)
     /// Process secret chunk with thread safety (alternative to single-threaded processing)
     #[allow(dead_code)] // Alternative processing method for thread-safe scenarios
-    fn process_secret_chunk_thread_safe(&self, secrets: Vec<SecretMatch>, options: &ProcessingOptions) -> Result<Vec<ProcessedSecret>> {
+    fn process_secret_chunk_thread_safe(
+        &self,
+        secrets: Vec<SecretMatch>,
+        options: &ProcessingOptions,
+    ) -> Result<Vec<ProcessedSecret>> {
         let mut results = Vec::new();
 
         for secret in secrets {
-            let _start_time = std::time::Instant::now(); // Prefix with underscore - timing not implemented yet
-            
             // Check cache first
             let cache_key = format!("secret_{}", secret.hash);
             let cached_result = if options.cache_results {
@@ -563,7 +613,7 @@ impl PerformanceEngine {
                 // Cache hit
                 let mut cache_hits = self.metrics_collector.cache_hits.lock().unwrap();
                 *cache_hits += 1;
-                
+
                 // Deserialize cached result
                 serde_json::from_str(&cached.data)?
             } else {
@@ -571,27 +621,19 @@ impl PerformanceEngine {
                 let mut cache_misses = self.metrics_collector.cache_misses.lock().unwrap();
                 *cache_misses += 1;
 
-                let validation_result = if options.validate_secrets {
-                    // This would call the secret validator
-                    // For now, simulate validation
-                    Some(crate::secrets::ValidationResult {
-                        secret_hash: format!("{:x}", md5::compute(&secret.matched_text)),
-                        is_valid: false,
-                        validation_method: "simulated".to_string(),
-                        error_message: None,
-                        additional_info: Some("Simulated validation".to_string()),
-                        validated_at: Utc::now(),
-                    })
-                } else {
-                    None
-                };
+                let _validation_requested = options.validate_secrets;
+                let _triage_requested = options.ai_triage;
+                let validation_result = None;
 
                 let processed = ProcessedSecret {
                     secret_hash: format!("{:x}", md5::compute(&secret.matched_text)),
                     secret_type: secret.detector_name.clone(),
                     severity: format!("{:?}", secret.severity),
                     repository: "unknown".to_string(),
-                    file_path: secret.filename.clone().unwrap_or_else(|| "unknown".to_string()),
+                    file_path: secret
+                        .filename
+                        .clone()
+                        .unwrap_or_else(|| "unknown".to_string()),
                     detection_time: Utc::now(),
                     validation_result,
                 };
@@ -635,8 +677,19 @@ impl PerformanceEngine {
     /// Get item from cache
     #[allow(dead_code)] // Core cache functionality
     fn get_from_cache(&self, key: &str) -> Option<CacheEntry> {
-        let mut cache = self.cache.lock().unwrap();
-        cache.get(key).cloned()
+        let mut cache = self
+            .cache
+            .lock()
+            .expect("Failed to lock cache mutex in get_from_cache");
+        let cached = cache.get(key).cloned();
+        if cached
+            .as_ref()
+            .is_some_and(|entry| entry.expiry <= chrono::Utc::now())
+        {
+            cache.pop(key);
+            return None;
+        }
+        cached
     }
 
     /// Cache a result
@@ -644,20 +697,39 @@ impl PerformanceEngine {
     fn cache_result(&self, key: &str, data: String) {
         let entry = CacheEntry {
             data,
-            expiry: chrono::Utc::now() + chrono::Duration::hours(24),
+            expiry: chrono::Utc::now() + chrono::Duration::hours(self.cache_policy.ttl_hours),
             access_count: 1,
         };
 
-        let mut cache = self.cache.lock().unwrap();
+        let mut cache = self
+            .cache
+            .lock()
+            .expect("Failed to lock cache mutex in cache_result");
         cache.put(key.to_string(), entry);
     }
 
     /// Collect performance metrics
     async fn collect_metrics(&self) -> Result<ProcessingMetrics> {
-        let secrets_processed = *self.metrics_collector.secrets_processed.lock().unwrap();
-        let cache_hits = *self.metrics_collector.cache_hits.lock().unwrap();
-        let cache_misses = *self.metrics_collector.cache_misses.lock().unwrap();
-        let processing_times = self.metrics_collector.processing_time_ms.lock().unwrap();
+        let secrets_processed = *self
+            .metrics_collector
+            .secrets_processed
+            .lock()
+            .expect("Failed to lock secrets_processed mutex in collect_metrics");
+        let cache_hits = *self
+            .metrics_collector
+            .cache_hits
+            .lock()
+            .expect("Failed to lock cache_hits mutex in collect_metrics");
+        let cache_misses = *self
+            .metrics_collector
+            .cache_misses
+            .lock()
+            .expect("Failed to lock cache_misses mutex in collect_metrics");
+        let processing_times = self
+            .metrics_collector
+            .processing_time_ms
+            .lock()
+            .expect("Failed to lock processing_time_ms mutex in collect_metrics");
 
         let total_cache_requests = cache_hits + cache_misses;
         let cache_hit_rate = if total_cache_requests > 0 {
@@ -679,7 +751,11 @@ impl PerformanceEngine {
         };
 
         // Estimate memory usage (rough approximation)
-        let cache_size = self.cache.lock().unwrap().len();
+        let cache_size = self
+            .cache
+            .lock()
+            .expect("Failed to lock cache mutex for size check")
+            .len();
         let memory_usage_mb = (cache_size * 1024) as f64 / (1024.0 * 1024.0); // Rough estimate
 
         Ok(ProcessingMetrics {
@@ -694,16 +770,16 @@ impl PerformanceEngine {
     /// Optimize database queries
     pub async fn optimize_database(&self, db_path: &str) -> Result<()> {
         let db = SecretDatabase::new(db_path)?;
-        
+
         // Run VACUUM to reclaim space
         db.connection.execute("VACUUM", [])?;
-        
+
         // Analyze tables for query optimization
         db.connection.execute("ANALYZE", [])?;
-        
+
         // Update statistics
         db.connection.execute("PRAGMA optimize", [])?;
-        
+
         info!("Database optimization completed");
         Ok(())
     }
@@ -711,7 +787,7 @@ impl PerformanceEngine {
     /// Generate performance report
     pub async fn generate_performance_report(&self) -> Result<PerformanceReport> {
         let metrics = self.collect_metrics().await?;
-        
+
         Ok(PerformanceReport {
             timestamp: chrono::Utc::now(),
             metrics: metrics.clone(),
@@ -731,14 +807,22 @@ impl PerformanceEngine {
         }
 
         if metrics.memory_usage_mb > 1000.0 {
-            recommendations.push("High memory usage detected - consider cache eviction tuning".to_string());
+            recommendations
+                .push("High memory usage detected - consider cache eviction tuning".to_string());
         }
 
         if metrics.average_processing_time_ms > 1000.0 {
-            recommendations.push("High processing time - consider optimizing secret validation".to_string());
+            recommendations
+                .push("High processing time - consider optimizing secret validation".to_string());
         }
 
         recommendations
+    }
+}
+
+impl Default for PerformanceEngine {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -760,10 +844,16 @@ impl MetricsCollector {
     }
 }
 
+impl Default for MetricsCollector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::secrets::{SecretMatch, SecretSeverity, SecretCategory};
+    use crate::secrets::{SecretCategory, SecretMatch, SecretSeverity};
 
     fn create_test_secret(id: &str) -> SecretMatch {
         SecretMatch {
@@ -792,7 +882,7 @@ mod tests {
     #[tokio::test]
     async fn test_parallel_processing() {
         let engine = PerformanceEngine::new();
-        
+
         let secrets = vec![
             create_test_secret("1"),
             create_test_secret("2"),
@@ -820,8 +910,8 @@ mod tests {
     #[tokio::test]
     async fn test_deduplication() {
         let engine = PerformanceEngine::new();
-        
-        let mut secrets = vec![
+
+        let secrets = vec![
             create_test_secret("1"),
             create_test_secret("2"),
             create_test_secret("1"), // Duplicate
@@ -833,14 +923,14 @@ mod tests {
 
     #[test]
     fn test_database_creation() {
-        let db = SecretDatabase::new(":memory:").unwrap();
-        // Database should be created successfully
+        let _db = SecretDatabase::new(":memory:").expect("Failed to create in-memory database");
+        // Database creation verified by successful construction
     }
 
     #[tokio::test]
     async fn test_metrics_collection() {
         let engine = PerformanceEngine::new();
-        
+
         // Simulate some processing
         {
             let mut processed = engine.metrics_collector.secrets_processed.lock().unwrap();
@@ -864,8 +954,27 @@ mod tests {
     async fn test_performance_report() {
         let engine = PerformanceEngine::new();
         let report = engine.generate_performance_report().await.unwrap();
-        
+
         assert!(!report.recommendations.is_empty());
         assert_eq!(report.metrics.total_processed, 0);
+    }
+
+    #[test]
+    fn test_expired_cache_entries_are_evicted_on_read() {
+        let engine = PerformanceEngine::new();
+        {
+            let mut cache = engine.cache.lock().unwrap();
+            cache.put(
+                "secret_hash".to_string(),
+                CacheEntry {
+                    data: "{}".to_string(),
+                    expiry: Utc::now() - chrono::Duration::hours(1),
+                    access_count: 1,
+                },
+            );
+        }
+
+        assert!(engine.get_from_cache("secret_hash").is_none());
+        assert_eq!(engine.cache.lock().unwrap().len(), 0);
     }
 }

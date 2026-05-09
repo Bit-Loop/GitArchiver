@@ -51,6 +51,8 @@ readonly BG_PURPLE='\033[45m'
 readonly BG_CYAN='\033[46m'
 readonly BG_WHITE='\033[47m'
 
+readonly SERVICE_LOG_FILE="${LOG_DIR:-logs}/service.log"
+
 # ┌─────────────────────────────────────────────────────────────────────────────┐
 # │                      🎭 ANIMATION & UI FUNCTIONS                            │
 # └─────────────────────────────────────────────────────────────────────────────┘
@@ -1006,8 +1008,8 @@ start_service() {
     echo -e "${BRIGHT_BLUE}${BOLD}└─────────────────────────────────────────────┘${NC}"
     
     # Check if binary exists
-    if [ ! -f "./target/release/github_archiver" ]; then
-        echo -e "${RED}[✗] Binary not found: ./target/release/github_archiver${NC}"
+    if [ ! -f "./target/release/web_server" ]; then
+        echo -e "${RED}[✗] Binary not found: ./target/release/web_server${NC}"
         echo -e "${YELLOW}💡 Run 'Build Project' first to compile the application${NC}"
         return 1
     fi
@@ -1016,17 +1018,18 @@ start_service() {
         PID=$(cat service.pid)
         if ps -p $PID > /dev/null 2>&1; then
             echo -e "${YELLOW}⚠️  Service is already running (PID: $PID)${NC}"
-            echo -e "${CYAN}📡 API accessible at: http://localhost:8081${NC}"
+            echo -e "${CYAN}📡 API accessible at: http://localhost:${WEB_PORT:-3000}${NC}"
             return 0
         else
             rm -f service.pid
         fi
     fi
     
-    echo -e "${BLUE}⚡ Starting server on port 8081...${NC}"
+    echo -e "${BLUE}⚡ Starting server on configured web port...${NC}"
+    mkdir -p "$(dirname "$SERVICE_LOG_FILE")"
     
-    # Start the service in background with correct binary name
-    nohup ./target/release/github_archiver > service.log 2>&1 &
+    # Start the API service in background.
+    nohup ./target/release/web_server >> "$SERVICE_LOG_FILE" 2>&1 &
     SERVICE_PID=$!
     echo $SERVICE_PID > service.pid
     
@@ -1034,14 +1037,14 @@ start_service() {
     sleep 3
     if ps -p $SERVICE_PID > /dev/null 2>&1; then
         echo -e "${GREEN}[✓] Service started successfully (PID: $SERVICE_PID)${NC}"
-        echo -e "${CYAN}📡 API accessible at: http://localhost:8081${NC}"
-        echo -e "${CYAN}📊 Dashboard available at: http://localhost:8081${NC}"
+        echo -e "${CYAN}📡 API accessible at: http://localhost:${WEB_PORT:-3000}${NC}"
+        echo -e "${CYAN}📊 Dashboard available at: http://localhost:${WEB_PORT:-3000}${NC}"
         
         # Test if service is responding
         echo -e "${BLUE}🔍 Testing service connectivity...${NC}"
         sleep 2
         if command -v curl >/dev/null 2>&1; then
-            if curl -s --connect-timeout 5 http://localhost:8081/health >/dev/null 2>&1; then
+            if curl -s --connect-timeout 5 "http://localhost:${WEB_PORT:-3000}/health" >/dev/null 2>&1; then
                 echo -e "${GREEN}[✓] Service is responding to requests${NC}"
             else
                 echo -e "${YELLOW}[⚠] Service started but may not be fully ready yet${NC}"
@@ -1049,9 +1052,9 @@ start_service() {
         fi
     else
         echo -e "${RED}[✗] Failed to start service${NC}"
-        echo -e "${YELLOW}💡 Check service.log for details:${NC}"
-        if [ -f "service.log" ]; then
-            tail -n 10 service.log
+        echo -e "${YELLOW}💡 Check $SERVICE_LOG_FILE for details:${NC}"
+        if [ -f "$SERVICE_LOG_FILE" ]; then
+            tail -n 10 "$SERVICE_LOG_FILE"
         fi
         return 1
     fi
@@ -1072,7 +1075,7 @@ stop_service() {
         fi
     else
         # Try to find and kill the process
-        local pid=$(pgrep -f "target/release/github_archiver")
+        local pid=$(pgrep -f "target/release/web_server")
         if [[ -n $pid ]]; then
             kill $pid
             echo -e "${GREEN}${BOLD}[✓]${NC} Service stopped (PID: $pid)"
@@ -1101,7 +1104,7 @@ restart_service() {
         fi
     else
         # Try to find and kill the process
-        local pid=$(pgrep -f "target/release/github_archiver")
+        local pid=$(pgrep -f "target/release/web_server")
         if [[ -n $pid ]]; then
             kill $pid
             echo -e "${GREEN}${BOLD}[✓]${NC} Service stopped (PID: $pid)"
@@ -1115,7 +1118,7 @@ restart_service() {
     echo -e "${GREEN}🚀 Starting service...${NC}"
     
     # Check if binary exists
-    if [[ ! -f target/release/github_archiver ]]; then
+    if [[ ! -f target/release/web_server ]]; then
         echo -e "${RED}${BOLD}[✗]${NC} Binary not found. Building project first..."
         echo
         build_project
@@ -1123,8 +1126,9 @@ restart_service() {
     fi
     
     # Start the service
-    if [[ -f target/release/github_archiver ]]; then
-        nohup ./target/release/github_archiver > service.log 2>&1 &
+    if [[ -f target/release/web_server ]]; then
+        mkdir -p "$(dirname "$SERVICE_LOG_FILE")"
+        nohup ./target/release/web_server >> "$SERVICE_LOG_FILE" 2>&1 &
         local SERVICE_PID=$!
         echo $SERVICE_PID > service.pid
         
@@ -1132,7 +1136,7 @@ restart_service() {
         sleep 2
         if kill -0 $SERVICE_PID 2>/dev/null; then
             echo -e "${GREEN}${BOLD}[✓]${NC} Service restarted successfully (PID: $SERVICE_PID)"
-            echo -e "${CYAN}📍 Log file: service.log${NC}"
+            echo -e "${CYAN}📍 Log file: $SERVICE_LOG_FILE${NC}"
             echo -e "${CYAN}🌐 Server should be available at: http://localhost:3000${NC}"
         else
             echo -e "${RED}${BOLD}[✗]${NC} Service failed to start. Check logs for details."
@@ -1247,7 +1251,7 @@ service_status() {
             rm service.pid
         fi
     else
-        local pid=$(pgrep -f "target/release/github_archiver")
+        local pid=$(pgrep -f "target/release/web_server")
         if [[ -n $pid ]]; then
             echo -e "${YELLOW}${BOLD}Status:${NC} Running (no PID file)"
             echo -e "${YELLOW}${BOLD}PID:${NC} $pid"
@@ -1340,10 +1344,10 @@ view_logs() {
     echo -e "${BRIGHT_BLUE}${BOLD}📋 Service Logs${NC}"
     echo -e "${CYAN}═══════════════════════════════════════${NC}"
     
-    if [[ -f service.log ]]; then
+    if [[ -f "$SERVICE_LOG_FILE" ]]; then
         echo -e "${GREEN}${BOLD}[Last 20 lines]${NC}"
         echo
-        tail -n 20 service.log | while IFS= read -r line; do
+        tail -n 20 "$SERVICE_LOG_FILE" | while IFS= read -r line; do
             if [[ $line == *"ERROR"* ]]; then
                 echo -e "${RED}$line${NC}"
             elif [[ $line == *"WARN"* ]]; then
@@ -1355,7 +1359,7 @@ view_logs() {
             fi
         done
     else
-        echo -e "${YELLOW}${BOLD}[!]${NC} No logs found. Service may not have been started yet."
+        echo -e "${YELLOW}${BOLD}[!]${NC} No logs found at $SERVICE_LOG_FILE. Service may not have been started yet."
     fi
     
     echo
@@ -1701,8 +1705,8 @@ comprehensive_health_check() {
     fi
     
     # Check log files
-    if [[ -f service.log ]]; then
-        local log_size=$(stat -f%z service.log 2>/dev/null || stat -c%s service.log 2>/dev/null || echo "0")
+    if [[ -f "$SERVICE_LOG_FILE" ]]; then
+        local log_size=$(stat -f%z "$SERVICE_LOG_FILE" 2>/dev/null || stat -c%s "$SERVICE_LOG_FILE" 2>/dev/null || echo "0")
         local log_mb=$((log_size / 1024 / 1024))
         echo -e "${CYAN}Service Log Size:${NC} ${log_mb}MB"
         if [ $log_mb -lt 100 ]; then
@@ -1874,11 +1878,11 @@ $(find . -maxdepth 2 -type f -name "*.rs" -o -name "*.toml" -o -name "*.sql" -o 
 ### Log Files
 EOF
     
-    if [[ -f service.log ]]; then
-        local log_size=$(stat -f%z service.log 2>/dev/null || stat -c%s service.log 2>/dev/null || echo "0")
+    if [[ -f "$SERVICE_LOG_FILE" ]]; then
+        local log_size=$(stat -f%z "$SERVICE_LOG_FILE" 2>/dev/null || stat -c%s "$SERVICE_LOG_FILE" 2>/dev/null || echo "0")
         local log_mb=$((log_size / 1024 / 1024))
-        echo "- **service.log:** ${log_mb}MB" >> "$report_file"
-        echo "- **Last Modified:** $(stat -f%Sm service.log 2>/dev/null || stat -c%y service.log 2>/dev/null)" >> "$report_file"
+        echo "- **$SERVICE_LOG_FILE:** ${log_mb}MB" >> "$report_file"
+        echo "- **Last Modified:** $(stat -f%Sm "$SERVICE_LOG_FILE" 2>/dev/null || stat -c%y "$SERVICE_LOG_FILE" 2>/dev/null)" >> "$report_file"
     else
         echo "- No service log found" >> "$report_file"
     fi

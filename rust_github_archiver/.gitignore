@@ -1,0 +1,86 @@
+# Rust build artifacts
+/target/
+**/*.rs.bk
+*.pdb
+
+# Frontend build artifacts
+tauri-app/node_modules/
+tauri-app/dist/
+
+# Environment variables (CRITICAL - contains secrets!)
+.env
+.env.local
+.env.*.local
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Log files
+*.log
+logs/
+*.log.*
+*.pid
+
+# Downloaded data
+gharchive_data/
+downloads/
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Backup files
+*.bak
+*.backup
+*.old
+backups/
+
+# JWT secrets
+jwt_secret.txt
+secrets.txt
+
+# API keys
+api_keys.txt
+*.key
+*.pem
+
+# Compiled binaries
+/bin/
+*.exe
+
+# Test coverage
+tarpaulin-report.html
+cobertura.xml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Package manager
+# Cargo.lock is intentionally tracked for this application.
+
+# OS specific
+Thumbs.db
+desktop.ini
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Rust-specific
+**/*.rs.bk
+*.orig
+
+# Session data
+sessions/
+
+# Cache
+.cache/
+cache/

@@ -227,23 +227,23 @@ export function WebhookConfig({ onNotification }: WebhookConfigProps) {
               <div>
                 <label className="block text-gray-300 text-sm mb-2">Name *</label>
                 <input
-                  type="text"
-                  value={newWebhook.name}
-                  onChange={(e) => setNewWebhook(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g., Slack Notifications"
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-lava-green focus:outline-none"
-                />
+	                  type="text"
+	                  value={newWebhook.name}
+	                  onChange={(e) => setNewWebhook(prev => ({ ...prev, name: e.target.value }))}
+	                  aria-label="Webhook name"
+	                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-lava-green focus:outline-none"
+	                />
               </div>
 
               <div>
                 <label className="block text-gray-300 text-sm mb-2">URL *</label>
                 <input
-                  type="url"
-                  value={newWebhook.url}
-                  onChange={(e) => setNewWebhook(prev => ({ ...prev, url: e.target.value }))}
-                  placeholder="https://hooks.slack.com/services/..."
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-lava-green focus:outline-none"
-                />
+	                  type="url"
+	                  value={newWebhook.url}
+	                  onChange={(e) => setNewWebhook(prev => ({ ...prev, url: e.target.value }))}
+	                  aria-label="Webhook URL"
+	                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-lava-green focus:outline-none"
+	                />
               </div>
 
               <div>

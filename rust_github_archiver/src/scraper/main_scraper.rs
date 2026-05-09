@@ -1,14 +1,19 @@
+use anyhow::Result; // Removed unused anyhow macro since using qualified path
+use serde::Serialize;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime}; // Removed unused UNIX_EPOCH
 use tokio::time;
-use anyhow::Result; // Removed unused anyhow macro since using qualified path
-use tracing::{info, warn, error, debug};
-use serde::Serialize; // Removed unused Deserialize
+use tracing::{debug, error, info, warn}; // Removed unused Deserialize
 
-use crate::core::{Config, DatabaseManager, ResourceMonitor, ResourceLimits};
+use crate::core::{Config, DatabaseManager, ResourceLimits, ResourceMonitor};
 use crate::scraper::{
-    ScraperManager, ArchiveScraper, FileProcessor, Downloader,
-    DownloadConfig, ProcessingConfig // Removed unused ScrapingStats
+    ArchiveScraper,
+    DownloadConfig,
+    Downloader,
+    FileProcessor,
+    ProcessingConfig, // Removed unused ScrapingStats
+    ScraperManager,
+    ScraperState,
 };
 
 #[derive(Debug, Clone, Serialize)]
@@ -38,8 +43,12 @@ pub struct MainScraper {
 
 impl MainScraper {
     pub fn new(config: Config) -> Result<Self> {
-        let scraper_manager = Arc::new(ScraperManager::new());
-        
+        Self::with_manager(config, Arc::new(ScraperManager::new()))
+    }
+
+    pub fn with_manager(config: Config, scraper_manager: Arc<ScraperManager>) -> Result<Self> {
+        let shared_manager = scraper_manager.clone();
+
         let download_config = DownloadConfig {
             max_concurrent_downloads: 6,
             chunk_size: 4096,
@@ -56,21 +65,12 @@ impl MainScraper {
             extract_metadata: true,
         };
 
-        let resource_limits = ResourceLimits {
-            memory_limit_gb: 18.0,
-            disk_limit_gb: 40.0,
-            cpu_limit_percent: 80.0,
-            memory_warning_threshold: 0.8,
-            disk_warning_threshold: 0.8,
-            cpu_warning_threshold: 0.7,
-            emergency_cleanup_threshold: 0.9,
-            monitoring_interval_seconds: 30,
-        };
+        let resource_limits: ResourceLimits = (&config.resources).into();
 
         Ok(Self {
             config: config.clone(),
-            scraper_manager: scraper_manager.clone(),
-            archive_scraper: Some(ArchiveScraper::new(config.clone(), scraper_manager)),
+            scraper_manager: shared_manager.clone(),
+            archive_scraper: Some(ArchiveScraper::new(config.clone(), shared_manager)?),
             file_processor: FileProcessor::new(processing_config),
             downloader: Downloader::new(download_config)?,
             database_manager: Some(DatabaseManager::new(config)),
@@ -105,9 +105,22 @@ impl MainScraper {
     pub async fn start(&mut self) -> Result<()> {
         info!("Starting main scraper...");
 
-        // Start the scraper state
-        self.scraper_manager.start().map_err(|e| anyhow::anyhow!(e))?;
-        
+        self.shutdown_requested = false;
+
+        match self.scraper_manager.get_status() {
+            Ok(status) if matches!(status.state, ScraperState::Running) => {
+                debug!("Scraper manager already running; reusing existing state");
+            }
+            Ok(_) => {
+                self.scraper_manager
+                    .start()
+                    .map_err(|e| anyhow::anyhow!(e))?;
+            }
+            Err(e) => {
+                return Err(anyhow::anyhow!(e));
+            }
+        }
+
         // Start the main processing loop
         self.run_main_loop().await?;
 
@@ -118,7 +131,9 @@ impl MainScraper {
         info!("Stopping main scraper...");
 
         self.shutdown_requested = true;
-        self.scraper_manager.stop().map_err(|e| anyhow::anyhow!(e))?;
+        self.scraper_manager
+            .stop()
+            .map_err(|e| anyhow::anyhow!(e))?;
 
         // Shutdown archive scraper
         if let Some(ref scraper) = self.archive_scraper {
@@ -136,30 +151,39 @@ impl MainScraper {
 
     pub async fn pause(&mut self) -> Result<()> {
         info!("Pausing main scraper...");
-        self.scraper_manager.pause().map_err(|e| anyhow::anyhow!(e))?;
+        self.scraper_manager
+            .pause()
+            .map_err(|e| anyhow::anyhow!(e))?;
         Ok(())
     }
 
     pub async fn resume(&mut self) -> Result<()> {
         info!("Resuming main scraper...");
-        self.scraper_manager.resume().map_err(|e| anyhow::anyhow!(e))?;
+        self.scraper_manager
+            .resume()
+            .map_err(|e| anyhow::anyhow!(e))?;
         Ok(())
     }
 
     pub async fn restart(&mut self) -> Result<()> {
         info!("Restarting main scraper...");
-        
-        self.scraper_manager.restart().map_err(|e| anyhow::anyhow!(e))?;
+
+        self.scraper_manager
+            .restart()
+            .map_err(|e| anyhow::anyhow!(e))?;
         self.start_time = Some(SystemTime::now());
-        
+
         info!("Main scraper restarted");
         Ok(())
     }
 
     pub async fn get_comprehensive_status(&mut self) -> Result<MainScraperStatus> {
-        let scraper_status = self.scraper_manager.get_status().map_err(|e| anyhow::anyhow!(e))?;
+        let scraper_status = self
+            .scraper_manager
+            .get_status()
+            .map_err(|e| anyhow::anyhow!(e))?;
         let running = self.scraper_manager.is_running();
-        
+
         let uptime_seconds = if let Some(start_time) = self.start_time {
             start_time.elapsed().unwrap_or(Duration::ZERO).as_secs_f64()
         } else {
@@ -187,11 +211,12 @@ impl MainScraper {
             None
         };
 
-        let last_activity = if scraper_status.last_updated != chrono::DateTime::<chrono::Utc>::MIN_UTC {
-            Some(scraper_status.last_updated.timestamp() as f64)
-        } else {
-            None
-        };
+        let last_activity =
+            if scraper_status.last_updated != chrono::DateTime::<chrono::Utc>::MIN_UTC {
+                Some(scraper_status.last_updated.timestamp() as f64)
+            } else {
+                None
+            };
 
         Ok(MainScraperStatus {
             running,
@@ -210,11 +235,29 @@ impl MainScraper {
         info!("Starting main processing loop...");
 
         while !self.shutdown_requested {
-            // Check if scraper should be running
-            if !self.scraper_manager.is_running() {
-                debug!("Scraper not running, waiting...");
-                time::sleep(Duration::from_secs(5)).await;
-                continue;
+            match self.scraper_manager.get_status() {
+                Ok(status) => match status.state {
+                    ScraperState::Stopped => {
+                        info!("Scraper manager entered stopped state; exiting runtime loop");
+                        break;
+                    }
+                    ScraperState::Paused => {
+                        debug!("Scraper paused, waiting...");
+                        time::sleep(Duration::from_secs(5)).await;
+                        continue;
+                    }
+                    ScraperState::Running => {}
+                    ScraperState::Error(ref error_message) => {
+                        warn!("Scraper runtime waiting on error state: {}", error_message);
+                        time::sleep(Duration::from_secs(5)).await;
+                        continue;
+                    }
+                },
+                Err(error) => {
+                    warn!("Failed to inspect scraper state: {}", error);
+                    time::sleep(Duration::from_secs(5)).await;
+                    continue;
+                }
             }
 
             // Check resource status
@@ -222,19 +265,22 @@ impl MainScraper {
                 match monitor.get_resource_status().await {
                     Ok(status) => {
                         if status.emergency_mode {
-                            warn!("Emergency mode activated: {:?}", status.emergency_conditions);
-                            
+                            warn!(
+                                "Emergency mode activated: {:?}",
+                                status.emergency_conditions
+                            );
+
                             // Pause scraper during emergency
                             let _ = self.scraper_manager.pause();
-                            
+
                             // Perform cleanup
                             if let Err(e) = monitor.emergency_cleanup().await {
                                 error!("Emergency cleanup failed: {}", e);
                             }
-                            
+
                             // Wait for system to recover
                             time::sleep(Duration::from_secs(60)).await;
-                            
+
                             // Resume scraper
                             let _ = self.scraper_manager.resume();
                             continue;
@@ -251,13 +297,22 @@ impl MainScraper {
                 match scraper.run_continuous_scraping().await {
                     Ok(()) => {
                         debug!("Archive scraping cycle completed");
+
+                        // Update scraper progress with stats from archive scraper
+                        if let Ok(stats) = scraper.get_stats().await {
+                            let _ = self.scraper_manager.update_progress(
+                                stats.events_processed,
+                                stats.files_processed,
+                                None,
+                            );
+                        }
                     }
                     Err(e) => {
                         error!("Archive scraping error: {}", e);
-                        
+
                         // Add error to stats
                         let _ = self.scraper_manager.add_error();
-                        
+
                         // Wait before retrying
                         time::sleep(Duration::from_secs(30)).await;
                     }
@@ -272,17 +327,20 @@ impl MainScraper {
         Ok(())
     }
 
-    pub async fn process_single_file(&self, filename: &str) -> Result<crate::scraper::FileProcessingResult> {
+    pub async fn process_single_file(
+        &self,
+        filename: &str,
+    ) -> Result<crate::scraper::FileProcessingResult> {
         info!("Processing single file: {}", filename);
 
         let file_path = self.config.download.download_dir.join(filename);
-        
+
         if !file_path.exists() {
             return Err(anyhow::anyhow!("File not found: {}", filename));
         }
 
         let result = self.file_processor.process_archive_file(&file_path).await?;
-        
+
         // Mark file as processed in database
         if let Some(ref db) = self.database_manager {
             db.mark_file_processed(
@@ -291,18 +349,29 @@ impl MainScraper {
                 result.file_size_bytes,
                 result.valid_events,
                 result.processing_time_seconds,
-            ).await?;
+            )
+            .await?;
         }
 
-        info!("Successfully processed file: {} ({} events)", filename, result.valid_events);
+        info!(
+            "Successfully processed file: {} ({} events)",
+            filename, result.valid_events
+        );
         Ok(result)
     }
 
-    pub async fn download_file(&self, url: &str, filename: &str) -> Result<crate::scraper::DownloadResult> {
+    pub async fn download_file(
+        &self,
+        url: &str,
+        filename: &str,
+    ) -> Result<crate::scraper::DownloadResult> {
         info!("Downloading file: {} -> {}", url, filename);
 
         let local_path = self.config.download.download_dir.join(filename);
-        let result = self.downloader.download_file(url, &local_path, None).await?;
+        let result = self
+            .downloader
+            .download_file(url, &local_path, None)
+            .await?;
 
         info!("Download completed: {:?}", result.status);
         Ok(result)
@@ -321,7 +390,7 @@ impl MainScraper {
 
         let mut cleaned = 0u64;
         let download_dir = &self.config.download.download_dir;
-        
+
         if !download_dir.exists() {
             return Ok(0);
         }
@@ -329,17 +398,17 @@ impl MainScraper {
         let cutoff_time = SystemTime::now() - Duration::from_secs(7 * 24 * 3600); // 7 days
 
         let mut entries = tokio::fs::read_dir(download_dir).await?;
-        
+
         while let Some(entry) = entries.next_entry().await? {
             if let Ok(metadata) = entry.metadata().await {
                 if let Ok(modified) = metadata.modified() {
                     if modified < cutoff_time {
                         if let Some(extension) = entry.path().extension() {
-                            if extension == "gz" {
-                                if tokio::fs::remove_file(entry.path()).await.is_ok() {
-                                    cleaned += 1;
-                                    debug!("Cleaned old file: {:?}", entry.path());
-                                }
+                            if extension == "gz"
+                                && tokio::fs::remove_file(entry.path()).await.is_ok()
+                            {
+                                cleaned += 1;
+                                debug!("Cleaned old file: {:?}", entry.path());
                             }
                         }
                     }
@@ -361,5 +430,81 @@ impl MainScraper {
 
     pub async fn shutdown(&mut self) -> Result<()> {
         self.stop().await
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::tempdir;
+
+    fn test_config() -> Config {
+        let dir = tempdir().expect("tempdir");
+        let mut config = Config::default();
+        config.download.download_dir = dir.keep();
+        config
+    }
+
+    #[tokio::test]
+    async fn comprehensive_status_reflects_shared_scraper_manager_state() {
+        let manager = Arc::new(ScraperManager::new());
+        let mut scraper =
+            MainScraper::with_manager(test_config(), manager.clone()).expect("main scraper");
+
+        manager.start().expect("start");
+        manager
+            .update_progress(17, 3, Some("events.json.gz".to_string()))
+            .expect("progress");
+        manager.add_error().expect("error");
+
+        let status = scraper.get_comprehensive_status().await.expect("status");
+
+        assert!(status.running);
+        assert_eq!(status.total_events_processed, 17);
+        assert_eq!(status.total_files_processed, 3);
+        assert_eq!(status.total_errors, 1);
+        assert!(status.last_activity.is_some());
+    }
+
+    #[tokio::test]
+    async fn pause_resume_and_restart_delegate_to_manager_fsm() {
+        let manager = Arc::new(ScraperManager::new());
+        let mut scraper =
+            MainScraper::with_manager(test_config(), manager.clone()).expect("main scraper");
+
+        manager.start().expect("start");
+        scraper.pause().await.expect("pause");
+        assert_eq!(
+            manager.get_status().expect("status").state,
+            ScraperState::Paused
+        );
+
+        scraper.resume().await.expect("resume");
+        assert_eq!(
+            manager.get_status().expect("status").state,
+            ScraperState::Running
+        );
+
+        manager
+            .update_progress(100, 4, Some("old.json.gz".to_string()))
+            .expect("progress");
+        scraper.restart().await.expect("restart");
+        let status = manager.get_status().expect("status");
+        assert_eq!(status.state, ScraperState::Running);
+        assert_eq!(status.events_processed, 0);
+        assert!(status.current_file.is_none());
+    }
+
+    #[tokio::test]
+    async fn process_single_file_reports_missing_file_without_database_work() {
+        let scraper = MainScraper::with_manager(test_config(), Arc::new(ScraperManager::new()))
+            .expect("main scraper");
+
+        let error = scraper
+            .process_single_file("missing.json.gz")
+            .await
+            .expect_err("missing file should fail");
+
+        assert!(error.to_string().contains("File not found"));
     }
 }

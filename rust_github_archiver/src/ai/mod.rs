@@ -1,3 +1,7 @@
 pub mod triage;
 
-pub use triage::{AITriageAgent, TriageResult, TriageContext, RevocationPriority, RiskFactor, RiskFactorType, ContextAnalysis, WordlistManager};
+pub use triage::{
+    AITriageAgent, ContextAnalysis, LocalOpenAiTriageClient, LocalOpenAiTriageConfig,
+    LocalTriageOutput, RedactedTriageInput, RevocationPriority, RiskFactor, RiskFactorType,
+    TriageContext, TriageResult, WordlistManager,
+};
