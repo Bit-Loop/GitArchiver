@@ -84,7 +84,7 @@
 ## 🧪 Testing & Deployment
 
 - [ ] Unit tests for pipelines and scanners (Rust CI enforces tests and coverage; continue expanding flow-level coverage).
-- [ ] Fuzzing for secret detectors (not implemented).
+- [x] Edge-case fuzzing for secret detectors, patch scanning, parser labels, and token filtering (`cargo test --test edge_case_fuzz --locked`; CI-enforced).
 - [x] GitHub Actions CI/CD pipeline (`.github/workflows/rust.yml`).
 - [x] Containerize for deployment across orgs (`rust_github_archiver/Dockerfile` and Docker Compose).
 

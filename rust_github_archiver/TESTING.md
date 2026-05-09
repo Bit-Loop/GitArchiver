@@ -4,11 +4,12 @@
 1. [Testing Overview](#testing-overview)
 2. [Unit Tests](#unit-tests)
 3. [Integration Tests](#integration-tests)
-4. [Performance Tests](#performance-tests)
-5. [Security Tests](#security-tests)
-6. [End-to-End Tests](#end-to-end-tests)
-7. [CI/CD Integration](#cicd-integration)
-8. [Test Coverage](#test-coverage)
+4. [Edge-Case Fuzz Tests](#edge-case-fuzz-tests)
+5. [Performance Tests](#performance-tests)
+6. [Security Tests](#security-tests)
+7. [End-to-End Tests](#end-to-end-tests)
+8. [CI/CD Integration](#cicd-integration)
+9. [Test Coverage](#test-coverage)
 
 ---
 
@@ -29,6 +30,7 @@
 ### Test Categories
 - **Unit Tests**: Individual components (rate limiter, token pool, etc.)
 - **Integration Tests**: Component interactions (API → Database, Webhooks)
+- **Edge-Case Fuzz Tests**: Generated inputs for scanner spans, patch extraction, parsers, and token filtering
 - **Performance Tests**: Load, stress, and scalability
 - **Security Tests**: Authentication, authorization, input validation
 - **E2E Tests**: Full user workflows
@@ -209,6 +211,29 @@ cargo test --test integration_tests test_api_endpoints
 - `POST /api/tokens/add`
 - `GET /api/webhooks`
 - `GET /api/metrics`
+
+---
+
+## Edge-Case Fuzz Tests
+
+The crate includes bounded property tests that run under the normal Rust test
+suite and in GitHub Actions. They focus on production parser and scanner
+invariants rather than long-running corpus fuzzing.
+
+```bash
+# Run the edge-case fuzz/property suite with default case count
+cargo test --test edge_case_fuzz --locked
+
+# Increase generated cases locally when changing detector logic
+PROPTEST_CASES=512 cargo test --test edge_case_fuzz --locked
+```
+
+**Covered invariants**:
+- Scanner findings always use valid UTF-8 byte spans into the scanned text.
+- Matched text, entropy, hashes, and filenames stay internally consistent.
+- Patch scanning only inspects added lines and skips diff metadata.
+- GitHub token filtering trims usable tokens and rejects sample/example values.
+- Secret category and severity parsers tolerate arbitrary labels.
 
 ---
 

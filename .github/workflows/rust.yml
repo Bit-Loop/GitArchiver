@@ -17,6 +17,7 @@ env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
   CARGO_INCREMENTAL: 0
+  PROPTEST_CASES: 128
   DATABASE_URL: postgresql://github_archiver:test_password@localhost:5432/github_archiver_test
   REDIS_URL: redis://localhost:6379
   ENABLE_AI_TRIAGE: "false"
@@ -109,6 +110,9 @@ jobs:
         run: |
           cargo install sqlx-cli --locked --no-default-features --features postgres
           sqlx migrate run
+
+      - name: Edge-case fuzz property tests
+        run: cargo test --test edge_case_fuzz --locked
 
       - name: Test all targets and features
         run: cargo test --all-targets --all-features --locked

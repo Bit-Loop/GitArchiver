@@ -126,3 +126,4 @@ entropy = "0.4"
 [dev-dependencies]
 tempfile = "3.8"
 mockall = "0.12"
+proptest = "1.6"

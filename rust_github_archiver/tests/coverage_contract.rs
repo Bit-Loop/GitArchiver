@@ -160,6 +160,7 @@ fn github_actions_runs_full_rust_tauri_ui_and_static_gates() {
         "cargo fmt --all -- --check",
         "cargo check --all-targets --all-features --locked",
         "cargo clippy --all-targets --all-features --locked -- -D warnings",
+        "cargo test --test edge_case_fuzz --locked",
         "cargo test --all-targets --all-features --locked",
         "cargo llvm-cov --all-targets --all-features --locked",
         "npm ci",
@@ -170,6 +171,25 @@ fn github_actions_runs_full_rust_tauri_ui_and_static_gates() {
         assert!(
             root_workflow.contains(required),
             "root GitHub Actions workflow does not contain required gate: {required}"
+        );
+    }
+}
+
+#[test]
+fn edge_case_fuzz_suite_is_registered() {
+    let source = read(repo_dir().join("tests/edge_case_fuzz.rs"));
+
+    for required in [
+        "proptest!",
+        "secret_scanner_handles_arbitrary_text_without_invalid_spans",
+        "secret_scanner_finds_known_secret_inside_generated_noise",
+        "patch_scanner_handles_generated_added_removed_and_metadata_lines",
+        "token_filter_trims_or_rejects_generated_inputs",
+        "category_and_severity_parsers_handle_generated_labels",
+    ] {
+        assert!(
+            source.contains(required),
+            "edge-case fuzz suite missing required coverage marker: {required}"
         );
     }
 }
