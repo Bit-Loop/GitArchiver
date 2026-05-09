@@ -4,6 +4,7 @@ use std::sync::Arc;
 use tracing::{error, info, warn};
 
 use crate::ai::{LocalOpenAiTriageClient, LocalOpenAiTriageConfig, RedactedTriageInput};
+use crate::realtime::usable_github_token;
 use crate::scanning::trufflehog::TruffleHogFinding;
 use crate::scanning::{GitCloner, ScanningService, TruffleHogConfig, TruffleHogScanner};
 use crate::{
@@ -71,6 +72,7 @@ pub enum DatabaseOperation {
         execute: bool,
         backup_path: Option<String>,
         hard_delete_invalid_summaries: bool,
+        annotate_failed_scan_errors: bool,
         hard_delete_invalid_queue_rows: bool,
         reset_stale_processing: bool,
     },
@@ -108,7 +110,8 @@ pub async fn run_comprehensive_hunt(args: ComprehensiveHuntOptions) -> Result<()
 
     let config = HunterConfig {
         gcp_project_id: std::env::var("GCP_PROJECT_ID").unwrap_or_default(),
-        github_token: std::env::var("GITHUB_TOKEN").unwrap_or_default(),
+        github_token: usable_github_token(&std::env::var("GITHUB_TOKEN").unwrap_or_default())
+            .unwrap_or_default(),
         redis_url: std::env::var("REDIS_URL").ok(),
         database_path: args.database,
         ai_model_path: args.model_path,
@@ -249,7 +252,8 @@ pub async fn run_realtime_monitor(args: MonitorOptions) -> Result<()> {
     }
     info!("Poll interval configured at {}s", args.interval);
 
-    let github_token = std::env::var("GITHUB_TOKEN").unwrap_or_default();
+    let github_token =
+        usable_github_token(&std::env::var("GITHUB_TOKEN").unwrap_or_default()).unwrap_or_default();
     let requested_requests_per_minute =
         u32::try_from(60u64.checked_div(args.interval).unwrap_or(60).max(1)).unwrap_or(1);
     let requests_per_minute = if github_token.trim().is_empty() {
@@ -379,6 +383,7 @@ pub async fn run_database_operation(operation: DatabaseOperation) -> Result<()> 
             execute,
             backup_path,
             hard_delete_invalid_summaries,
+            annotate_failed_scan_errors,
             hard_delete_invalid_queue_rows,
             reset_stale_processing,
         } => {
@@ -395,6 +400,7 @@ pub async fn run_database_operation(operation: DatabaseOperation) -> Result<()> 
                     execute,
                     backup_path,
                     hard_delete_invalid_summaries,
+                    annotate_failed_scan_errors,
                     hard_delete_invalid_queue_rows,
                     reset_stale_processing,
                     operator: None,

@@ -170,6 +170,9 @@ GITHUB_USERNAME=your-username     # GitHub username
 # Run only API server
 ./run.sh server
 
+# Install the API/dashboard as a user-level persistent service
+scripts/install-user-services.sh --enable-now
+
 # Run only scraper
 ./run.sh scraper
 

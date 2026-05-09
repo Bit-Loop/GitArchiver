@@ -173,6 +173,7 @@ pub struct ScanQueueStats {
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct ScanStateRepairCounts {
     pub invalid_secret_scan_summaries: i64,
+    pub failed_scans_missing_error_metadata: i64,
     pub invalid_pending_push_scans: i64,
     pub stale_processing_events: i64,
     pub pending_events: i64,
@@ -189,6 +190,8 @@ pub struct ScanStateRepairRequest {
     pub backup_path: Option<String>,
     pub hard_delete_invalid_summaries: bool,
     #[serde(default)]
+    pub annotate_failed_scan_errors: bool,
+    #[serde(default)]
     pub hard_delete_invalid_queue_rows: bool,
     pub reset_stale_processing: bool,
     pub operator: Option<String>,
@@ -201,11 +204,13 @@ pub struct ScanStateRepairReport {
     pub dry_run: bool,
     pub backup_path: Option<String>,
     pub hard_delete_invalid_summaries: bool,
+    pub annotate_failed_scan_errors: bool,
     pub hard_delete_invalid_queue_rows: bool,
     pub reset_stale_processing: bool,
     pub pre_counts: ScanStateRepairCounts,
     pub post_counts: ScanStateRepairCounts,
     pub deleted_invalid_summaries: i64,
+    pub annotated_failed_scan_errors: i64,
     pub deleted_invalid_queue_rows: i64,
     pub reset_stale_processing_rows: i64,
     pub operator: String,
@@ -2129,6 +2134,12 @@ impl Database {
                 ) AS invalid_secret_scan_summaries,
                 (
                     SELECT COUNT(*)
+                    FROM secret_scans scan
+                    WHERE scan.status = 'failed'
+                      AND NULLIF(BTRIM(COALESCE(scan.metadata->>'error', '')), '') IS NULL
+                ) AS failed_scans_missing_error_metadata,
+                (
+                    SELECT COUNT(*)
                     FROM pending_push_scans
                     WHERE status IN ('pending', 'failed', 'processing')
                       AND COALESCE(is_zero_commit, FALSE) = FALSE
@@ -2176,6 +2187,7 @@ impl Database {
 
         Ok(ScanStateRepairCounts {
             invalid_secret_scan_summaries: row.get("invalid_secret_scan_summaries"),
+            failed_scans_missing_error_metadata: row.get("failed_scans_missing_error_metadata"),
             invalid_pending_push_scans: row.get("invalid_pending_push_scans"),
             stale_processing_events: row.get("stale_processing_events"),
             pending_events: row.get("pending_events"),
@@ -2211,11 +2223,13 @@ impl Database {
                 dry_run: true,
                 backup_path: request.backup_path,
                 hard_delete_invalid_summaries: request.hard_delete_invalid_summaries,
+                annotate_failed_scan_errors: request.annotate_failed_scan_errors,
                 hard_delete_invalid_queue_rows: request.hard_delete_invalid_queue_rows,
                 reset_stale_processing: request.reset_stale_processing,
                 post_counts: pre_counts.clone(),
                 pre_counts,
                 deleted_invalid_summaries: 0,
+                annotated_failed_scan_errors: 0,
                 deleted_invalid_queue_rows: 0,
                 reset_stale_processing_rows: 0,
                 operator,
@@ -2224,11 +2238,12 @@ impl Database {
         }
 
         if !request.hard_delete_invalid_summaries
+            && !request.annotate_failed_scan_errors
             && !request.hard_delete_invalid_queue_rows
             && !request.reset_stale_processing
         {
             return Err(anyhow::anyhow!(
-                "execute requires at least one repair action: --hard-delete-invalid-summaries, --hard-delete-invalid-queue-rows, or --reset-stale-processing"
+                "execute requires at least one repair action: --hard-delete-invalid-summaries, --annotate-failed-scan-errors, --hard-delete-invalid-queue-rows, or --reset-stale-processing"
             ));
         }
 
@@ -2260,6 +2275,51 @@ impl Database {
             .execute(&mut *tx)
             .await
             .context("Failed to delete invalid secret scan summaries")?
+            .rows_affected() as i64
+        } else {
+            0
+        };
+
+        let annotated_failed_scan_errors = if request.annotate_failed_scan_errors {
+            sqlx::query(
+                r#"
+                UPDATE secret_scans
+                SET metadata = COALESCE(metadata, '{}'::jsonb)
+                    || jsonb_build_object(
+                        'error', COALESCE(NULLIF(BTRIM(metadata->>'failure_reason'), ''), 'legacy scan failure without recorded error'),
+                        'failure_reason', COALESCE(NULLIF(BTRIM(metadata->>'failure_reason'), ''), 'legacy scan failure without recorded error'),
+                        'failure_class', CASE
+                            WHEN LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%binary not found%' THEN 'scanner_unavailable'
+                            WHEN LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%not found%' THEN 'repository_not_found'
+                            WHEN LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%forbidden%'
+                              OR LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%invalid credentials%'
+                              OR LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%authentication%'
+                              OR LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%permission denied%' THEN 'repository_forbidden'
+                            WHEN LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%rate_limit%'
+                              OR LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%rate limit%'
+                              OR LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%rate limited%'
+                              OR LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%status 403%' THEN 'rate_limited'
+                            WHEN LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%too large%' THEN 'repository_too_large'
+                            WHEN LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%misconfigured endpoint%' THEN 'misconfigured_endpoint'
+                            WHEN LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%unable to determine repository url%' THEN 'repository_url_missing'
+                            WHEN LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%timeout%'
+                              OR LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%timed out%' THEN 'timeout'
+                            WHEN LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%cancelled%'
+                              OR LOWER(COALESCE(metadata->>'failure_reason', '')) LIKE '%shutdown%' THEN 'cancelled'
+                            WHEN NULLIF(BTRIM(COALESCE(metadata->>'failure_reason', '')), '') IS NULL THEN 'legacy_missing_error'
+                            ELSE 'scanner_error'
+                        END,
+                        'failure_recorded', true,
+                        'failure_backfilled', true,
+                        'failure_backfilled_at', NOW()
+                    )
+                WHERE status = 'failed'
+                  AND NULLIF(BTRIM(COALESCE(metadata->>'error', '')), '') IS NULL
+                "#,
+            )
+            .execute(&mut *tx)
+            .await
+            .context("Failed to annotate failed scan error metadata")?
             .rows_affected() as i64
         } else {
             0
@@ -2316,11 +2376,13 @@ impl Database {
             dry_run: false,
             backup_path: Some(backup_path.clone()),
             hard_delete_invalid_summaries: request.hard_delete_invalid_summaries,
+            annotate_failed_scan_errors: request.annotate_failed_scan_errors,
             hard_delete_invalid_queue_rows: request.hard_delete_invalid_queue_rows,
             reset_stale_processing: request.reset_stale_processing,
             pre_counts,
             post_counts,
             deleted_invalid_summaries,
+            annotated_failed_scan_errors,
             deleted_invalid_queue_rows,
             reset_stale_processing_rows,
             operator,
@@ -2365,6 +2427,18 @@ impl Database {
         .await
         .context("Failed to collect stale queue backup rows")?;
 
+        let failed_scan_rows_missing_error: Value = sqlx::query_scalar(
+            r#"
+            SELECT COALESCE(jsonb_agg(to_jsonb(scan)), '[]'::jsonb)
+            FROM secret_scans scan
+            WHERE scan.status = 'failed'
+              AND NULLIF(BTRIM(COALESCE(scan.metadata->>'error', '')), '') IS NULL
+            "#,
+        )
+        .fetch_one(&self.pool)
+        .await
+        .context("Failed to collect failed scan metadata backup rows")?;
+
         let invalid_queue_rows: Value = sqlx::query_scalar(
             r#"
             SELECT COALESCE(jsonb_agg(to_jsonb(queue)), '[]'::jsonb)
@@ -2389,6 +2463,7 @@ impl Database {
             },
             "pre_counts": pre_counts,
             "invalid_secret_scans": invalid_secret_scans,
+            "failed_scan_rows_missing_error": failed_scan_rows_missing_error,
             "stale_processing_rows": stale_processing_rows,
             "invalid_queue_rows": invalid_queue_rows,
         });
@@ -2414,6 +2489,8 @@ impl Database {
         let metadata = serde_json::json!({
             "hard_delete_invalid_queue_rows": report.hard_delete_invalid_queue_rows,
             "deleted_invalid_queue_rows": report.deleted_invalid_queue_rows,
+            "annotate_failed_scan_errors": report.annotate_failed_scan_errors,
+            "annotated_failed_scan_errors": report.annotated_failed_scan_errors,
         });
 
         sqlx::query(

@@ -69,6 +69,7 @@ services:
       # GitHub Configuration (Optional)
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       GITHUB_USERNAME: ${GITHUB_USERNAME:-}
+      TRUFFLEHOG_PATH: ${TRUFFLEHOG_PATH:-/usr/bin/trufflehog}
       
       # Download Configuration
       DOWNLOAD_DIR: /app/gharchive_data

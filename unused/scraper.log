@@ -1,5 +1,0 @@
-nohup: ignoring input
-ERROR:root:Database connection attempt 1 failed: password authentication failed for user "gharchive"
-ERROR:root:Database connection attempt 2 failed: password authentication failed for user "gharchive"
-ERROR:root:Database connection attempt 3 failed: password authentication failed for user "gharchive"
-ERROR:root:Fatal error: password authentication failed for user "gharchive"

@@ -36,7 +36,7 @@ pub use rate_limiter::{AdaptiveRateLimiter, RateLimitStatus};
 /// Real-time GitHub event monitor
 pub struct GitHubEventMonitor {
     client: Client,
-    github_token: String, // Store token for authenticated requests
+    github_token: Arc<RwLock<Option<String>>>,
     persistence: Option<Arc<PersistenceService>>,
     rate_limiter: AdaptiveRateLimiter,
     secret_scanner: SecretScanner,
@@ -179,11 +179,13 @@ pub enum AlertSeverity {
 impl GitHubEventMonitor {
     /// Create a new real-time monitor
     pub async fn new(github_token: &str) -> Result<Self> {
-        let commit_fetcher = DanglingCommitFetcher::new(github_token, None).await?;
+        let github_token = usable_github_token(github_token);
+        let commit_fetcher =
+            DanglingCommitFetcher::new(github_token.as_deref().unwrap_or_default(), None).await?;
 
         Ok(Self {
             client: Client::new(),
-            github_token: github_token.to_string(), // Store for authenticated requests
+            github_token: Arc::new(RwLock::new(github_token)),
             persistence: None,
             rate_limiter: AdaptiveRateLimiter::new(5, true), // 5 req/min, auto-adjust enabled
             secret_scanner: SecretScanner::new(),
@@ -311,9 +313,9 @@ impl GitHubEventMonitor {
 
         // Add authentication if token is available
         // GitHub API uses "token" prefix for personal access tokens
-        if !self.github_token.is_empty() {
-            request_builder =
-                request_builder.header("Authorization", format!("token {}", self.github_token));
+        let github_token = self.github_token.read().await.clone();
+        if let Some(token) = github_token.as_deref() {
+            request_builder = request_builder.header("Authorization", format!("token {}", token));
             debug!("Using authenticated GitHub API request with token prefix");
         } else {
             warn!("No GitHub token - using unauthenticated requests (60 req/hour limit)");
@@ -352,6 +354,15 @@ impl GitHubEventMonitor {
                 .await;
 
             return Ok(vec![]); // Return empty, will retry after pause
+        }
+
+        if response.status() == StatusCode::UNAUTHORIZED && github_token.is_some() {
+            warn!(
+                "GitHub token was rejected with 401 Unauthorized; disabling authenticated requests for this monitor. Replace or unset GITHUB_TOKEN."
+            );
+            *self.github_token.write().await = None;
+            self.rate_limiter.set_rate(1).await;
+            return Ok(vec![]);
         }
 
         if !response.status().is_success() {
@@ -1212,6 +1223,33 @@ impl GitHubEventMonitor {
     }
 }
 
+pub fn usable_github_token(raw_token: &str) -> Option<String> {
+    let token = raw_token.trim();
+    if token.is_empty() {
+        return None;
+    }
+
+    let lowered = token.to_ascii_lowercase();
+    let sample_markers = [
+        "redacted",
+        "example",
+        "sample",
+        "replace",
+        "change_me",
+        "changeme",
+        "your_github_token",
+        "your-token",
+    ];
+
+    if sample_markers.iter().any(|marker| lowered.contains(marker))
+        || (lowered.contains("place") && lowered.contains("holder"))
+    {
+        None
+    } else {
+        Some(token.to_string())
+    }
+}
+
 /// Handle incoming webhook (for receiving alerts from external systems)
 async fn handle_incoming_webhook(
     Json(payload): Json<serde_json::Value>,
@@ -1346,6 +1384,25 @@ mod tests {
     async fn test_event_monitor_creation() {
         let monitor = GitHubEventMonitor::new("fake_token").await.unwrap();
         assert_eq!(monitor.processing_queue.read().await.len(), 0);
+    }
+
+    #[tokio::test]
+    async fn event_monitor_ignores_sample_tokens() {
+        let monitor = GitHubEventMonitor::new("ghp_REDACTED_EXAMPLE")
+            .await
+            .unwrap();
+        assert!(monitor.github_token.read().await.is_none());
+    }
+
+    #[test]
+    fn usable_github_token_rejects_empty_and_sample_values() {
+        assert_eq!(usable_github_token(""), None);
+        assert_eq!(usable_github_token("ghp_REDACTED_EXAMPLE"), None);
+        assert_eq!(usable_github_token("replace_with_token"), None);
+        assert_eq!(
+            usable_github_token("ghp_livevalue").as_deref(),
+            Some("ghp_livevalue")
+        );
     }
 
     #[tokio::test]

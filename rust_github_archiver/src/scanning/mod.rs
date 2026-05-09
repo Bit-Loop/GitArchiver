@@ -604,11 +604,13 @@ impl ScanningService {
                     self.handle_scan_cancellation(&scan_id, &msg).await;
                     return Err(anyhow!(msg));
                 }
-                if msg.to_ascii_lowercase().contains("rate_limit")
-                    || msg.to_ascii_lowercase().contains("status 403")
+                if lowered.contains("rate_limit")
+                    || lowered.contains("rate limit")
+                    || lowered.contains("rate limited")
+                    || lowered.contains("status 403")
                 {
                     warn!(
-                        "Scan {} hit rate limits for {}. Marking events for retry.",
+                        "Scan {} hit rate limits for {}. Marking events failed with retry delay.",
                         scan_id, repository
                     );
                 }

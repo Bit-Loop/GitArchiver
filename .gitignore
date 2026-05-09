@@ -1,0 +1,22 @@
+.env
+.env.*
+*.log
+*.pid
+api_secrets.json
+notes.txt
+.codex
+AGENTS.md
+
+# Rust/application build output
+rust_github_archiver/target/
+rust_github_archiver/tauri-app/target/
+
+# Local Python environments from the legacy implementation
+venv/
+github_scraper_env/
+
+# Local caches and editor files
+.cache/
+.DS_Store
+*.swp
+*.swo

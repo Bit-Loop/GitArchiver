@@ -294,6 +294,10 @@ struct RepairScanStateArgs {
     #[arg(long)]
     hard_delete_invalid_summaries: bool,
 
+    /// Backfill legacy failed secret_scans rows with explicit error metadata
+    #[arg(long)]
+    annotate_failed_scan_errors: bool,
+
     /// Hard-delete queued PushEvent rows that are neither zero-commit nor forced
     #[arg(long)]
     hard_delete_invalid_queue_rows: bool,
@@ -438,6 +442,7 @@ async fn execute_admin(args: AdminGroupArgs) -> Result<()> {
                         execute,
                         backup_path: args.backup_path.map(|path| path.display().to_string()),
                         hard_delete_invalid_summaries: args.hard_delete_invalid_summaries,
+                        annotate_failed_scan_errors: args.annotate_failed_scan_errors,
                         hard_delete_invalid_queue_rows: args.hard_delete_invalid_queue_rows,
                         reset_stale_processing: args.reset_stale_processing,
                     }

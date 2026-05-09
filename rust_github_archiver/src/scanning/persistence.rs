@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::core::database::Database;
 use crate::scanning::domain::{EvidenceArtifact, FindingRecord, RepositoryRef, ScanFinding};
-use crate::scanning::CompletedScan;
+use crate::scanning::{CompletedScan, ScanStatus};
 use crate::secrets::{FindingDetectionRecord, FindingScanRecord};
 
 pub struct ScanPersistenceAdapter<'a> {
@@ -61,6 +61,11 @@ fn build_scan_record(
         .initiator
         .source_reference()
         .map(std::string::ToString::to_string);
+    let normalized_failure_reason = failure_reason
+        .map(str::trim)
+        .filter(|reason| !reason.is_empty());
+    let failure_class = normalized_failure_reason.map(classify_failure_reason);
+    let failed = matches!(scan.status, ScanStatus::Failed);
 
     let scan_metadata = json!({
         "repository": repository,
@@ -72,7 +77,10 @@ fn build_scan_record(
         "verified_secrets": scan.results.verified_findings,
         "source_reference": source_reference,
         "created_by": scan.created_by.clone(),
-        "failure_reason": failure_reason,
+        "error": normalized_failure_reason,
+        "failure_reason": normalized_failure_reason,
+        "failure_class": failure_class,
+        "failure_recorded": failed && normalized_failure_reason.is_some(),
         "initiator": scan.initiator,
         "source_events": scan.source_events,
     });
@@ -94,6 +102,40 @@ fn build_scan_record(
         secrets_found: scan.results.findings.len() as i64,
         created_by: scan.created_by.clone(),
         metadata: scan_metadata,
+    }
+}
+
+fn classify_failure_reason(reason: &str) -> &'static str {
+    let lowered = reason.to_ascii_lowercase();
+
+    if lowered.contains("trufflehog binary not found") || lowered.contains("binary not found") {
+        "scanner_unavailable"
+    } else if lowered.contains("not found") || lowered.contains("repo not found") {
+        "repository_not_found"
+    } else if lowered.contains("forbidden")
+        || lowered.contains("invalid credentials")
+        || lowered.contains("authentication")
+        || lowered.contains("permission denied")
+    {
+        "repository_forbidden"
+    } else if lowered.contains("rate_limit")
+        || lowered.contains("rate limit")
+        || lowered.contains("rate limited")
+        || lowered.contains("status 403")
+    {
+        "rate_limited"
+    } else if lowered.contains("too large") {
+        "repository_too_large"
+    } else if lowered.contains("misconfigured endpoint") {
+        "misconfigured_endpoint"
+    } else if lowered.contains("unable to determine repository url") {
+        "repository_url_missing"
+    } else if lowered.contains("timeout") || lowered.contains("timed out") {
+        "timeout"
+    } else if lowered.contains("cancelled") || lowered.contains("shutdown") {
+        "cancelled"
+    } else {
+        "scanner_error"
     }
 }
 
@@ -275,6 +317,66 @@ mod tests {
                 .and_then(|finding| finding.get("artifact"))
                 .and_then(|artifact| artifact.get("commit_sha")),
             Some(&json!("abc123"))
+        );
+    }
+
+    #[test]
+    fn build_scan_record_records_structured_failure_metadata() {
+        let mut scan = sample_scan();
+        scan.status = ScanStatus::Failed;
+        scan.results.findings.clear();
+
+        let record = build_scan_record(
+            &scan,
+            Uuid::new_v4(),
+            Some("Repo forbidden: invalid credentials"),
+        );
+
+        assert_eq!(record.status, "failed");
+        assert_eq!(
+            record
+                .metadata
+                .get("error")
+                .and_then(|value| value.as_str()),
+            Some("Repo forbidden: invalid credentials")
+        );
+        assert_eq!(
+            record
+                .metadata
+                .get("failure_reason")
+                .and_then(|value| value.as_str()),
+            Some("Repo forbidden: invalid credentials")
+        );
+        assert_eq!(
+            record
+                .metadata
+                .get("failure_class")
+                .and_then(|value| value.as_str()),
+            Some("repository_forbidden")
+        );
+        assert_eq!(
+            record
+                .metadata
+                .get("failure_recorded")
+                .and_then(|value| value.as_bool()),
+            Some(true)
+        );
+    }
+
+    #[test]
+    fn classify_failure_reason_groups_common_scanner_failures() {
+        assert_eq!(
+            classify_failure_reason("TruffleHog binary not found"),
+            "scanner_unavailable"
+        );
+        assert_eq!(
+            classify_failure_reason("Repo not found"),
+            "repository_not_found"
+        );
+        assert_eq!(classify_failure_reason("Rate limited"), "rate_limited");
+        assert_eq!(
+            classify_failure_reason("Unable to determine repository URL"),
+            "repository_url_missing"
         );
     }
 }
