@@ -18,6 +18,7 @@ pub struct StartMonitorRequest {
     pub requests_per_minute: Option<u32>,
     pub auto_adjust: Option<bool>,
     pub github_token: Option<String>,
+    pub organizations: Option<Vec<String>>,
 }
 
 /// Request body for updating rate limit configuration
@@ -80,7 +81,11 @@ pub async fn start_event_monitor(
         });
 
     // Get rate limit configuration
-    let requests_per_minute = request.requests_per_minute.unwrap_or(5);
+    let unauthenticated = github_token.trim().is_empty();
+    let requests_per_minute =
+        request
+            .requests_per_minute
+            .unwrap_or(if unauthenticated { 1 } else { 5 });
     let auto_adjust = request.auto_adjust.unwrap_or(false);
 
     // Validate rate limit
@@ -109,6 +114,7 @@ pub async fn start_event_monitor(
         })?
         .with_persistence(app_state.persistence.clone())
         .with_rate_limit(requests_per_minute, auto_adjust)
+        .with_organizations(request.organizations.unwrap_or_default())
         .with_scanning_service(app_state.scanning_service.clone())
         .with_metrics_collector(app_state.metrics_collector.clone());
 

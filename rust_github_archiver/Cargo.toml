@@ -4,6 +4,7 @@ version = "2.0.0"
 edition = "2021"
 description = "Professional GitHub Archive Scraper in Rust"
 authors = ["Your Name <isaiah.fpga@gmail.com>"]
+default-run = "github_archiver"
 
 [features]
 default = []

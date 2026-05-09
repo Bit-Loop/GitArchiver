@@ -1,13 +1,14 @@
 use anyhow::Result;
 use serde::Serialize;
+use std::sync::Arc;
 use tracing::{error, info, warn};
 
 use crate::ai::{LocalOpenAiTriageClient, LocalOpenAiTriageConfig, RedactedTriageInput};
 use crate::scanning::trufflehog::TruffleHogFinding;
-use crate::scanning::{GitCloner, TruffleHogConfig, TruffleHogScanner};
+use crate::scanning::{GitCloner, ScanningService, TruffleHogConfig, TruffleHogScanner};
 use crate::{
     bigquery::RepositoryFilter,
-    core::{Config, Database},
+    core::{Config, Database, PersistenceService},
     GitHubEventMonitor, GitHubSecretHunter, HunterConfig, PerformanceEngine, SecretDatabase,
 };
 
@@ -70,6 +71,7 @@ pub enum DatabaseOperation {
         execute: bool,
         backup_path: Option<String>,
         hard_delete_invalid_summaries: bool,
+        hard_delete_invalid_queue_rows: bool,
         reset_stale_processing: bool,
     },
 }
@@ -247,10 +249,32 @@ pub async fn run_realtime_monitor(args: MonitorOptions) -> Result<()> {
     }
     info!("Poll interval configured at {}s", args.interval);
 
-    let github_token = std::env::var("GITHUB_TOKEN")
-        .map_err(|_| anyhow::anyhow!("GITHUB_TOKEN environment variable is required"))?;
+    let github_token = std::env::var("GITHUB_TOKEN").unwrap_or_default();
+    let requested_requests_per_minute =
+        u32::try_from(60u64.checked_div(args.interval).unwrap_or(60).max(1)).unwrap_or(1);
+    let requests_per_minute = if github_token.trim().is_empty() {
+        warn!("GITHUB_TOKEN is not set; using unauthenticated GitHub Events requests at 1 req/min");
+        1
+    } else {
+        requested_requests_per_minute.clamp(1, 60)
+    };
 
-    let monitor = GitHubEventMonitor::new(&github_token).await?;
+    let config = Config::default();
+    let database = Arc::new(Database::new(&config).await?);
+    let persistence = Arc::new(PersistenceService::new(database));
+    let scan_concurrency = usize::max(
+        1,
+        usize::min(config.download.max_concurrent_downloads as usize, 32),
+    );
+    let scanning_service =
+        Arc::new(ScanningService::new(scan_concurrency).with_persistence(persistence.clone()));
+
+    let monitor = GitHubEventMonitor::new(&github_token)
+        .await?
+        .with_persistence(persistence)
+        .with_scanning_service(scanning_service)
+        .with_organizations(args.organizations)
+        .with_rate_limit(requests_per_minute, true);
 
     if let Some(webhook_url) = args.webhook {
         monitor
@@ -355,6 +379,7 @@ pub async fn run_database_operation(operation: DatabaseOperation) -> Result<()> 
             execute,
             backup_path,
             hard_delete_invalid_summaries,
+            hard_delete_invalid_queue_rows,
             reset_stale_processing,
         } => {
             if execute && backup_path.is_none() {
@@ -370,6 +395,7 @@ pub async fn run_database_operation(operation: DatabaseOperation) -> Result<()> 
                     execute,
                     backup_path,
                     hard_delete_invalid_summaries,
+                    hard_delete_invalid_queue_rows,
                     reset_stale_processing,
                     operator: None,
                 })

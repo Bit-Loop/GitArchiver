@@ -1337,6 +1337,10 @@ mod tests {
     fn github_token_preview_never_returns_full_secret() {
         assert_eq!(github_token_preview(""), "");
         assert_eq!(github_token_preview("short"), "****");
-        assert_eq!(github_token_preview("ghp_REDACTED_EXAMPLE"), "ghp_...cdef");
+        let token = "ghp_0123456789abcdef";
+        let preview = github_token_preview(token);
+
+        assert_eq!(preview, "ghp_...cdef");
+        assert_ne!(preview, token);
     }
 }

@@ -127,8 +127,11 @@ impl DanglingCommitFetcher {
     pub async fn new(github_token: &str, redis_url: Option<&str>) -> Result<Self> {
         info!("Initializing dangling commit fetcher");
 
-        let github = Octocrab::builder()
-            .personal_token(github_token.to_string())
+        let mut builder = Octocrab::builder();
+        if !github_token.trim().is_empty() {
+            builder = builder.personal_token(github_token.to_string());
+        }
+        let github = builder
             .build()
             .map_err(|e| anyhow!("Failed to create GitHub client: {}", e))?;
 

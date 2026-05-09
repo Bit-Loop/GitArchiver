@@ -43,6 +43,7 @@ pub struct GitHubEventMonitor {
     scanning_service: Option<Arc<ScanningService>>,
     metrics_collector: Option<Arc<MetricsCollector>>,
     commit_fetcher: Arc<tokio::sync::Mutex<DanglingCommitFetcher>>,
+    organization_filter: Arc<RwLock<Vec<String>>>,
     last_event_id: Arc<RwLock<Option<String>>>,
     webhook_endpoints: Arc<RwLock<Vec<WebhookEndpoint>>>,
     processing_queue: Arc<RwLock<Vec<GitHubEvent>>>,
@@ -88,6 +89,10 @@ pub struct PushEventPayload {
     pub size: u32,
     #[serde(default)]
     pub distinct_size: u32,
+    #[serde(default)]
+    pub created: bool,
+    #[serde(default)]
+    pub deleted: bool,
     #[serde(default)]
     pub r#ref: Option<String>,
     #[serde(default)]
@@ -185,6 +190,7 @@ impl GitHubEventMonitor {
             scanning_service: None,
             metrics_collector: None,
             commit_fetcher: Arc::new(tokio::sync::Mutex::new(commit_fetcher)),
+            organization_filter: Arc::new(RwLock::new(Vec::new())),
             last_event_id: Arc::new(RwLock::new(None)),
             webhook_endpoints: Arc::new(RwLock::new(Vec::new())),
             processing_queue: Arc::new(RwLock::new(Vec::new())),
@@ -202,6 +208,21 @@ impl GitHubEventMonitor {
     /// Configure rate limiter settings
     pub fn with_rate_limit(mut self, requests_per_minute: u32, auto_adjust: bool) -> Self {
         self.rate_limiter = AdaptiveRateLimiter::new(requests_per_minute, auto_adjust);
+        self
+    }
+
+    /// Restrict processing to repositories owned by the listed organizations/users.
+    pub fn with_organizations(self, organizations: Vec<String>) -> Self {
+        let normalized = organizations
+            .into_iter()
+            .map(|org| org.trim().to_ascii_lowercase())
+            .filter(|org| !org.is_empty())
+            .collect();
+
+        if let Ok(mut filter) = self.organization_filter.try_write() {
+            *filter = normalized;
+        }
+
         self
     }
 
@@ -362,6 +383,8 @@ impl GitHubEventMonitor {
 
     /// Process incoming events for database storage and secret detection
     async fn process_events(&self, events: Vec<GitHubEvent>) -> Result<()> {
+        let events = self.filter_events_by_organization(events).await;
+
         if events.is_empty() {
             return Ok(());
         }
@@ -382,6 +405,41 @@ impl GitHubEventMonitor {
         self.process_queue().await?;
 
         Ok(())
+    }
+
+    async fn filter_events_by_organization(&self, events: Vec<GitHubEvent>) -> Vec<GitHubEvent> {
+        let organizations = self.organization_filter.read().await.clone();
+        if organizations.is_empty() {
+            return events;
+        }
+
+        let original_count = events.len();
+        let filtered = events
+            .into_iter()
+            .filter(|event| {
+                Self::repo_matches_organization_filter(&event.repo.name, &organizations)
+            })
+            .collect::<Vec<_>>();
+
+        if filtered.len() != original_count {
+            debug!(
+                "Filtered GitHub Events API batch by organization: {} -> {} events",
+                original_count,
+                filtered.len()
+            );
+        }
+
+        filtered
+    }
+
+    fn repo_matches_organization_filter(repo_name: &str, organizations: &[String]) -> bool {
+        repo_name
+            .split_once('/')
+            .map(|(owner, _)| {
+                let owner = owner.to_ascii_lowercase();
+                organizations.iter().any(|org| org == &owner)
+            })
+            .unwrap_or(false)
     }
 
     /// Save events to database using existing Database::insert_events_batch
@@ -914,7 +972,22 @@ impl GitHubEventMonitor {
     }
 
     fn is_zero_commit_push(payload: &PushEventPayload) -> bool {
-        payload.size == 0 || payload.commits.is_empty()
+        payload.forced
+            && !payload.created
+            && !payload.deleted
+            && payload.size == 0
+            && payload.distinct_size == 0
+            && payload.commits.is_empty()
+            && payload
+                .before
+                .as_deref()
+                .map(|sha| !sha.trim().is_empty() && sha != ZERO_SHA)
+                .unwrap_or(false)
+            && payload
+                .head
+                .as_deref()
+                .map(|sha| !sha.trim().is_empty() && sha != ZERO_SHA)
+                .unwrap_or(false)
     }
 
     /// Create a secret alert
@@ -1292,6 +1365,59 @@ mod tests {
 
         monitor.remove_webhook_endpoint(id).await.unwrap();
         assert_eq!(monitor.webhook_endpoints.read().await.len(), 0);
+    }
+
+    #[test]
+    fn organization_filter_matches_repository_owner_case_insensitively() {
+        let organizations = vec!["github".to_string(), "rust-lang".to_string()];
+
+        assert!(GitHubEventMonitor::repo_matches_organization_filter(
+            "GitHub/docs",
+            &organizations
+        ));
+        assert!(GitHubEventMonitor::repo_matches_organization_filter(
+            "rust-lang/rust",
+            &organizations
+        ));
+        assert!(!GitHubEventMonitor::repo_matches_organization_filter(
+            "tokio-rs/tokio",
+            &organizations
+        ));
+        assert!(!GitHubEventMonitor::repo_matches_organization_filter(
+            "malformed-repo-name",
+            &organizations
+        ));
+    }
+
+    #[test]
+    fn zero_commit_detection_requires_force_push_metadata() {
+        let base_payload = PushEventPayload {
+            before: Some("1111111111111111111111111111111111111111".to_string()),
+            head: Some("2222222222222222222222222222222222222222".to_string()),
+            ..PushEventPayload::default()
+        };
+
+        assert!(!GitHubEventMonitor::is_zero_commit_push(&base_payload));
+
+        let mut forced_zero_commit = base_payload.clone();
+        forced_zero_commit.forced = true;
+        assert!(GitHubEventMonitor::is_zero_commit_push(&forced_zero_commit));
+
+        let mut ordinary_push_with_missing_commit_list = base_payload.clone();
+        ordinary_push_with_missing_commit_list.size = 2;
+        assert!(!GitHubEventMonitor::is_zero_commit_push(
+            &ordinary_push_with_missing_commit_list
+        ));
+
+        let mut branch_deletion = forced_zero_commit.clone();
+        branch_deletion.deleted = true;
+        branch_deletion.head = Some(ZERO_SHA.to_string());
+        assert!(!GitHubEventMonitor::is_zero_commit_push(&branch_deletion));
+
+        let mut branch_creation = forced_zero_commit;
+        branch_creation.created = true;
+        branch_creation.before = Some(ZERO_SHA.to_string());
+        assert!(!GitHubEventMonitor::is_zero_commit_push(&branch_creation));
     }
 
     #[tokio::test]

@@ -10,6 +10,8 @@ use uuid::Uuid;
 use super::config::Config;
 use crate::secrets::{SecretCategory, SecretDetectionRecord, SecretScanRecord, SecretSeverity};
 
+const ZERO_SHA: &str = "0000000000000000000000000000000000000000";
+
 /// Canonical database runtime health snapshot shared by API, scraper, and monitoring code.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct DatabaseHealth {
@@ -171,6 +173,7 @@ pub struct ScanQueueStats {
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 pub struct ScanStateRepairCounts {
     pub invalid_secret_scan_summaries: i64,
+    pub invalid_pending_push_scans: i64,
     pub stale_processing_events: i64,
     pub pending_events: i64,
     pub processing_events: i64,
@@ -185,6 +188,8 @@ pub struct ScanStateRepairRequest {
     pub execute: bool,
     pub backup_path: Option<String>,
     pub hard_delete_invalid_summaries: bool,
+    #[serde(default)]
+    pub hard_delete_invalid_queue_rows: bool,
     pub reset_stale_processing: bool,
     pub operator: Option<String>,
 }
@@ -196,10 +201,12 @@ pub struct ScanStateRepairReport {
     pub dry_run: bool,
     pub backup_path: Option<String>,
     pub hard_delete_invalid_summaries: bool,
+    pub hard_delete_invalid_queue_rows: bool,
     pub reset_stale_processing: bool,
     pub pre_counts: ScanStateRepairCounts,
     pub post_counts: ScanStateRepairCounts,
     pub deleted_invalid_summaries: i64,
+    pub deleted_invalid_queue_rows: i64,
     pub reset_stale_processing_rows: i64,
     pub operator: String,
     pub executed_at: DateTime<Utc>,
@@ -1174,6 +1181,11 @@ impl Database {
             return Ok(());
         }
 
+        let is_zero_commit = Self::detect_zero_commit(&event.payload);
+        if !is_zero_commit {
+            return Ok(());
+        }
+
         let repository_full_name = if let Some(full) = event.repo.full_name.as_ref() {
             full.clone()
         } else if let (Some(owner), Some(name)) = (&event.repo.owner_login, &event.repo.name) {
@@ -1219,8 +1231,6 @@ impl Database {
             .and_then(|v| v.as_i64())
             .unwrap_or(0) as i32;
 
-        let is_zero_commit = Self::detect_zero_commit(&event.payload);
-
         sqlx::query(
             r#"
             INSERT INTO pending_push_scans (
@@ -1264,14 +1274,48 @@ impl Database {
             .map(|arr| arr.is_empty())
             .unwrap_or(false);
 
-        if commits_empty {
-            return true;
-        }
-
-        payload
+        let size_is_zero = payload
             .get("size")
             .and_then(|v| v.as_i64())
             .map(|size| size == 0)
+            .unwrap_or(false);
+        let distinct_size_is_zero = payload
+            .get("distinct_size")
+            .and_then(|v| v.as_i64())
+            .map(|size| size == 0)
+            .unwrap_or(true);
+
+        let forced = payload
+            .get("forced")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
+        let created = payload
+            .get("created")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
+        let deleted = payload
+            .get("deleted")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
+
+        forced
+            && !created
+            && !deleted
+            && size_is_zero
+            && distinct_size_is_zero
+            && commits_empty
+            && Self::payload_sha_is_nonzero(payload, "before")
+            && Self::payload_sha_is_nonzero(payload, "head")
+    }
+
+    fn payload_sha_is_nonzero(payload: &Value, key: &str) -> bool {
+        payload
+            .get(key)
+            .and_then(|v| v.as_str())
+            .map(|sha| {
+                let sha = sha.trim();
+                !sha.is_empty() && sha != ZERO_SHA
+            })
             .unwrap_or(false)
     }
 
@@ -1753,7 +1797,10 @@ impl Database {
             return Ok(());
         }
 
-        const ZERO_SHA: &str = "0000000000000000000000000000000000000000";
+        if !record.is_zero_commit {
+            return Ok(());
+        }
+
         if before_sha == ZERO_SHA {
             return Ok(());
         }
@@ -2083,6 +2130,13 @@ impl Database {
                 (
                     SELECT COUNT(*)
                     FROM pending_push_scans
+                    WHERE status IN ('pending', 'failed', 'processing')
+                      AND COALESCE(is_zero_commit, FALSE) = FALSE
+                      AND COALESCE(forced_flag, FALSE) = FALSE
+                ) AS invalid_pending_push_scans,
+                (
+                    SELECT COUNT(*)
+                    FROM pending_push_scans
                     WHERE status = 'processing'
                       AND (next_attempt_after IS NULL OR next_attempt_after <= NOW())
                 ) AS stale_processing_events,
@@ -2122,6 +2176,7 @@ impl Database {
 
         Ok(ScanStateRepairCounts {
             invalid_secret_scan_summaries: row.get("invalid_secret_scan_summaries"),
+            invalid_pending_push_scans: row.get("invalid_pending_push_scans"),
             stale_processing_events: row.get("stale_processing_events"),
             pending_events: row.get("pending_events"),
             processing_events: row.get("processing_events"),
@@ -2156,19 +2211,24 @@ impl Database {
                 dry_run: true,
                 backup_path: request.backup_path,
                 hard_delete_invalid_summaries: request.hard_delete_invalid_summaries,
+                hard_delete_invalid_queue_rows: request.hard_delete_invalid_queue_rows,
                 reset_stale_processing: request.reset_stale_processing,
                 post_counts: pre_counts.clone(),
                 pre_counts,
                 deleted_invalid_summaries: 0,
+                deleted_invalid_queue_rows: 0,
                 reset_stale_processing_rows: 0,
                 operator,
                 executed_at,
             });
         }
 
-        if !request.hard_delete_invalid_summaries && !request.reset_stale_processing {
+        if !request.hard_delete_invalid_summaries
+            && !request.hard_delete_invalid_queue_rows
+            && !request.reset_stale_processing
+        {
             return Err(anyhow::anyhow!(
-                "execute requires at least one repair action: --hard-delete-invalid-summaries or --reset-stale-processing"
+                "execute requires at least one repair action: --hard-delete-invalid-summaries, --hard-delete-invalid-queue-rows, or --reset-stale-processing"
             ));
         }
 
@@ -2200,6 +2260,23 @@ impl Database {
             .execute(&mut *tx)
             .await
             .context("Failed to delete invalid secret scan summaries")?
+            .rows_affected() as i64
+        } else {
+            0
+        };
+
+        let deleted_invalid_queue_rows = if request.hard_delete_invalid_queue_rows {
+            sqlx::query(
+                r#"
+                DELETE FROM pending_push_scans
+                WHERE status IN ('pending', 'failed', 'processing')
+                  AND COALESCE(is_zero_commit, FALSE) = FALSE
+                  AND COALESCE(forced_flag, FALSE) = FALSE
+                "#,
+            )
+            .execute(&mut *tx)
+            .await
+            .context("Failed to delete invalid pending push queue rows")?
             .rows_affected() as i64
         } else {
             0
@@ -2239,10 +2316,12 @@ impl Database {
             dry_run: false,
             backup_path: Some(backup_path.clone()),
             hard_delete_invalid_summaries: request.hard_delete_invalid_summaries,
+            hard_delete_invalid_queue_rows: request.hard_delete_invalid_queue_rows,
             reset_stale_processing: request.reset_stale_processing,
             pre_counts,
             post_counts,
             deleted_invalid_summaries,
+            deleted_invalid_queue_rows,
             reset_stale_processing_rows,
             operator,
             executed_at,
@@ -2286,6 +2365,19 @@ impl Database {
         .await
         .context("Failed to collect stale queue backup rows")?;
 
+        let invalid_queue_rows: Value = sqlx::query_scalar(
+            r#"
+            SELECT COALESCE(jsonb_agg(to_jsonb(queue)), '[]'::jsonb)
+            FROM pending_push_scans queue
+            WHERE status IN ('pending', 'failed', 'processing')
+              AND COALESCE(is_zero_commit, FALSE) = FALSE
+              AND COALESCE(forced_flag, FALSE) = FALSE
+            "#,
+        )
+        .fetch_one(&self.pool)
+        .await
+        .context("Failed to collect invalid queue backup rows")?;
+
         let backup = serde_json::json!({
             "created_at": Utc::now(),
             "operator": operator,
@@ -2298,6 +2390,7 @@ impl Database {
             "pre_counts": pre_counts,
             "invalid_secret_scans": invalid_secret_scans,
             "stale_processing_rows": stale_processing_rows,
+            "invalid_queue_rows": invalid_queue_rows,
         });
 
         if let Some(parent) = std::path::Path::new(backup_path).parent() {
@@ -2318,6 +2411,11 @@ impl Database {
     }
 
     async fn insert_maintenance_repair_run(&self, report: &ScanStateRepairReport) -> Result<()> {
+        let metadata = serde_json::json!({
+            "hard_delete_invalid_queue_rows": report.hard_delete_invalid_queue_rows,
+            "deleted_invalid_queue_rows": report.deleted_invalid_queue_rows,
+        });
+
         sqlx::query(
             r#"
             INSERT INTO maintenance_repair_runs (
@@ -2329,7 +2427,7 @@ impl Database {
                 $1, 'scan_state', $2, $3,
                 $4, $5,
                 $6, $7, $8,
-                $9, $10, $11, '{}'::jsonb
+                $9, $10, $11, $12
             )
             "#,
         )
@@ -2344,6 +2442,7 @@ impl Database {
         .bind(report.reset_stale_processing_rows)
         .bind(&report.operator)
         .bind(report.executed_at)
+        .bind(metadata)
         .execute(&self.pool)
         .await
         .context("Failed to insert maintenance repair run")?;
@@ -2385,6 +2484,7 @@ impl Database {
             FROM pending_push_scans
             WHERE status IN ('pending', 'failed')
               AND next_attempt_after <= NOW()
+              AND (is_zero_commit = TRUE OR forced_flag = TRUE)
             "#,
         );
 
@@ -3155,6 +3255,63 @@ impl Database {
     }
 }
 
+#[cfg(test)]
+mod zero_commit_detection_tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn ordinary_push_with_empty_commit_list_is_not_zero_commit_work() {
+        let payload = json!({
+            "before": "1111111111111111111111111111111111111111",
+            "head": "2222222222222222222222222222222222222222",
+            "size": 4,
+            "distinct_size": 4,
+            "forced": false,
+            "commits": []
+        });
+
+        assert!(!Database::detect_zero_commit(&payload));
+    }
+
+    #[test]
+    fn forced_zero_commit_push_is_zero_commit_work() {
+        let payload = json!({
+            "before": "1111111111111111111111111111111111111111",
+            "head": "2222222222222222222222222222222222222222",
+            "size": 0,
+            "distinct_size": 0,
+            "forced": true,
+            "commits": []
+        });
+
+        assert!(Database::detect_zero_commit(&payload));
+    }
+
+    #[test]
+    fn branch_create_and_delete_are_not_zero_commit_work() {
+        let created = json!({
+            "before": ZERO_SHA,
+            "head": "2222222222222222222222222222222222222222",
+            "size": 0,
+            "forced": true,
+            "created": true,
+            "commits": []
+        });
+        let deleted = json!({
+            "before": "1111111111111111111111111111111111111111",
+            "head": ZERO_SHA,
+            "size": 0,
+            "forced": true,
+            "deleted": true,
+            "commits": []
+        });
+
+        assert!(!Database::detect_zero_commit(&created));
+        assert!(!Database::detect_zero_commit(&deleted));
+    }
+}
+
 #[cfg(all(test, feature = "db-tests"))]
 #[cfg(test)]
 mod tests {
@@ -3542,6 +3699,8 @@ mod tests {
                 "head": head_sha,
                 "ref": "refs/heads/main",
                 "size": 0,
+                "distinct_size": 0,
+                "forced": true,
                 "commits": []
             }
         })];

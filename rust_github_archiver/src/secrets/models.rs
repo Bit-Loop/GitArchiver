@@ -170,6 +170,11 @@ mod tests {
             json!({}),
         );
 
-        assert_eq!(record.matched_text_preview, "ghp_…[redacted:22]");
+        let expected_len = secret_match.matched_text.chars().count();
+        assert_eq!(
+            record.matched_text_preview,
+            format!("ghp_…[redacted:{}]", expected_len)
+        );
+        assert_ne!(record.matched_text_preview, secret_match.matched_text);
     }
 }
