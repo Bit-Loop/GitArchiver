@@ -38,7 +38,7 @@
   JWT_SECRET=replace_with_random_32_byte_hex
   
   # Security
-  ADMIN_PASSWORD=change_on_first_login
+  ADMIN_PASSWORD=<strong-random-admin-password>
   
   # Optional: Redis Cache
   REDIS_URL=redis://localhost:6379
@@ -348,7 +348,7 @@ curl http://localhost:8081/health
 # Login
 TOKEN=$(curl -s -X POST http://localhost:8081/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"admin123"}' \
+  -d "{\"username\":\"admin\",\"password\":\"${ADMIN_PASSWORD:?set ADMIN_PASSWORD}\"}" \
   | jq -r '.token')
 
 # Use token

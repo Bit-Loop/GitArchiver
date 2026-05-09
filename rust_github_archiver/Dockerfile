@@ -87,8 +87,8 @@ DB_PORT=5432
 DB_NAME=github_archiver
 DB_USER=github_archiver
 DB_PASSWORD=github_archiver_password
-DB_MIN_CONNECTIONS=5
-DB_MAX_CONNECTIONS=20
+DB_MIN_CONNECTIONS=1
+DB_MAX_CONNECTIONS=8
 
 # Web Server Configuration
 WEB_HOST=0.0.0.0
@@ -107,8 +107,9 @@ DISK_LIMIT_GB=50.0
 CPU_LIMIT_PERCENT=80.0
 
 # Security Configuration
-ADMIN_PASSWORD=admin123
-JWT_SECRET=change-this-secret-key
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=<strong-random-admin-password>
+JWT_SECRET=<output-of-openssl-rand-hex-32>
 
 # Logging Configuration
 RUST_LOG=info

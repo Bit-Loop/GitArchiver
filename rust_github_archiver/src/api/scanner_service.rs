@@ -148,13 +148,7 @@ pub async fn start_repository_scan(
         )
         .await?;
 
-    wait_for_scan_response(
-        app_state,
-        &scan_id,
-        &repository,
-        StdDuration::from_secs(300),
-    )
-    .await
+    wait_for_scan_response(app_state, &scan_id, &repository, StdDuration::from_secs(30)).await
 }
 
 pub async fn start_batch_scan(
@@ -453,7 +447,7 @@ fn convert_api_scan_config(config: &ScanConfiguration) -> ScanConfig {
 }
 
 fn batch_timeout(config: &ScanConfiguration) -> StdDuration {
-    StdDuration::from_secs(config.timeout_seconds.unwrap_or(300).max(30) as u64)
+    StdDuration::from_secs(config.timeout_seconds.unwrap_or(30).clamp(1, 30) as u64)
 }
 
 async fn wait_for_scan_response(
@@ -588,10 +582,13 @@ mod tests {
     }
 
     #[test]
-    fn batch_timeout_enforces_minimum_floor() {
+    fn batch_timeout_respects_short_waits_and_caps_long_waits() {
         let mut config = sample_scan_config();
         config.timeout_seconds = Some(5);
 
+        assert_eq!(batch_timeout(&config), StdDuration::from_secs(5));
+
+        config.timeout_seconds = Some(300);
         assert_eq!(batch_timeout(&config), StdDuration::from_secs(30));
     }
 

@@ -11,7 +11,8 @@ use tracing::info;
 #[derive(Clone)]
 struct AppState {
     api_base_url: String,
-    api_token: Option<String>,
+    jwt_token: Option<String>,
+    api_key: Option<String>,
     client: Client,
 }
 
@@ -21,13 +22,18 @@ impl AppState {
             .unwrap_or_else(|_| "http://127.0.0.1:3000".to_string())
             .trim_end_matches('/')
             .to_string();
-        let api_token = std::env::var("GITARCHIVER_API_TOKEN")
+        let jwt_token = std::env::var("GITARCHIVER_JWT_TOKEN")
+            .ok()
+            .filter(|value| !value.trim().is_empty());
+        let api_key = std::env::var("GITARCHIVER_API_KEY")
+            .or_else(|_| std::env::var("GITARCHIVER_API_TOKEN"))
             .ok()
             .filter(|value| !value.trim().is_empty());
 
         Self {
             api_base_url,
-            api_token,
+            jwt_token,
+            api_key,
             client: Client::new(),
         }
     }
@@ -40,8 +46,10 @@ impl AppState {
     ) -> Result<Value, String> {
         let url = format!("{}{}", self.api_base_url, path);
         let mut request = self.client.request(method, url);
-        if let Some(token) = &self.api_token {
+        if let Some(token) = &self.jwt_token {
             request = request.bearer_auth(token);
+        } else if let Some(api_key) = &self.api_key {
+            request = request.header("X-API-Key", api_key);
         }
         if let Some(body) = body {
             request = request.json(&body);
@@ -171,12 +179,14 @@ async fn get_dashboard_data(state: State<'_, AppState>) -> Result<Value, String>
         .unwrap_or_else(|_| json!({ "results": [] }));
 
     let severity = statistics
-        .get("severity_breakdown")
+        .get("severity_distribution")
+        .or_else(|| statistics.get("severity_breakdown"))
         .or_else(|| statistics.get("secrets_by_severity"))
         .cloned()
         .unwrap_or_else(|| json!({}));
     let total_secrets = statistics
-        .get("total_secrets")
+        .get("total_secrets_found")
+        .or_else(|| statistics.get("total_secrets"))
         .or_else(|| statistics.get("secrets_found"))
         .and_then(Value::as_i64)
         .unwrap_or(0);
@@ -212,16 +222,8 @@ async fn validate_secret(
     reason: Option<String>,
     state: State<'_, AppState>,
 ) -> Result<Value, String> {
-    state
-        .post_json(
-            "/api/scanner/validation",
-            json!({
-                "secret_id": secret_id,
-                "is_valid": is_valid,
-                "reason": reason,
-            }),
-        )
-        .await
+    let _ = (secret_id, is_valid, reason, state);
+    Err("Secret validation is not exposed by the current GitArchiver API".to_string())
 }
 
 #[tauri::command]
@@ -261,10 +263,10 @@ async fn get_performance_report(
         "time_range": time_range.unwrap_or_else(|| "24h".to_string()),
         "scan_performance": {
             "total_scans": statistics.get("total_scans").and_then(Value::as_i64).unwrap_or(0),
-            "avg_scan_time": statistics.get("avg_scan_duration_ms").and_then(Value::as_f64).unwrap_or(0.0),
+            "avg_scan_time": statistics.pointer("/scan_stats/avg_scan_time_ms").or_else(|| statistics.get("avg_scan_duration_ms")).and_then(Value::as_f64).unwrap_or(0.0),
             "successful_scans": statistics.get("successful_scans").and_then(Value::as_i64).unwrap_or(0),
-            "failed_scans": statistics.get("failed_scans").and_then(Value::as_i64).unwrap_or(0),
-            "scans_per_hour": statistics.get("scan_rate_per_hour").and_then(Value::as_f64).unwrap_or(0.0),
+            "failed_scans": statistics.pointer("/scan_stats/failed_scans").or_else(|| statistics.get("failed_scans")).and_then(Value::as_i64).unwrap_or(0),
+            "scans_per_hour": statistics.pointer("/scan_stats/scan_rate_per_minute").and_then(Value::as_f64).unwrap_or(0.0) * 60.0,
         },
         "resource_usage": {
             "cpu_usage_history": [metrics.pointer("/system/cpu_usage").and_then(Value::as_f64).unwrap_or(0.0)],
@@ -274,7 +276,7 @@ async fn get_performance_report(
             "timestamps": [Utc::now().to_rfc3339()],
         },
         "detection_metrics": {
-            "secrets_detected": statistics.get("total_secrets").and_then(Value::as_i64).unwrap_or(0),
+            "secrets_detected": statistics.get("total_secrets_found").or_else(|| statistics.get("total_secrets")).and_then(Value::as_i64).unwrap_or(0),
             "false_positives": statistics.get("false_positives").and_then(Value::as_i64).unwrap_or(0),
             "accuracy_rate": statistics.get("accuracy_rate").and_then(Value::as_f64).unwrap_or(0.0),
             "detection_types": statistics.get("category_breakdown").cloned().unwrap_or_else(|| json!({})),

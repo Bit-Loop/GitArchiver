@@ -4,15 +4,16 @@
 
 ### 1. **Weak Default Admin Password** - SEVERITY: HIGH
 **Location**: `src/auth/users.rs:30`
+**Status**: Fixed; startup now rejects missing, weak, and documented/default admin passwords.
 
 **Issue**:
 ```rust
 let admin_password = std::env::var("ADMIN_PASSWORD")
-    .unwrap_or_else(|_| "admin123".to_string());
+    .unwrap_or_else(|_| "<unsafe-default-password>".to_string());
 ```
 
 **Risk**:
-- Default password `admin123` is publicly visible in source code
+- A documented/default password was publicly visible in source code
 - Attackers can gain admin access if `.env` is not properly configured
 - Default credentials are commonly exploited
 
@@ -160,7 +161,7 @@ pub fn validate_security_config() -> Result<()> {
     if admin_pw.len() < 12 {
         warn!("⚠️  ADMIN_PASSWORD is too short. Use 20+ characters!");
     }
-    if admin_pw == "admin123" || admin_pw == "password" {
+    if is_documented_or_common_password(&admin_pw) {
         return Err(anyhow!("❌ NEVER use default passwords in production!"));
     }
     
@@ -281,7 +282,7 @@ git status | grep .env  # Should return nothing
 git check-ignore .env   # Should output: .env
 
 # Verify no secrets in current code
-grep -r "admin123" src/  # Should only find this advisory
+grep -r "unsafe-default-password" src/  # Should find no production fallback
 
 # Verify strong passwords
 echo $ADMIN_PASSWORD | wc -c  # Should be 20+ characters

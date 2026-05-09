@@ -21,9 +21,9 @@ Your codebase is **fundamentally solid** with excellent architecture, but has so
    - Most dangerous: `src/scraper/archive_scraper.rs:128-129` (XML parsing)
    - Risk: Production panics if external data changes format
    
-2. **Default admin credentials** - Security vulnerability
-   - Username: `admin`, Password: `admin123`
-   - No forced password change mechanism
+2. **Default admin credentials** - Historical security vulnerability
+   - Current code requires `ADMIN_PASSWORD` before startup
+   - Weak/common admin passwords are rejected
    
 3. **No rate limiting** on authentication endpoints
    - `/api/auth/login` vulnerable to brute force
@@ -117,8 +117,8 @@ DB_NAME=github_archiver
 DB_USER=github_archiver
 DB_PASSWORD=github_archiver_password
 GITHUB_TOKEN=ghp_REDACTED_EXAMPLE
-JWT_SECRET=$(openssl rand -hex 32)
-ADMIN_PASSWORD=change_on_first_login
+JWT_SECRET=<output-of-openssl-rand-hex-32>
+ADMIN_PASSWORD=<strong-random-admin-password>
 EOF
 
 # 2. Fix the most dangerous unwrap (30 min)

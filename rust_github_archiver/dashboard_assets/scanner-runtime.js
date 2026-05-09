@@ -84,9 +84,12 @@
             if (issuesEl) {
                 const issues = Array.isArray(statusPayload.issues) ? statusPayload.issues : [];
                 deps.state.latestIssues = issues;
-                issuesEl.innerHTML = issues.length
-                    ? issues.slice(0, 3).map((msg) => `<div>${msg}</div>`).join('')
-                    : '';
+                issuesEl.replaceChildren();
+                issues.slice(0, 3).forEach((msg) => {
+                    const item = document.createElement('div');
+                    item.textContent = msg;
+                    issuesEl.appendChild(item);
+                });
             }
         }
 

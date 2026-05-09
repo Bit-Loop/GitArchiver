@@ -182,7 +182,16 @@ pub async fn add_webhook(
     let webhook_id = app_state
         .webhook_manager
         .add_endpoint(request.url.clone(), request.secret, request.events)
-        .await;
+        .await
+        .map_err(|e| {
+            (
+                StatusCode::BAD_REQUEST,
+                Json(json!({
+                    "error": "Invalid webhook endpoint",
+                    "message": e.to_string()
+                })),
+            )
+        })?;
 
     Ok(Json(json!({
         "status": "success",

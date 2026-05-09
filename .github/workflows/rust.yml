@@ -244,8 +244,7 @@ jobs:
         uses: taiki-e/install-action@cargo-audit
 
       - name: Audit Rust dependencies
-        # RUSTSEC-2023-0071 has no patched release; keep it explicit so new advisories still fail.
-        run: cargo audit --ignore RUSTSEC-2023-0071
+        run: cargo audit --deny warnings
 
   production-ready:
     name: Production-Readiness Gate

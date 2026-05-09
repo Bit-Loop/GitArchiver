@@ -1,7 +1,7 @@
 # Complete Codebase Improvements Summary
 
-**Project:** GitHub Archiver (Rust)  
-**Date:** 2024  
+**Project:** GitHub Archiver (Rust)
+**Date:** 2024
 **Status:** ✅ Phase 1-3 Complete | ⚠️ TODOs Documented
 
 ---
@@ -35,20 +35,20 @@ This document provides a comprehensive overview of all improvements made to the 
 -- Primary Keys Query
 SELECT kcu.column_name, tc.constraint_name
 FROM information_schema.table_constraints tc
-JOIN information_schema.key_column_usage kcu 
+JOIN information_schema.key_column_usage kcu
   ON tc.constraint_name = kcu.constraint_name
-WHERE tc.table_name = $1 
+WHERE tc.table_name = $1
   AND tc.constraint_type = 'PRIMARY KEY'
 
 -- Foreign Keys Query
 SELECT kcu.column_name, ccu.table_name AS foreign_table_name,
        ccu.column_name AS foreign_column_name, tc.constraint_name
 FROM information_schema.table_constraints tc
-JOIN information_schema.key_column_usage kcu 
+JOIN information_schema.key_column_usage kcu
   ON tc.constraint_name = kcu.constraint_name
-JOIN information_schema.constraint_column_usage ccu 
+JOIN information_schema.constraint_column_usage ccu
   ON ccu.constraint_name = tc.constraint_name
-WHERE tc.table_name = $1 
+WHERE tc.table_name = $1
   AND tc.constraint_type = 'FOREIGN KEY'
 
 -- Indexes Query
@@ -56,13 +56,13 @@ SELECT indexname, indexdef
 FROM pg_indexes
 WHERE tablename = $1
 
--- Check Constraints Query  
+-- Check Constraints Query
 SELECT constraint_name, check_clause
 FROM information_schema.check_constraints
 WHERE constraint_name IN (
     SELECT constraint_name
     FROM information_schema.table_constraints
-    WHERE table_name = $1 
+    WHERE table_name = $1
       AND constraint_type = 'CHECK'
 )
 ```
@@ -185,13 +185,13 @@ WHERE constraint_name IN (
 ### 🔴 CRITICAL Security Issues (User Action Required)
 
 #### 1. Hardcoded Admin Password
-**File:** `src/auth/users.rs:30`  
-**Issue:** Default password "admin123" in production code  
-**Risk:** CRITICAL - Unauthorized access to admin panel  
+**File:** `src/auth/users.rs:30`
+**Issue:** Historical unsafe default password in production code
+**Risk:** CRITICAL - Unauthorized access to admin panel
 
 **Code:**
 ```rust
-unwrap_or_else(|_| "admin123".to_string())
+unwrap_or_else(|_| "<unsafe-default-password>".to_string())
 ```
 
 **Remediation:**
@@ -207,9 +207,9 @@ docker-compose restart
 ```
 
 #### 2. Environment File in Repository
-**File:** `.env` (root directory)  
-**Issue:** Credentials tracked in git  
-**Risk:** CRITICAL - Secret exposure via git history  
+**File:** `.env` (root directory)
+**Issue:** Credentials tracked in git
+**Risk:** CRITICAL - Secret exposure via git history
 
 **Remediation:**
 ```bash
@@ -224,8 +224,8 @@ export ENCRYPTION_KEY=$(openssl rand -hex 32)
 ```
 
 #### 3. Missing .gitignore (FIXED ✅)
-**File:** `.gitignore` (created)  
-**Status:** FIXED - Comprehensive patterns added  
+**File:** `.gitignore` (created)
+**Status:** FIXED - Comprehensive patterns added
 
 **Coverage:**
 - Environment files (`.env*`)
@@ -236,9 +236,9 @@ export ENCRYPTION_KEY=$(openssl rand -hex 32)
 - Downloaded data (`gharchive_data/`)
 
 #### 4. Port Configuration Bug
-**File:** `src/bin/web_server.rs:22,25`  
-**Issue:** Wrong default ports (8090 vs 8081)  
-**Risk:** MINOR - Service binding confusion  
+**File:** `src/bin/web_server.rs:22,25`
+**Issue:** Wrong default ports (8090 vs 8081)
+**Risk:** MINOR - Service binding confusion
 
 **Fix Required:**
 ```rust
@@ -284,9 +284,9 @@ let addr = format!("0.0.0.0:{}", port);
 - **Collection types:** ✅ Proper capacity hints added
 
 ### ⚠️ Mutex Lock Pattern (NOTED, Not Critical)
-**File:** `src/performance/mod.rs` (30+ instances)  
-**Pattern:** `.lock().unwrap()` in metrics collection  
-**Assessment:** Acceptable for metrics use case  
+**File:** `src/performance/mod.rs` (30+ instances)
+**Pattern:** `.lock().unwrap()` in metrics collection
+**Assessment:** Acceptable for metrics use case
 **Future Improvement:** Consider `.expect("message")` or atomic counters
 
 ---
@@ -487,6 +487,6 @@ docker-compose up -d
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** 2024  
+**Document Version:** 1.0
+**Last Updated:** 2024
 **Status:** Phase 1-3 Complete ✅ | Security Fixes Pending ⚠️

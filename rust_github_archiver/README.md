@@ -83,7 +83,7 @@ nano .env
 ```
 http://localhost:8081
 Username: admin
-Password: admin123 (change in .env)
+Password: set `ADMIN_PASSWORD` in `.env` before startup
 ```
 
 ### 5. Operator Roles
@@ -104,8 +104,8 @@ DB_PORT=5432                        # PostgreSQL port
 DB_NAME=github_archiver             # Database name
 DB_USER=github_archiver             # Database user
 DB_PASSWORD=github_archiver_password # Database password
-DB_MIN_CONNECTIONS=5                # Minimum connection pool size
-DB_MAX_CONNECTIONS=20               # Maximum connection pool size
+DB_MIN_CONNECTIONS=1                # Minimum connection pool size
+DB_MAX_CONNECTIONS=8                # Maximum connection pool size
 ```
 
 #### Download Configuration
@@ -131,10 +131,18 @@ PERFORMANCE_CACHE_TTL_HOURS=24     # In-memory research cache TTL
 
 #### Security Configuration
 ```bash
-ADMIN_PASSWORD=admin123            # Web interface password
-JWT_SECRET=your-secret-key         # JWT signing secret
+ADMIN_PASSWORD=<strong-random-password> # Required; startup fails if weak or missing
+JWT_SECRET=<32+ char random secret>     # Required; generate with `openssl rand -hex 32`
 WEB_HOST=0.0.0.0                  # Web server bind address
 WEB_PORT=8081                     # Web server port
+```
+
+#### Research Workspace
+```bash
+ENABLE_RESEARCH_MODE=true                 # Authenticated candidate review and report export
+ENABLE_EXTERNAL_AI_RESEARCH=false         # Keep AI research local unless explicitly enabled
+RESEARCH_AI_BASE_URL=http://127.0.0.1:11434/v1
+RESEARCH_AI_MODEL=<local-model-name>
 ```
 
 #### GitHub API (Optional)

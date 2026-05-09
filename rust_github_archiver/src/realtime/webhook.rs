@@ -2,11 +2,13 @@
 /// Sends notifications when secrets are detected in GitHub events
 use anyhow::{anyhow, Result};
 use chrono::{DateTime, Utc};
-use reqwest::Client;
+use reqwest::{redirect::Policy, Client};
 use serde::{Deserialize, Serialize};
+use std::net::IpAddr;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use tracing::{debug, error, info, warn};
+use url::Url;
 use uuid::Uuid;
 
 use crate::realtime::RealTimeSecretAlert;
@@ -16,6 +18,7 @@ use crate::realtime::RealTimeSecretAlert;
 pub struct WebhookEndpoint {
     pub id: Uuid,
     pub url: String,
+    #[serde(skip_serializing)]
     pub secret: Option<String>,
     pub events: Vec<String>, // Event types to trigger on: ["secret_detected", "high_severity", etc.]
     pub active: bool,
@@ -110,8 +113,50 @@ impl WebhookManager {
     pub fn new() -> Self {
         Self {
             endpoints: Arc::new(RwLock::new(Vec::new())),
-            client: Client::new(),
+            client: Client::builder()
+                .redirect(Policy::none())
+                .timeout(std::time::Duration::from_secs(10))
+                .build()
+                .expect("webhook HTTP client should build"),
             max_retries: 3,
+        }
+    }
+
+    fn validate_webhook_url(url: &str) -> Result<()> {
+        let parsed = Url::parse(url).map_err(|e| anyhow!("Invalid webhook URL: {}", e))?;
+
+        if parsed.scheme() != "https" {
+            return Err(anyhow!("Webhook URL must use https"));
+        }
+        if !parsed.username().is_empty() || parsed.password().is_some() {
+            return Err(anyhow!("Webhook URL must not contain embedded credentials"));
+        }
+
+        let host = parsed
+            .host_str()
+            .ok_or_else(|| anyhow!("Webhook URL must include a host"))?;
+        let host_lower = host.to_ascii_lowercase();
+        if host_lower == "localhost" || host_lower.ends_with(".localhost") {
+            return Err(anyhow!("Webhook URL host is not allowed"));
+        }
+
+        if let Ok(ip) = host.parse::<IpAddr>() {
+            if is_blocked_webhook_ip(ip) {
+                return Err(anyhow!("Webhook URL points to a private or local address"));
+            }
+        }
+
+        Ok(())
+    }
+
+    fn redacted_url_for_log(url: &str) -> String {
+        match Url::parse(url) {
+            Ok(mut parsed) => {
+                parsed.set_query(None);
+                parsed.set_fragment(None);
+                parsed.to_string()
+            }
+            Err(_) => "<invalid-url>".to_string(),
         }
     }
 
@@ -121,13 +166,19 @@ impl WebhookManager {
         url: String,
         secret: Option<String>,
         events: Vec<String>,
-    ) -> Uuid {
+    ) -> Result<Uuid> {
+        Self::validate_webhook_url(&url)?;
+
         let mut endpoints = self.endpoints.write().await;
         let webhook = WebhookEndpoint::new(url.clone(), secret, events);
         let id = webhook.id;
         endpoints.push(webhook);
-        info!("Added webhook endpoint: {} ({})", url, id);
-        id
+        info!(
+            "Added webhook endpoint: {} ({})",
+            Self::redacted_url_for_log(&url),
+            id
+        );
+        Ok(id)
     }
 
     /// Remove webhook endpoint
@@ -160,6 +211,7 @@ impl WebhookManager {
             .ok_or_else(|| anyhow!("Webhook {} not found", id))?;
 
         if let Some(url) = url {
+            Self::validate_webhook_url(&url)?;
             webhook.url = url;
         }
         if let Some(secret) = secret {
@@ -298,10 +350,7 @@ impl WebhookManager {
             request = request.header("X-Hub-Signature-256", format!("sha256={}", signature));
         }
 
-        let response = request
-            .timeout(std::time::Duration::from_secs(10))
-            .send()
-            .await?;
+        let response = request.send().await?;
 
         if !response.status().is_success() {
             return Err(anyhow!(
@@ -376,8 +425,31 @@ impl Clone for WebhookManager {
     fn clone(&self) -> Self {
         Self {
             endpoints: self.endpoints.clone(),
-            client: Client::new(),
+            client: Client::builder()
+                .redirect(Policy::none())
+                .timeout(std::time::Duration::from_secs(10))
+                .build()
+                .expect("webhook HTTP client should build"),
             max_retries: self.max_retries,
+        }
+    }
+}
+
+fn is_blocked_webhook_ip(ip: IpAddr) -> bool {
+    match ip {
+        IpAddr::V4(ip) => {
+            ip.is_private()
+                || ip.is_loopback()
+                || ip.is_link_local()
+                || ip.is_broadcast()
+                || ip.is_documentation()
+                || ip.is_unspecified()
+        }
+        IpAddr::V6(ip) => {
+            ip.is_loopback()
+                || ip.is_unspecified()
+                || ip.is_unique_local()
+                || ip.is_unicast_link_local()
         }
     }
 }
@@ -412,7 +484,8 @@ mod tests {
                 Some("secret123".to_string()),
                 vec!["secret_detected".to_string()],
             )
-            .await;
+            .await
+            .expect("webhook endpoint");
 
         let endpoints = manager.get_endpoints().await;
         assert_eq!(endpoints.len(), 1);
@@ -469,6 +542,32 @@ mod tests {
         assert!(endpoint.active);
         assert_eq!(endpoint.total_triggers, 0);
         assert_eq!(endpoint.consecutive_failures, 0);
+    }
+
+    #[test]
+    fn webhook_endpoint_serialization_redacts_secret() {
+        let endpoint = WebhookEndpoint::new(
+            "https://example.com/webhook?token=secret".to_string(),
+            Some("secret123".to_string()),
+            vec!["secret_detected".to_string()],
+        );
+
+        let serialized = serde_json::to_string(&endpoint).expect("serialize endpoint");
+
+        assert!(!serialized.contains("secret123"));
+        assert!(!serialized.contains("\"secret\""));
+    }
+
+    #[test]
+    fn webhook_url_validation_rejects_ssrf_targets() {
+        assert!(WebhookManager::validate_webhook_url("http://example.com/hook").is_err());
+        assert!(WebhookManager::validate_webhook_url("https://127.0.0.1/hook").is_err());
+        assert!(WebhookManager::validate_webhook_url("https://10.0.0.1/hook").is_err());
+        assert!(WebhookManager::validate_webhook_url("https://localhost/hook").is_err());
+        assert!(
+            WebhookManager::validate_webhook_url("https://user:pass@example.com/hook").is_err()
+        );
+        assert!(WebhookManager::validate_webhook_url("https://example.com/hook").is_ok());
     }
 
     #[tokio::test]
@@ -590,7 +689,8 @@ mod tests {
                 None,
                 vec!["secret_detected".to_string()],
             )
-            .await;
+            .await
+            .expect("webhook endpoint");
 
         let id2 = manager
             .add_endpoint(
@@ -598,7 +698,8 @@ mod tests {
                 Some("secret".to_string()),
                 vec!["high_severity".to_string()],
             )
-            .await;
+            .await
+            .expect("webhook endpoint");
 
         let endpoints = manager.get_endpoints().await;
         assert_eq!(endpoints.len(), 2);
@@ -628,7 +729,8 @@ mod tests {
                 None,
                 vec!["secret_detected".to_string()],
             )
-            .await;
+            .await
+            .expect("webhook endpoint");
 
         let result = manager
             .update_endpoint(
@@ -657,7 +759,8 @@ mod tests {
                 Some("old_secret".to_string()),
                 vec!["secret_detected".to_string()],
             )
-            .await;
+            .await
+            .expect("webhook endpoint");
 
         // Update only the secret
         let result = manager
@@ -684,11 +787,13 @@ mod tests {
 
         manager
             .add_endpoint("https://example.com/webhook1".to_string(), None, vec![])
-            .await;
+            .await
+            .expect("webhook endpoint");
 
         manager
             .add_endpoint("https://example.com/webhook2".to_string(), None, vec![])
-            .await;
+            .await
+            .expect("webhook endpoint");
 
         let stats = manager.get_stats().await;
         assert_eq!(stats.total_webhooks, 2);
@@ -759,7 +864,7 @@ mod tests {
         }
 
         for handle in handles {
-            handle.await.unwrap();
+            handle.await.unwrap().expect("webhook endpoint");
         }
 
         let endpoints = manager.get_endpoints().await;
@@ -772,7 +877,8 @@ mod tests {
 
         let id = manager1
             .add_endpoint("https://example.com/webhook".to_string(), None, vec![])
-            .await;
+            .await
+            .expect("webhook endpoint");
 
         let manager2 = manager1.clone();
         let endpoints = manager2.get_endpoints().await;
@@ -827,13 +933,21 @@ mod tests {
         // Add 3 webhooks
         let id1 = manager
             .add_endpoint("https://example.com/1".to_string(), None, vec![])
-            .await;
+            .await
+            .expect("webhook endpoint");
         let id2 = manager
             .add_endpoint("https://example.com/2".to_string(), None, vec![])
-            .await;
+            .await
+            .expect("webhook endpoint");
         manager
             .add_endpoint("https://example.com/3".to_string(), None, vec![])
-            .await;
+            .await
+            .expect("webhook endpoint");
+
+        assert!(
+            WebhookManager::validate_webhook_url("http://127.0.0.1/hook").is_err(),
+            "plain HTTP private endpoints must be rejected"
+        );
 
         // Manually mark some triggers (would normally happen during send_alert)
         {

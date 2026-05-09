@@ -71,7 +71,7 @@ WS  /api/monitoring/ws
 
 ### Frontend Implementation (100% Complete)
 
-#### 1. **Production Dashboard** (`monitoring-dashboard.html`)
+#### 1. **Production Dashboard** (`dashboard`)
 - **Lines of Code:** 1,200+ lines
 - **Framework:** Vanilla JavaScript with modern APIs
 - **UI Library:** Tailwind CSS 3.0
@@ -180,7 +180,7 @@ WS  /api/monitoring/ws
    - WebSocket implementation
    - Helper functions
 
-2. **`monitoring-dashboard.html`** (NEW)
+2. **`dashboard`** (NEW)
    - 1,200+ lines of HTML/CSS/JavaScript
    - 4 complete dashboard tabs
    - 8+ interactive charts
@@ -262,7 +262,7 @@ cd rust_github_archiver
 
 Open in browser:
 ```
-http://localhost:8081/monitoring-dashboard.html
+http://localhost:8081/dashboard
 ```
 
 ### 3. Test API Endpoints

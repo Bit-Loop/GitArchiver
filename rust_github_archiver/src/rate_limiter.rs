@@ -25,9 +25,9 @@ pub struct RateLimitConfig {
 impl Default for RateLimitConfig {
     fn default() -> Self {
         Self {
-            max_requests: 100,
+            max_requests: 60,
             window: Duration::from_secs(60),
-            burst_size: 20,
+            burst_size: 10,
         }
     }
 }
@@ -131,19 +131,24 @@ pub struct RateLimitInfo {
 
 /// Extract client identifier from request
 fn get_client_identifier(req: &Request) -> String {
-    // Try to get IP from X-Forwarded-For header (for reverse proxies)
-    if let Some(forwarded) = req.headers().get("X-Forwarded-For") {
-        if let Ok(forwarded_str) = forwarded.to_str() {
-            if let Some(ip) = forwarded_str.split(',').next() {
-                return ip.trim().to_string();
+    let trust_proxy_headers = std::env::var("TRUST_PROXY_HEADERS")
+        .map(|value| value.eq_ignore_ascii_case("true"))
+        .unwrap_or(false);
+
+    if trust_proxy_headers {
+        // Proxy headers are accepted only when the deployment explicitly enables trusted proxy mode.
+        if let Some(forwarded) = req.headers().get("X-Forwarded-For") {
+            if let Ok(forwarded_str) = forwarded.to_str() {
+                if let Some(ip) = forwarded_str.split(',').next() {
+                    return ip.trim().to_string();
+                }
             }
         }
-    }
 
-    // Try X-Real-IP header
-    if let Some(real_ip) = req.headers().get("X-Real-IP") {
-        if let Ok(ip_str) = real_ip.to_str() {
-            return ip_str.to_string();
+        if let Some(real_ip) = req.headers().get("X-Real-IP") {
+            if let Ok(ip_str) = real_ip.to_str() {
+                return ip_str.to_string();
+            }
         }
     }
 
@@ -258,6 +263,14 @@ impl Default for EndpointRateLimits {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::{Mutex, OnceLock};
+
+    fn env_lock() -> std::sync::MutexGuard<'static, ()> {
+        static LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+        LOCK.get_or_init(|| Mutex::new(()))
+            .lock()
+            .expect("env lock")
+    }
 
     #[test]
     fn test_token_bucket_consume() {
@@ -309,5 +322,32 @@ mod tests {
 
         // Different client should be allowed
         assert!(limiter.check_rate_limit("other-client").await.is_ok());
+    }
+
+    #[test]
+    fn client_identifier_ignores_forwarded_headers_by_default() {
+        let _guard = env_lock();
+        let request = Request::builder()
+            .header("X-Forwarded-For", "203.0.113.5")
+            .body(axum::body::Body::empty())
+            .expect("request");
+
+        std::env::remove_var("TRUST_PROXY_HEADERS");
+
+        assert_eq!(get_client_identifier(&request), "unknown");
+    }
+
+    #[test]
+    fn client_identifier_uses_forwarded_headers_only_in_trusted_proxy_mode() {
+        let _guard = env_lock();
+        let request = Request::builder()
+            .header("X-Forwarded-For", "203.0.113.5, 10.0.0.1")
+            .body(axum::body::Body::empty())
+            .expect("request");
+
+        std::env::set_var("TRUST_PROXY_HEADERS", "true");
+
+        assert_eq!(get_client_identifier(&request), "203.0.113.5");
+        std::env::remove_var("TRUST_PROXY_HEADERS");
     }
 }

@@ -267,7 +267,7 @@ $ cargo build --bin web_server
 
 ### Test CPU/Memory/Disk Metrics
 1. Start server: `cargo run --bin web_server`
-2. Open dashboard: `http://localhost:8081/monitoring-dashboard.html`
+2. Open dashboard: `http://localhost:8081/dashboard`
 3. Click "Real-Time Monitoring" tab
 4. Observe CPU/Memory/Disk gauges updating every second
 5. Run heavy task (e.g., `stress --cpu 4`) → CPU gauge should spike

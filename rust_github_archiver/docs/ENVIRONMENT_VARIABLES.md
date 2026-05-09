@@ -7,363 +7,412 @@ Complete reference for all environment variables used in GitHub Archiver.
 ### Database Configuration
 
 #### `DATABASE_URL`
-**Required**: Yes  
-**Type**: String (PostgreSQL connection URL)  
-**Example**: `postgresql://user:password@localhost:5432/github_archiver`  
+**Required**: Yes
+**Type**: String (PostgreSQL connection URL)
+**Example**: `postgresql://user:password@localhost:5432/github_archiver`
 **Description**: PostgreSQL database connection string. Must include username, password, host, port, and database name.
 
 #### `DB_MAX_CONNECTIONS`
-**Required**: No  
-**Type**: Integer  
-**Default**: `100`  
-**Example**: `DB_MAX_CONNECTIONS=150`  
+**Required**: No
+**Type**: Integer
+**Default**: `100`
+**Example**: `DB_MAX_CONNECTIONS=150`
 **Description**: Maximum number of database connections in the pool.
 
 #### `DB_MIN_CONNECTIONS`
-**Required**: No  
-**Type**: Integer  
-**Default**: `10`  
-**Example**: `DB_MIN_CONNECTIONS=20`  
+**Required**: No
+**Type**: Integer
+**Default**: `10`
+**Example**: `DB_MIN_CONNECTIONS=20`
 **Description**: Minimum number of database connections to maintain in the pool.
 
 #### `DB_CONNECTION_TIMEOUT`
-**Required**: No  
-**Type**: Integer (seconds)  
-**Default**: `30`  
-**Example**: `DB_CONNECTION_TIMEOUT=60`  
+**Required**: No
+**Type**: Integer (seconds)
+**Default**: `30`
+**Example**: `DB_CONNECTION_TIMEOUT=60`
 **Description**: Timeout for establishing a database connection.
 
 ### Authentication & Security
 
 #### `JWT_SECRET`
-**Required**: Yes  
-**Type**: String (base64 encoded)  
-**Example**: `JWT_SECRET=your-secret-key-min-32-chars`  
-**Description**: Secret key for JWT token signing. Must be at least 32 characters. Keep this secret and rotate regularly.
+**Required**: Yes
+**Type**: String
+**Example**: `JWT_SECRET=<output-of-openssl-rand-hex-32>`
+**Description**: Secret key for JWT token signing. Must be at least 32 characters and must not be a documented/default placeholder. Keep this secret and rotate regularly.
 
 #### `JWT_EXPIRATION`
-**Required**: No  
-**Type**: Integer (seconds)  
-**Default**: `3600` (1 hour)  
-**Example**: `JWT_EXPIRATION=86400`  
+**Required**: No
+**Type**: Integer (seconds)
+**Default**: `3600` (1 hour)
+**Example**: `JWT_EXPIRATION=86400`
 **Description**: JWT token expiration time in seconds.
 
 #### `ADMIN_USERNAME`
-**Required**: No  
-**Type**: String  
-**Default**: `admin`  
-**Example**: `ADMIN_USERNAME=administrator`  
+**Required**: No
+**Type**: String
+**Default**: `admin`
+**Example**: `ADMIN_USERNAME=administrator`
 **Description**: Default admin username for initial setup.
 
 #### `ADMIN_PASSWORD`
-**Required**: Yes (production)  
-**Type**: String  
-**Example**: `ADMIN_PASSWORD=SecurePassword123!`  
-**Description**: Default admin password. Change immediately after first login.
+**Required**: Yes (production)
+**Type**: String
+**Example**: `ADMIN_PASSWORD=<strong-random-admin-password>`
+**Description**: Initial admin password. Startup rejects weak, common, or missing values.
 
 ### GitHub API
 
 #### `GITHUB_TOKEN`
-**Required**: Yes  
-**Type**: String (Personal Access Token)  
-**Example**: `GITHUB_TOKEN=ghp_REDACTED_EXAMPLE`  
+**Required**: Yes
+**Type**: String (Personal Access Token)
+**Example**: `GITHUB_TOKEN=ghp_REDACTED_EXAMPLE`
 **Description**: GitHub Personal Access Token for API access. Required scopes: `public_repo`, `read:org`, `read:user`.
 
 #### `GITHUB_API_URL`
-**Required**: No  
-**Type**: String (URL)  
-**Default**: `https://api.github.com`  
-**Example**: `GITHUB_API_URL=https://api.github.com`  
+**Required**: No
+**Type**: String (URL)
+**Default**: `https://api.github.com`
+**Example**: `GITHUB_API_URL=https://api.github.com`
 **Description**: GitHub API base URL. Use for GitHub Enterprise Server.
 
 ### Server Configuration
 
 #### `SERVER_HOST`
-**Required**: No  
-**Type**: String (IP address)  
-**Default**: `0.0.0.0`  
-**Example**: `SERVER_HOST=127.0.0.1`  
+**Required**: No
+**Type**: String (IP address)
+**Default**: `0.0.0.0`
+**Example**: `SERVER_HOST=127.0.0.1`
 **Description**: Server bind address.
 
 #### `SERVER_PORT`
-**Required**: No  
-**Type**: Integer  
-**Default**: `8081`  
-**Example**: `SERVER_PORT=3000`  
+**Required**: No
+**Type**: Integer
+**Default**: `8081`
+**Example**: `SERVER_PORT=3000`
 **Description**: Server listen port.
 
 #### `SERVER_WORKERS`
-**Required**: No  
-**Type**: Integer  
-**Default**: (CPU cores)  
-**Example**: `SERVER_WORKERS=4`  
+**Required**: No
+**Type**: Integer
+**Default**: (CPU cores)
+**Example**: `SERVER_WORKERS=4`
 **Description**: Number of worker threads. Defaults to number of CPU cores.
 
 ### Rate Limiting
 
 #### `RATE_LIMIT_ENABLED`
-**Required**: No  
-**Type**: Boolean  
-**Default**: `true`  
-**Example**: `RATE_LIMIT_ENABLED=true`  
+**Required**: No
+**Type**: Boolean
+**Default**: `true`
+**Example**: `RATE_LIMIT_ENABLED=true`
 **Description**: Enable or disable rate limiting.
 
 #### `RATE_LIMIT_REQUESTS`
-**Required**: No  
-**Type**: Integer  
-**Default**: `1000`  
-**Example**: `RATE_LIMIT_REQUESTS=5000`  
+**Required**: No
+**Type**: Integer
+**Default**: `1000`
+**Example**: `RATE_LIMIT_REQUESTS=5000`
 **Description**: Maximum requests per window for authenticated users.
 
 #### `RATE_LIMIT_WINDOW`
-**Required**: No  
-**Type**: Integer (seconds)  
-**Default**: `60`  
-**Example**: `RATE_LIMIT_WINDOW=300`  
+**Required**: No
+**Type**: Integer (seconds)
+**Default**: `60`
+**Example**: `RATE_LIMIT_WINDOW=300`
 **Description**: Rate limit window duration in seconds.
 
 #### `RATE_LIMIT_BURST`
-**Required**: No  
-**Type**: Integer  
-**Default**: `100`  
-**Example**: `RATE_LIMIT_BURST=200`  
+**Required**: No
+**Type**: Integer
+**Default**: `100`
+**Example**: `RATE_LIMIT_BURST=200`
 **Description**: Burst size for rate limiter (allows brief spikes).
 
 ### Logging
 
 #### `RUST_LOG`
-**Required**: No  
-**Type**: String (log level)  
-**Default**: `info`  
-**Valid Values**: `error`, `warn`, `info`, `debug`, `trace`  
-**Example**: `RUST_LOG=debug`  
+**Required**: No
+**Type**: String (log level)
+**Default**: `info`
+**Valid Values**: `error`, `warn`, `info`, `debug`, `trace`
+**Example**: `RUST_LOG=debug`
 **Description**: Application log level. Can be module-specific: `rust_github_archiver=debug,sqlx=warn`.
 
 #### `LOG_FORMAT`
-**Required**: No  
-**Type**: String  
-**Default**: `json`  
-**Valid Values**: `json`, `pretty`, `compact`  
-**Example**: `LOG_FORMAT=json`  
+**Required**: No
+**Type**: String
+**Default**: `json`
+**Valid Values**: `json`, `pretty`, `compact`
+**Example**: `LOG_FORMAT=json`
 **Description**: Log output format. Use `json` for production, `pretty` for development.
 
 #### `LOG_FILE`
-**Required**: No  
-**Type**: String (file path)  
-**Default**: None (stdout only)  
-**Example**: `LOG_FILE=/var/log/github-archiver/app.log`  
+**Required**: No
+**Type**: String (file path)
+**Default**: None (stdout only)
+**Example**: `LOG_FILE=/var/log/github-archiver/app.log`
 **Description**: Path to log file. If not set, logs only to stdout.
 
 ### Monitoring & Metrics
 
 #### `METRICS_ENABLED`
-**Required**: No  
-**Type**: Boolean  
-**Default**: `true`  
-**Example**: `METRICS_ENABLED=true`  
+**Required**: No
+**Type**: Boolean
+**Default**: `true`
+**Example**: `METRICS_ENABLED=true`
 **Description**: Enable Prometheus metrics endpoint.
 
 #### `METRICS_PORT`
-**Required**: No  
-**Type**: Integer  
-**Default**: `9090`  
-**Example**: `METRICS_PORT=9091`  
+**Required**: No
+**Type**: Integer
+**Default**: `9090`
+**Example**: `METRICS_PORT=9091`
 **Description**: Port for Prometheus metrics endpoint.
 
 #### `HEALTH_CHECK_INTERVAL`
-**Required**: No  
-**Type**: Integer (seconds)  
-**Default**: `10`  
-**Example**: `HEALTH_CHECK_INTERVAL=30`  
+**Required**: No
+**Type**: Integer (seconds)
+**Default**: `10`
+**Example**: `HEALTH_CHECK_INTERVAL=30`
 **Description**: Interval for internal health checks.
 
 ### Scraping & Processing
 
 #### `SCRAPER_ENABLED`
-**Required**: No  
-**Type**: Boolean  
-**Default**: `true`  
-**Example**: `SCRAPER_ENABLED=false`  
+**Required**: No
+**Type**: Boolean
+**Default**: `true`
+**Example**: `SCRAPER_ENABLED=false`
 **Description**: Enable or disable GitHub event scraping.
 
 #### `SCRAPER_INTERVAL`
-**Required**: No  
-**Type**: Integer (seconds)  
-**Default**: `300` (5 minutes)  
-**Example**: `SCRAPER_INTERVAL=600`  
+**Required**: No
+**Type**: Integer (seconds)
+**Default**: `300` (5 minutes)
+**Example**: `SCRAPER_INTERVAL=600`
 **Description**: Interval between scraping runs.
 
 #### `SCRAPER_BATCH_SIZE`
-**Required**: No  
-**Type**: Integer  
-**Default**: `100`  
-**Example**: `SCRAPER_BATCH_SIZE=500`  
+**Required**: No
+**Type**: Integer
+**Default**: `100`
+**Example**: `SCRAPER_BATCH_SIZE=500`
 **Description**: Number of events to process in each batch.
 
 #### `SCRAPER_MAX_RETRIES`
-**Required**: No  
-**Type**: Integer  
-**Default**: `3`  
-**Example**: `SCRAPER_MAX_RETRIES=5`  
+**Required**: No
+**Type**: Integer
+**Default**: `3`
+**Example**: `SCRAPER_MAX_RETRIES=5`
 **Description**: Maximum number of retry attempts for failed scraping.
 
 ### Secret Scanning
 
 #### `SECRET_SCANNER_ENABLED`
-**Required**: No  
-**Type**: Boolean  
-**Default**: `true`  
-**Example**: `SECRET_SCANNER_ENABLED=true`  
+**Required**: No
+**Type**: Boolean
+**Default**: `true`
+**Example**: `SECRET_SCANNER_ENABLED=true`
 **Description**: Enable secret scanning functionality.
 
 #### `SECRET_SCANNER_THREADS`
-**Required**: No  
-**Type**: Integer  
-**Default**: `4`  
-**Example**: `SECRET_SCANNER_THREADS=8`  
+**Required**: No
+**Type**: Integer
+**Default**: `4`
+**Example**: `SECRET_SCANNER_THREADS=8`
 **Description**: Number of threads for parallel secret scanning.
 
 #### `SECRET_VALIDATION_ENABLED`
-**Required**: No  
-**Type**: Boolean  
-**Default**: `true`  
-**Example**: `SECRET_VALIDATION_ENABLED=false`  
+**Required**: No
+**Type**: Boolean
+**Default**: `true`
+**Example**: `SECRET_VALIDATION_ENABLED=false`
 **Description**: Enable validation of detected secrets (e.g., AWS key validation).
 
 ### Redis (Optional)
 
 #### `REDIS_URL`
-**Required**: No  
-**Type**: String (Redis connection URL)  
-**Default**: None  
-**Example**: `REDIS_URL=redis://localhost:6379`  
+**Required**: No
+**Type**: String (Redis connection URL)
+**Default**: None
+**Example**: `REDIS_URL=redis://localhost:6379`
 **Description**: Redis connection URL for caching. If not set, in-memory caching is used.
 
 #### `REDIS_POOL_SIZE`
-**Required**: No  
-**Type**: Integer  
-**Default**: `10`  
-**Example**: `REDIS_POOL_SIZE=20`  
+**Required**: No
+**Type**: Integer
+**Default**: `10`
+**Example**: `REDIS_POOL_SIZE=20`
 **Description**: Size of Redis connection pool.
 
 #### `CACHE_TTL`
-**Required**: No  
-**Type**: Integer (seconds)  
-**Default**: `300` (5 minutes)  
-**Example**: `CACHE_TTL=600`  
+**Required**: No
+**Type**: Integer (seconds)
+**Default**: `300` (5 minutes)
+**Example**: `CACHE_TTL=600`
 **Description**: Default time-to-live for cached entries.
 
 ### Webhooks
 
 #### `WEBHOOK_ENABLED`
-**Required**: No  
-**Type**: Boolean  
-**Default**: `true`  
-**Example**: `WEBHOOK_ENABLED=false`  
+**Required**: No
+**Type**: Boolean
+**Default**: `true`
+**Example**: `WEBHOOK_ENABLED=false`
 **Description**: Enable webhook notifications.
 
 #### `WEBHOOK_TIMEOUT`
-**Required**: No  
-**Type**: Integer (seconds)  
-**Default**: `10`  
-**Example**: `WEBHOOK_TIMEOUT=30`  
+**Required**: No
+**Type**: Integer (seconds)
+**Default**: `10`
+**Example**: `WEBHOOK_TIMEOUT=30`
 **Description**: Timeout for webhook delivery.
 
 #### `WEBHOOK_MAX_RETRIES`
-**Required**: No  
-**Type**: Integer  
-**Default**: `3`  
-**Example**: `WEBHOOK_MAX_RETRIES=5`  
+**Required**: No
+**Type**: Integer
+**Default**: `3`
+**Example**: `WEBHOOK_MAX_RETRIES=5`
 **Description**: Maximum retries for failed webhook deliveries.
 
 ### Notifications
 
 #### `SLACK_WEBHOOK_URL`
-**Required**: No  
-**Type**: String (URL)  
-**Default**: None  
-**Example**: `SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx/yyy/zzz`  
+**Required**: No
+**Type**: String (URL)
+**Default**: None
+**Example**: `SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx/yyy/zzz`
 **Description**: Slack webhook URL for notifications.
 
 #### `DISCORD_WEBHOOK_URL`
-**Required**: No  
-**Type**: String (URL)  
-**Default**: None  
-**Example**: `DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx/yyy`  
+**Required**: No
+**Type**: String (URL)
+**Default**: None
+**Example**: `DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/xxx/yyy`
 **Description**: Discord webhook URL for notifications.
 
 #### `SMTP_HOST`
-**Required**: No  
-**Type**: String  
-**Default**: None  
-**Example**: `SMTP_HOST=smtp.gmail.com`  
+**Required**: No
+**Type**: String
+**Default**: None
+**Example**: `SMTP_HOST=smtp.gmail.com`
 **Description**: SMTP server hostname for email notifications.
 
 #### `SMTP_PORT`
-**Required**: No  
-**Type**: Integer  
-**Default**: `587`  
-**Example**: `SMTP_PORT=465`  
+**Required**: No
+**Type**: Integer
+**Default**: `587`
+**Example**: `SMTP_PORT=465`
 **Description**: SMTP server port.
 
 #### `SMTP_USERNAME`
-**Required**: No  
-**Type**: String  
-**Default**: None  
-**Example**: `SMTP_USERNAME=notifications@example.com`  
+**Required**: No
+**Type**: String
+**Default**: None
+**Example**: `SMTP_USERNAME=notifications@example.com`
 **Description**: SMTP authentication username.
 
 #### `SMTP_PASSWORD`
-**Required**: No  
-**Type**: String  
-**Default**: None  
-**Example**: `SMTP_PASSWORD=app-specific-password`  
+**Required**: No
+**Type**: String
+**Default**: None
+**Example**: `SMTP_PASSWORD=app-specific-password`
 **Description**: SMTP authentication password.
 
 ### Feature Flags
 
 #### `FEATURE_AI_TRIAGE`
-**Required**: No  
-**Type**: Boolean  
-**Default**: `false`  
-**Example**: `FEATURE_AI_TRIAGE=true`  
+**Required**: No
+**Type**: Boolean
+**Default**: `false`
+**Example**: `FEATURE_AI_TRIAGE=true`
 **Description**: Enable AI-powered secret triage (requires AI feature flag at compile time).
 
+#### `ENABLE_RESEARCH_MODE`
+**Required**: No
+**Type**: Boolean
+**Default**: `true`
+**Example**: `ENABLE_RESEARCH_MODE=true`
+**Description**: Enables the authenticated bug-bounty research workspace, candidate review endpoints, scoring, and report export.
+
+#### `ENABLE_EXTERNAL_AI_RESEARCH`
+**Required**: No
+**Type**: Boolean
+**Default**: `false`
+**Example**: `ENABLE_EXTERNAL_AI_RESEARCH=false`
+**Description**: Allows research assist jobs to call external OpenAI or Anthropic-compatible providers. Keep disabled for local-only operation.
+
+#### `RESEARCH_AI_BASE_URL`
+**Required**: No
+**Type**: URL
+**Default**: `http://127.0.0.1:11434/v1`
+**Example**: `RESEARCH_AI_BASE_URL=http://127.0.0.1:11434/v1`
+**Description**: Base URL for the local OpenAI-compatible research assistant provider.
+
+#### `RESEARCH_AI_MODEL`
+**Required**: Yes for research AI assist
+**Type**: String
+**Default**: None
+**Example**: `RESEARCH_AI_MODEL=local-security-assistant`
+**Description**: Model used for local research report assistance. Request-level model overrides are also accepted by the authenticated API.
+
+#### `RESEARCH_AI_API_KEY`
+**Required**: No for local providers
+**Type**: String
+**Default**: None
+**Example**: `RESEARCH_AI_API_KEY=<local-provider-key>`
+**Description**: Optional bearer token for local OpenAI-compatible providers. External providers should use provider-specific keys.
+
+#### `RESEARCH_OPENAI_API_KEY`
+**Required**: Yes when using provider `openai`
+**Type**: String
+**Default**: None
+**Example**: `RESEARCH_OPENAI_API_KEY=<openai-api-key>`
+**Description**: OpenAI API key for explicitly confirmed external research assistance. Full evidence sends to external providers require per-job confirmation.
+
+#### `RESEARCH_ANTHROPIC_API_KEY`
+**Required**: Yes when using provider `anthropic`
+**Type**: String
+**Default**: None
+**Example**: `RESEARCH_ANTHROPIC_API_KEY=<anthropic-api-key>`
+**Description**: Anthropic API key for explicitly confirmed external research assistance. Full evidence sends to external providers require per-job confirmation.
+
 #### `FEATURE_BIGQUERY`
-**Required**: No  
-**Type**: Boolean  
-**Default**: `false`  
-**Example**: `FEATURE_BIGQUERY=true`  
+**Required**: No
+**Type**: Boolean
+**Default**: `false`
+**Example**: `FEATURE_BIGQUERY=true`
 **Description**: Enable BigQuery integration.
 
 #### `FEATURE_REALTIME`
-**Required**: No  
-**Type**: Boolean  
-**Default**: `true`  
-**Example**: `FEATURE_REALTIME=false`  
+**Required**: No
+**Type**: Boolean
+**Default**: `true`
+**Example**: `FEATURE_REALTIME=false`
 **Description**: Enable real-time event processing.
 
 ### Development & Testing
 
 #### `DEV_MODE`
-**Required**: No  
-**Type**: Boolean  
-**Default**: `false`  
-**Example**: `DEV_MODE=true`  
+**Required**: No
+**Type**: Boolean
+**Default**: `false`
+**Example**: `DEV_MODE=true`
 **Description**: Enable development mode (more verbose logging, less strict validation).
 
 #### `TEST_MODE`
-**Required**: No  
-**Type**: Boolean  
-**Default**: `false`  
-**Example**: `TEST_MODE=true`  
+**Required**: No
+**Type**: Boolean
+**Default**: `false`
+**Example**: `TEST_MODE=true`
 **Description**: Enable test mode (disables external API calls, uses mock data).
 
 #### `MOCK_GITHUB_API`
-**Required**: No  
-**Type**: Boolean  
-**Default**: `false`  
-**Example**: `MOCK_GITHUB_API=true`  
+**Required**: No
+**Type**: Boolean
+**Default**: `false`
+**Example**: `MOCK_GITHUB_API=true`
 **Description**: Use mock GitHub API responses instead of real API calls.
 
 ---
@@ -374,22 +423,22 @@ Complete reference for all environment variables used in GitHub Archiver.
 ```bash
 # Required only
 DATABASE_URL=postgresql://user:password@postgres:5432/github_archiver
-JWT_SECRET=your-secret-key-minimum-32-characters-long
+JWT_SECRET=<output-of-openssl-rand-hex-32>
 GITHUB_TOKEN=ghp_REDACTED_EXAMPLE
-ADMIN_PASSWORD=ChangeMe123!
+ADMIN_PASSWORD=<strong-random-admin-password>
 ```
 
 ### Recommended Production Configuration
 ```bash
 # Database
 DATABASE_URL=postgresql://user:password@postgres:5432/github_archiver
-DB_MAX_CONNECTIONS=150
-DB_MIN_CONNECTIONS=20
+DB_MAX_CONNECTIONS=8
+DB_MIN_CONNECTIONS=1
 
 # Security
-JWT_SECRET=your-secret-key-minimum-32-characters-long
+JWT_SECRET=<output-of-openssl-rand-hex-32>
 JWT_EXPIRATION=3600
-ADMIN_PASSWORD=SecurePassword123!
+ADMIN_PASSWORD=<strong-random-admin-password>
 
 # GitHub
 GITHUB_TOKEN=ghp_REDACTED_EXAMPLE
@@ -431,9 +480,9 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx/yyy/zzz
 # Database
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/github_archiver_dev
 
-# Security (dev only - not secure!)
-JWT_SECRET=dev-secret-key-min-32-chars-long
-ADMIN_PASSWORD=admin
+# Security (dev only - generate local values; do not reuse in production)
+JWT_SECRET=<output-of-openssl-rand-hex-32>
+ADMIN_PASSWORD=<strong-random-admin-password>
 
 # GitHub
 GITHUB_TOKEN=ghp_REDACTED_EXAMPLE
@@ -457,8 +506,8 @@ MOCK_GITHUB_API=false
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/github_archiver_test
 
 # Security
-JWT_SECRET=test-secret-key-minimum-32-chars
-ADMIN_PASSWORD=test
+JWT_SECRET=<output-of-openssl-rand-hex-32>
+ADMIN_PASSWORD=<strong-random-admin-password>
 
 # Testing
 TEST_MODE=true

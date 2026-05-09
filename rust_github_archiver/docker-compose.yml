@@ -84,8 +84,8 @@ services:
       CPU_LIMIT_PERCENT: ${CPU_LIMIT_PERCENT:-80.0}
       
       # Security Configuration
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
-      JWT_SECRET: ${JWT_SECRET:-change-this-secret-key}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD must be set to a strong random password}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set to a 32+ character random secret}
       
       # Logging Configuration
       RUST_LOG: ${RUST_LOG:-info}

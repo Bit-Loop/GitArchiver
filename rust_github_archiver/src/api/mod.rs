@@ -12,6 +12,7 @@ pub mod maintenance_handlers;
 pub mod middleware;
 pub mod monitoring_handlers;
 pub mod realtime_handlers;
+pub mod research_handlers;
 pub mod routes;
 pub mod scanner_handlers;
 pub mod scanner_service;

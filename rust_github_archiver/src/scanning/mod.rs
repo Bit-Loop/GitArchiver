@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use std::time::{Duration as StdDuration, Instant as StdInstant};
-use tokio::sync::{watch, RwLock, Semaphore};
+use tokio::sync::{watch, OwnedSemaphorePermit, RwLock, Semaphore};
 use tracing::{error, info, warn}; // Removed unused debug
 use uuid::Uuid;
 
@@ -503,6 +503,9 @@ impl ScanningService {
         }
 
         let scan_id = Uuid::new_v4().to_string();
+        let permit = self.semaphore.clone().try_acquire_owned().map_err(|_| {
+            anyhow!("Scanner concurrency limit reached; retry after active scans finish")
+        })?;
         let source_events: Vec<SourceEventProvenance> = event_targets
             .iter()
             .map(SourceEventProvenance::from)
@@ -541,7 +544,10 @@ impl ScanningService {
         let scan_id_clone = scan_id.clone();
 
         tokio::spawn(async move {
-            if let Err(e) = service.execute_scan(scan_id_clone, repo, config).await {
+            if let Err(e) = service
+                .execute_scan(scan_id_clone, repo, config, permit)
+                .await
+            {
                 error!("Scan execution failed: {}", e);
             }
         });
@@ -556,14 +562,8 @@ impl ScanningService {
         scan_id: String,
         repository: String,
         config: ScanConfig,
+        _permit: OwnedSemaphorePermit,
     ) -> Result<()> {
-        // Acquire semaphore permit
-        let _permit = self
-            .semaphore
-            .acquire()
-            .await
-            .map_err(|e| anyhow!("Failed to acquire scan permit: {}", e))?;
-
         if let Err(error) = self.wait_for_execution_window(&scan_id).await {
             self.handle_scan_cancellation(&scan_id, &error.to_string())
                 .await;

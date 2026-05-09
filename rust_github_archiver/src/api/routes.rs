@@ -2,7 +2,7 @@
 use axum::{
     middleware,
     response::Html,
-    routing::{get, post},
+    routing::{get, patch, post},
     Extension, Router,
 };
 use std::path::PathBuf;
@@ -72,6 +72,11 @@ use crate::api::realtime_handlers::{
     get_event_monitor_status, get_recent_event_samples, pause_event_monitor,
     reset_rate_limiter_stats, resume_event_monitor, search_events, start_event_monitor,
     stop_event_monitor, update_rate_limit,
+};
+use crate::api::research_handlers::{
+    create_research_finding, export_research_finding, get_research_finding,
+    list_research_candidates, list_research_findings, run_research_ai_assist,
+    score_research_finding, update_research_finding,
 };
 use crate::api::state::AppState;
 use crate::auth::{
@@ -152,6 +157,21 @@ pub fn create_routes(app_state: AppState) -> Router {
         .route("/api/metrics/report", get(get_metrics_report))
         .route("/api/health/extended", get(get_extended_health))
         .route("/api/ai/triage/:job_id", get(get_ai_triage))
+        .route("/api/database/stats", get(database_stats))
+        .route("/api/v1/database/stats", get(database_stats))
+        .route("/api/scanner/results", get(get_scan_results))
+        .route("/api/v1/scanner/results", get(get_scan_results))
+        .route("/api/scanner/statistics", get(get_scan_statistics))
+        .route("/api/v1/scanner/statistics", get(get_scan_statistics))
+        .route("/api/scanner/detectors", get(get_detectors))
+        .route("/api/v1/scanner/detectors", get(get_detectors))
+        .route("/api/monitoring/metrics", get(get_realtime_metrics))
+        .route("/api/v1/monitoring/metrics", get(get_realtime_metrics))
+        .route("/api/realtime/events", get(get_recent_event_samples))
+        .route("/api/config", get(get_app_config))
+        .route("/api/research/candidates", get(list_research_candidates))
+        .route("/api/research/findings", get(list_research_findings))
+        .route("/api/research/findings/:id", get(get_research_finding))
         .with_state(app_state.clone())
         .layer(middleware::from_fn_with_state(
             app_state.user_manager.clone(),
@@ -185,6 +205,20 @@ pub fn create_routes(app_state: AppState) -> Router {
         .route("/api/realtime/config", post(update_rate_limit))
         .route("/api/realtime/stats/reset", post(reset_rate_limiter_stats))
         .route("/api/ai/triage", post(run_ai_triage))
+        .route("/api/research/findings", post(create_research_finding))
+        .route("/api/research/findings/:id", patch(update_research_finding))
+        .route(
+            "/api/research/findings/:id/score",
+            post(score_research_finding),
+        )
+        .route(
+            "/api/research/findings/:id/ai-assist",
+            post(run_research_ai_assist),
+        )
+        .route(
+            "/api/research/findings/:id/export",
+            post(export_research_finding),
+        )
         .with_state(app_state.clone())
         .layer(middleware::from_fn_with_state(
             app_state.user_manager.clone(),
@@ -267,24 +301,11 @@ pub fn create_routes(app_state: AppState) -> Router {
         .route("/health/ready", get(readiness_handler))
         .route("/api/database/status", get(database_status))
         .route("/api/v1/database/status", get(database_status))
-        .route("/api/database/stats", get(database_stats))
-        .route("/api/v1/database/stats", get(database_stats))
-        // Scanner public endpoints
-        .route("/api/scanner/results", get(get_scan_results))
-        .route("/api/v1/scanner/results", get(get_scan_results))
-        .route("/api/scanner/statistics", get(get_scan_statistics))
-        .route("/api/v1/scanner/statistics", get(get_scan_statistics))
-        .route("/api/scanner/detectors", get(get_detectors))
-        .route("/api/v1/scanner/detectors", get(get_detectors))
-        // Monitoring public endpoints
-        .route("/api/monitoring/metrics", get(get_realtime_metrics))
-        .route("/api/v1/monitoring/metrics", get(get_realtime_metrics))
+        // Monitoring websocket endpoints are protected separately by the UI/API token handshake.
         .route("/api/monitoring/ws", get(realtime_websocket))
         .route("/api/v1/monitoring/ws", get(realtime_websocket))
         // GitHub Events realtime monitoring endpoints
         .route("/api/realtime/status", get(get_event_monitor_status))
-        .route("/api/realtime/events", get(get_recent_event_samples))
-        .route("/api/config", get(get_app_config))
         // Dashboard routes (public access)
         .route("/", get(serve_dashboard))
         .route("/dashboard", get(serve_dashboard))
@@ -317,6 +338,9 @@ pub fn create_routes(app_state: AppState) -> Router {
         // Add rate limiting middleware (extension then middleware)
         .layer(middleware::from_fn(rate_limiter::rate_limit_middleware))
         .layer(Extension(app_state.rate_limiter.clone()))
+        .layer(tower_http::limit::RequestBodyLimitLayer::new(
+            10 * 1024 * 1024,
+        ))
         // Add request size and timeout middleware (no config needed, use constants)
         .layer(middleware::from_fn(security::request_size_limit_middleware))
         .layer(middleware::from_fn(security::request_timeout_middleware))

@@ -101,7 +101,7 @@ ScanningService Database   (ResourceMonitor) Config
 - `src/api/monitoring_handlers.rs` (613 lines) - Complete rewrite with real data integration
 
 **Existing Frontend** (already created):
-- `monitoring-dashboard.html` (1,200+ lines) - 4-tab UI with Chart.js visualization
+- `dashboard` (1,200+ lines) - 4-tab UI with Chart.js visualization
 
 ### 🎯 Frontend Integration Points
 
@@ -151,7 +151,7 @@ $ cargo build --bin web_server
    ```
 
 2. **Open dashboard**:
-   - Navigate to `http://localhost:8081/monitoring-dashboard.html`
+   - Navigate to `http://localhost:8081/dashboard`
 
 3. **Verify tabs populate with real data**:
    - **Overview Tab**: Should show actual secret counts, repositories, scan statistics

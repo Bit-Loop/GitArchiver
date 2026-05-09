@@ -135,9 +135,9 @@ let secrets = vec![  // Remove 'mut'
 
 **Location:** `src/auth/users.rs` (implied from architecture)
 ```rust
-// Default admin credentials in code
+// Historical default admin credentials in code
 username: "admin"
-password: "admin123"
+password: "<unsafe-default-password>"
 ```
 
 **Problem:** Default credentials are a major security risk if not changed.

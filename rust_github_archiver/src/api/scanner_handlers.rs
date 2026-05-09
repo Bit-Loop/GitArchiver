@@ -256,14 +256,21 @@ pub async fn get_scan_results(
         offset: Some(offset),
     };
 
+    let total_count = app_state
+        .persistence
+        .count_secret_detections(&filter)
+        .await
+        .unwrap_or(0);
+
     match app_state.persistence.secret_detections(filter).await {
         Ok(detections) => {
-            let total_loaded = detections.len() as u32;
-            let has_more = total_loaded as i64 == limit;
+            let total_loaded = detections.len() as i64;
+            let has_more = offset + total_loaded < total_count;
 
             Json(json!({
                 "results": detections,
-                "total_count": total_loaded,
+                "total_count": total_count,
+                "loaded_count": total_loaded,
                 "page_size": limit,
                 "has_more": has_more,
                 "filters_applied": filters
@@ -283,24 +290,59 @@ pub async fn get_scan_results(
 pub async fn get_scan_statistics(State(app_state): State<AppState>) -> Json<Value> {
     info!("Fetching scan statistics");
 
-    let stats = app_state.scanning_service.get_statistics().await;
-
-    Json(json!({
-        "total_scans": stats.total_scans,
-        "repositories_scanned": stats.repositories_scanned,
-        "total_secrets_found": stats.total_findings,
-        "verified_secrets": stats.verified_findings,
-        "false_positives": stats.false_positives,
-        "scan_stats": {
-            "avg_scan_time_ms": stats.avg_scan_time_ms,
-            "avg_secrets_per_repo": stats.avg_secrets_per_repo,
-            "success_rate": stats.success_rate,
-        },
-        "severity_distribution": stats.severity_distribution,
-        "category_distribution": stats.category_distribution,
-        "detector_performance": stats.detector_performance,
-        "recent_activity": stats.recent_activity,
-    }))
+    match app_state.persistence.secret_overview_metrics().await {
+        Ok(overview) => Json(json!({
+            "source": "database",
+            "total_scans": overview.total_scans,
+            "repositories_scanned": overview.repositories_scanned,
+            "total_secrets_found": overview.total_secrets,
+            "verified_secrets": overview.verified_secrets,
+            "false_positives": overview.false_positives,
+            "scan_stats": {
+                "avg_scan_time_ms": overview.avg_scan_duration_ms.unwrap_or(0),
+                "avg_secrets_per_repo": if overview.repositories_scanned > 0 {
+                    overview.total_secrets as f64 / overview.repositories_scanned as f64
+                } else {
+                    0.0
+                },
+                "success_rate": overview.scan_success_rate,
+                "failed_scans": overview.failed_scans,
+                "active_scans": overview.active_scans,
+                "last_scan_time": overview.last_scan_time,
+                "scan_rate_per_minute": overview.scan_rate_per_minute,
+                "repos_per_minute": overview.repos_per_minute,
+            },
+            "severity_distribution": overview.severity_counts,
+            "category_distribution": overview.category_counts,
+            "detector_performance": {},
+            "recent_activity": {
+                "last_scan_time": overview.last_scan_time,
+                "scan_rate_per_minute": overview.scan_rate_per_minute,
+                "repos_per_minute": overview.repos_per_minute
+            },
+        })),
+        Err(error) => {
+            error!("Failed to load database-backed scan statistics: {}", error);
+            let stats = app_state.scanning_service.get_statistics().await;
+            Json(json!({
+                "source": "memory",
+                "total_scans": stats.total_scans,
+                "repositories_scanned": stats.repositories_scanned,
+                "total_secrets_found": stats.total_findings,
+                "verified_secrets": stats.verified_findings,
+                "false_positives": stats.false_positives,
+                "scan_stats": {
+                    "avg_scan_time_ms": stats.avg_scan_time_ms,
+                    "avg_secrets_per_repo": stats.avg_secrets_per_repo,
+                    "success_rate": stats.success_rate,
+                },
+                "severity_distribution": stats.severity_distribution,
+                "category_distribution": stats.category_distribution,
+                "detector_performance": stats.detector_performance,
+                "recent_activity": stats.recent_activity,
+            }))
+        }
+    }
 }
 
 /// Get available secret detectors

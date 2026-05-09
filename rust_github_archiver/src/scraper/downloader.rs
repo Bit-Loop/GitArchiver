@@ -132,7 +132,7 @@ impl Downloader {
                     });
                 }
                 Err(e) => {
-                    error!("Download attempt {} failed for {}: {}", attempt + 1, url, e);
+                    warn!("Download attempt {} failed for {}: {}", attempt + 1, url, e);
                     last_error = Some(e);
 
                     // Clean up partial file

@@ -40,7 +40,8 @@
 
         button,
         input,
-        select {
+        select,
+        textarea {
             font: inherit;
         }
 
@@ -319,7 +320,8 @@
         }
 
         input,
-        select {
+        select,
+        textarea {
             min-height: 38px;
             width: 100%;
             padding: 8px 10px;
@@ -327,6 +329,11 @@
             border: 1px solid var(--border);
             background: #ffffff;
             color: var(--text);
+        }
+
+        textarea {
+            min-height: 92px;
+            resize: vertical;
         }
 
         input:focus,
@@ -459,6 +466,22 @@
 
         .list-item:last-child {
             border-bottom: 0;
+        }
+
+        .detail-box {
+            display: grid;
+            gap: 10px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface-muted);
+        }
+
+        .detail-box pre {
+            margin: 0;
+            max-height: 220px;
+            overflow: auto;
+            white-space: pre-wrap;
         }
 
         .empty,
@@ -626,6 +649,7 @@
                 <button class="active" type="button" data-section="overview">Overview <span id="navOverview">0</span></button>
                 <button type="button" data-section="scanner">Scanner <span id="navScanner">idle</span></button>
                 <button type="button" data-section="detections">Detections <span id="navDetections">0</span></button>
+                <button type="button" data-section="research">Research <span id="navResearch">0</span></button>
                 <button type="button" data-section="logs">Logs <span id="navLogs">0</span></button>
             </nav>
 
@@ -788,6 +812,130 @@
                     </article>
                 </section>
 
+                <section id="research" class="section">
+                    <div class="grid metrics">
+                        <article class="metric">
+                            <div class="metric-label">Candidates</div>
+                            <div class="metric-value" id="researchCandidateCount">0</div>
+                            <div class="metric-note">From events and detections</div>
+                        </article>
+                        <article class="metric">
+                            <div class="metric-label">Findings</div>
+                            <div class="metric-value" id="researchFindingCount">0</div>
+                            <div class="metric-note">Local research records</div>
+                        </article>
+                        <article class="metric">
+                            <div class="metric-label">Selected Score</div>
+                            <div class="metric-value" id="researchSelectedScore">0</div>
+                            <div class="metric-note" id="researchSelectedStatus">No finding selected</div>
+                        </article>
+                        <article class="metric">
+                            <div class="metric-label">AI Mode</div>
+                            <div class="metric-value" id="researchAiMode">Local</div>
+                            <div class="metric-note">External sends require confirmation</div>
+                        </article>
+                    </div>
+
+                    <div class="grid two">
+                        <article class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title">Research Candidates</h2>
+                                <button class="btn" id="refreshResearchButton" type="button">Refresh</button>
+                            </div>
+                            <div class="panel-body">
+                                <div class="table-wrap">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Source</th>
+                                                <th>Asset</th>
+                                                <th>Signal</th>
+                                                <th>Severity</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="researchCandidatesBody">
+                                            <tr><td colspan="5">Loading candidates</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="panel">
+                            <div class="panel-header">
+                                <h2 class="panel-title">Research Findings</h2>
+                                <button class="btn" id="scoreResearchButton" type="button">Score Selected</button>
+                            </div>
+                            <div class="panel-body">
+                                <div class="table-wrap">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Title</th>
+                                                <th>Status</th>
+                                                <th>Score</th>
+                                                <th>Asset</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="researchFindingsBody">
+                                            <tr><td colspan="4">No findings loaded</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+
+                    <article class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Selected Finding</h2>
+                            <div class="toolbar">
+                                <button class="btn" id="exportResearchButton" type="button">Export Markdown</button>
+                                <button class="btn primary" id="researchRunAiButton" type="button">AI Assist</button>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="grid two">
+                                <div class="detail-box" id="researchDetail">
+                                    <div class="empty">Select or create a research finding.</div>
+                                </div>
+                                <div class="grid">
+                                    <div class="form-grid" style="grid-template-columns: minmax(160px, 1fr) minmax(160px, 1fr) auto;">
+                                        <label>
+                                            Provider
+                                            <select id="researchProvider">
+                                                <option value="local-openai">Local OpenAI</option>
+                                                <option value="openai">GPT / OpenAI</option>
+                                                <option value="anthropic">Claude / Anthropic</option>
+                                            </select>
+                                        </label>
+                                        <label>
+                                            Model
+                                            <input id="researchModel" type="text" autocomplete="off">
+                                        </label>
+                                        <label>
+                                            Full Evidence
+                                            <select id="researchFullEvidence">
+                                                <option value="false">Redacted</option>
+                                                <option value="true">Full</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <label>
+                                        AI Prompt
+                                        <textarea id="researchAiPrompt">Improve this bug bounty report draft. Call out missing proof, scope risk, and impact gaps without inventing facts.</textarea>
+                                    </label>
+                                    <div class="detail-box">
+                                        <strong>Output</strong>
+                                        <pre id="researchOutput">No output yet.</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </section>
+
                 <section id="logs" class="section">
                     <article class="panel">
                         <div class="panel-header">
@@ -830,10 +978,6 @@
                         Password
                         <input id="passwordInput" type="password" autocomplete="current-password" required>
                     </label>
-                    <label style="display: flex; align-items: center; gap: 8px; text-transform: none; letter-spacing: 0; font-size: 13px;">
-                        <input id="rememberInput" type="checkbox" style="width: auto; min-height: auto;">
-                        Keep session in this browser
-                    </label>
                     <div class="modal-actions">
                         <button class="btn" type="button" id="cancelLoginButton">Cancel</button>
                         <button class="btn primary" type="submit" id="loginSubmitButton">Sign In</button>
@@ -843,562 +987,6 @@
         </article>
     </div>
 
-    <script>
-        const state = {
-            token: localStorage.getItem('authToken') || sessionStorage.getItem('authToken') || '',
-            user: null,
-            scannerStatus: 'unknown',
-            refreshTimer: null
-        };
-
-        const $ = (id) => document.getElementById(id);
-
-        function setText(id, value) {
-            const el = $(id);
-            if (el) {
-                el.textContent = value;
-            }
-        }
-
-        function formatNumber(value) {
-            const number = Number(value);
-            return Number.isFinite(number) ? number.toLocaleString() : '0';
-        }
-
-        function formatPercent(value) {
-            const number = Number(value);
-            return Number.isFinite(number) ? `${number.toFixed(1)}%` : '0.0%';
-        }
-
-        function formatTime(value) {
-            if (!value) {
-                return 'n/a';
-            }
-            const date = new Date(value);
-            return Number.isNaN(date.getTime())
-                ? 'n/a'
-                : date.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
-        }
-
-        function formatDuration(seconds) {
-            const value = Number(seconds);
-            if (!Number.isFinite(value) || value < 0) {
-                return 'n/a';
-            }
-            if (value < 60) {
-                return `${Math.round(value)}s`;
-            }
-            if (value < 3600) {
-                return `${Math.round(value / 60)}m`;
-            }
-            return `${Math.round(value / 3600)}h`;
-        }
-
-        function authHeaders() {
-            return state.token ? { Authorization: `Bearer ${state.token}` } : {};
-        }
-
-        async function readJson(response) {
-            const text = await response.text();
-            if (!text) {
-                return {};
-            }
-            try {
-                return JSON.parse(text);
-            } catch (error) {
-                return { error: text };
-            }
-        }
-
-        async function api(path, options = {}) {
-            const headers = {
-                Accept: 'application/json',
-                ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-                ...(options.auth ? authHeaders() : {}),
-                ...(options.headers || {})
-            };
-            const response = await fetch(path, { ...options, headers });
-            const data = await readJson(response);
-            if (!response.ok) {
-                const message = data.message || data.error || `${response.status} ${response.statusText}`;
-                const error = new Error(message);
-                error.status = response.status;
-                error.payload = data;
-                throw error;
-            }
-            return data;
-        }
-
-        function setChip(id, text, tone) {
-            const chip = $(id);
-            if (!chip) {
-                return;
-            }
-            chip.classList.remove('good', 'warn', 'bad');
-            if (tone) {
-                chip.classList.add(tone);
-            }
-            const label = chip.querySelector('span:last-child');
-            if (label) {
-                label.textContent = text;
-            }
-        }
-
-        function toast(message, type = 'info') {
-            const host = $('toast');
-            const item = document.createElement('div');
-            item.className = `toast-item ${type}`;
-            item.textContent = message;
-            host.appendChild(item);
-            setTimeout(() => item.remove(), 4200);
-        }
-
-        function classifyStatus(value) {
-            const status = String(value || '').toLowerCase();
-            if (['running', 'healthy', 'ok', 'ready', 'connected'].includes(status)) {
-                return 'good';
-            }
-            if (['idle', 'paused', 'queued', 'warning', 'degraded'].includes(status)) {
-                return 'warn';
-            }
-            if (['error', 'failed', 'offline', 'stopped', 'unavailable'].includes(status)) {
-                return 'bad';
-            }
-            return '';
-        }
-
-        function showSection(sectionId) {
-            document.querySelectorAll('.section').forEach((section) => {
-                section.classList.toggle('active', section.id === sectionId);
-            });
-            document.querySelectorAll('.rail button').forEach((button) => {
-                button.classList.toggle('active', button.dataset.section === sectionId);
-            });
-        }
-
-        function updateAuthUi() {
-            const signedIn = Boolean(state.token);
-            $('loginButton').hidden = signedIn;
-            $('logoutButton').hidden = !signedIn;
-            setChip('authChip', signedIn ? (state.user?.username || 'Signed in') : 'Signed out', signedIn ? 'good' : 'warn');
-        }
-
-        async function verifyAuth() {
-            if (!state.token) {
-                updateAuthUi();
-                return;
-            }
-            try {
-                const data = await api('/api/auth/verify', { auth: true });
-                state.user = { username: data.user, role: data.role };
-            } catch (error) {
-                state.token = '';
-                state.user = null;
-                localStorage.removeItem('authToken');
-                sessionStorage.removeItem('authToken');
-            }
-            updateAuthUi();
-        }
-
-        async function loadSystemStatus() {
-            const data = await api('/api/v1/system/status');
-            const status = data.status || 'unknown';
-            setText('systemStatus', status);
-            setText('systemNote', `${data.hostname || 'host unknown'} | load ${Number(data.load_average || 0).toFixed(2)}`);
-            setText('databaseStatus', data.database?.is_connected ? 'Connected' : 'Offline');
-            setText('databaseNote', `Connections ${formatNumber(data.database?.connection_count)} | cache ${formatPercent(data.database?.cache_hit_ratio)}`);
-            setChip('apiChip', 'API online', data.ready ? 'good' : classifyStatus(status));
-
-            if (data.scraper) {
-                state.scannerStatus = data.scraper.status || 'unknown';
-                renderScannerFallback(data.scraper);
-            }
-        }
-
-        function renderScannerFallback(scraper) {
-            setText('scannerStatus', scraper.status || 'Unknown');
-            setText('navScanner', scraper.status || 'idle');
-            setText('filesProcessed', formatNumber(scraper.files_processed));
-            setText('eventsProcessed', formatNumber(scraper.events_processed));
-            setText('scannerRate', `${Number(scraper.processing_rate || 0).toFixed(1)}/min`);
-            setChip('scannerStatusChip', `Scanner ${scraper.status || 'unknown'}`, classifyStatus(scraper.status));
-            updateScannerButtons(scraper.status || 'unknown');
-        }
-
-        async function loadScannerMetrics() {
-            if (!state.token) {
-                renderScannerIssues(['Sign in to view queue metrics and control the scanner.']);
-                return;
-            }
-
-            const data = await api('/api/v1/scanner/metrics', { auth: true });
-            state.scannerStatus = data.status || 'unknown';
-            setText('scannerStatus', data.status || 'Unknown');
-            setText('navScanner', data.status || 'idle');
-            setText('activeScans', formatNumber(data.active_scans));
-            setText('filesProcessed', formatNumber(data.files_processed));
-            setText('eventsProcessed', formatNumber(data.events_processed));
-            setText('scannerRate', `${Number(data.processing_rate_per_minute || 0).toFixed(1)}/min`);
-            setText('queuePending', formatNumber(data.queue_pending));
-            setText('queueNote', `${formatNumber(data.queue_processing)} processing, ${formatNumber(data.queue_failed)} failed`);
-            setText('oldestPending', formatDuration(data.oldest_pending_age_seconds));
-            setChip('scannerStatusChip', `Scanner ${data.status || 'unknown'}`, classifyStatus(data.status));
-            setChip('trufflehogChip', data.trufflehog_available ? 'TruffleHog ready' : 'TruffleHog missing', data.trufflehog_available ? 'good' : 'bad');
-            renderScannerIssues(data.issues || []);
-            updateScannerButtons(data.status || 'unknown');
-        }
-
-        function updateScannerButtons(status) {
-            const primary = $('scannerPrimaryButton');
-            if (!primary) {
-                return;
-            }
-            if (status === 'running') {
-                primary.textContent = 'Pause';
-                primary.dataset.action = 'pause';
-            } else if (status === 'paused') {
-                primary.textContent = 'Resume';
-                primary.dataset.action = 'resume';
-            } else {
-                primary.textContent = 'Start';
-                primary.dataset.action = 'start';
-            }
-        }
-
-        function renderScannerIssues(issues) {
-            const host = $('scannerIssues');
-            if (!host) {
-                return;
-            }
-            if (!issues.length) {
-                host.innerHTML = '<div class="empty">No scanner issues reported.</div>';
-                return;
-            }
-            host.innerHTML = issues
-                .slice(0, 5)
-                .map((issue) => `<div class="error-box">${escapeHtml(issue)}</div>`)
-                .join('');
-        }
-
-        async function loadOverview() {
-            if (state.token) {
-                try {
-                    const data = await api('/api/v1/monitoring/overview', { auth: true });
-                    renderOverview(data);
-                    return;
-                } catch (error) {
-                    if (error.status !== 401) {
-                        throw error;
-                    }
-                }
-            }
-            const stats = await api('/api/v1/scanner/statistics');
-            renderOverview({
-                total_secrets: stats.total_secrets_found,
-                critical_secrets: stats.severity_distribution?.Critical || stats.severity_distribution?.critical || 0,
-                high_secrets: stats.severity_distribution?.High || stats.severity_distribution?.high || 0,
-                verified_secrets: stats.verified_secrets,
-                repositories_scanned: stats.repositories_scanned,
-                severity_distribution: stats.severity_distribution || {},
-                top_repositories: []
-            });
-        }
-
-        function renderOverview(data) {
-            setText('secretTotal', formatNumber(data.total_secrets));
-            setText('navOverview', formatNumber(data.total_secrets));
-            setText('navDetections', formatNumber(data.total_secrets));
-            setText('secretNote', `${formatNumber(data.critical_secrets)} critical, ${formatNumber(data.high_secrets)} high`);
-            setText('verifiedChip', `${formatNumber(data.verified_secrets)} verified`);
-            setText('repoScanChip', `${formatNumber(data.repositories_scanned)} repos`);
-            renderSeverityBars(data.severity_distribution || {});
-            renderTopRepositories(data.top_repositories || []);
-        }
-
-        function renderSeverityBars(distribution) {
-            const host = $('severityBars');
-            const entries = ['Critical', 'High', 'Medium', 'Low'].map((label) => {
-                const value = distribution[label] ?? distribution[label.toLowerCase()] ?? 0;
-                return [label, Number(value) || 0];
-            });
-            const max = Math.max(...entries.map((entry) => entry[1]), 1);
-            host.innerHTML = entries.map(([label, value]) => {
-                const width = Math.round((value / max) * 100);
-                return `
-                    <div class="bar-row">
-                        <span>${label}</span>
-                        <span class="bar-track"><span class="bar-fill" style="width: ${width}%"></span></span>
-                        <span class="mono">${formatNumber(value)}</span>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function renderTopRepositories(repositories) {
-            const host = $('topRepos');
-            if (!repositories.length) {
-                host.innerHTML = '<div class="empty">No repository risk data available.</div>';
-                return;
-            }
-            host.innerHTML = repositories.slice(0, 8).map((repo) => `
-                <div class="list-item">
-                    <div>
-                        <strong>${escapeHtml(repo.repository || 'unknown')}</strong>
-                        <div class="metric-note">${formatNumber(repo.critical_count)} critical | ${formatNumber(repo.high_count)} high</div>
-                    </div>
-                    <div class="mono">${Number(repo.risk_score || 0).toFixed(1)}</div>
-                </div>
-            `).join('');
-        }
-
-        async function loadDetections() {
-            const params = new URLSearchParams({ limit: '50' });
-            const repo = $('repositoryFilter').value.trim();
-            const severity = $('severityFilter').value;
-            if (repo) {
-                params.set('repository', repo);
-            }
-            if (severity) {
-                params.set('severity', severity);
-            }
-            const data = await api(`/api/v1/scanner/results?${params.toString()}`);
-            renderDetections(data.results || []);
-        }
-
-        function renderDetections(rows) {
-            const body = $('detectionsBody');
-            if (!rows.length) {
-                body.innerHTML = '<tr><td colspan="6">No detections match the current filter.</td></tr>';
-                return;
-            }
-            body.innerHTML = rows.map((row) => {
-                const severity = String(row.severity || '').toLowerCase();
-                return `
-                    <tr>
-                        <td>${formatTime(row.detected_at)}</td>
-                        <td class="mono">${escapeHtml(row.repository || 'unknown')}</td>
-                        <td>${escapeHtml(row.detector_name || row.detector || 'unknown')}</td>
-                        <td><span class="severity ${severity}">${escapeHtml(row.severity || 'unknown')}</span></td>
-                        <td class="truncate" title="${escapeHtml(row.file_path || '')}">${escapeHtml(row.file_path || 'n/a')}</td>
-                        <td>${row.verified ? 'Yes' : 'No'}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        async function loadLogs() {
-            if (!state.token) {
-                renderLogs([], 'Sign in to view system logs.');
-                return;
-            }
-            const params = new URLSearchParams({ page: '1', page_size: '80' });
-            const level = $('logLevelFilter').value;
-            if (level) {
-                params.set('level', level);
-            }
-            const data = await api(`/api/v1/monitoring/logs?${params.toString()}`, { auth: true });
-            renderLogs(data.logs || []);
-            setText('navLogs', formatNumber(data.total_count || (data.logs || []).length));
-        }
-
-        function renderLogs(logs, emptyText = 'No log entries available.') {
-            const host = $('logList');
-            if (!logs.length) {
-                host.innerHTML = `<div class="empty">${escapeHtml(emptyText)}</div>`;
-                return;
-            }
-            host.innerHTML = logs.map((log) => `
-                <div class="log-line">
-                    <span class="mono">${formatTime(log.timestamp)}</span>
-                    <strong>${escapeHtml(log.level || 'info')}</strong>
-                    <span>${escapeHtml(log.message || '')}</span>
-                </div>
-            `).join('');
-        }
-
-        async function refreshAll() {
-            $('refreshButton').disabled = true;
-            const tasks = [
-                loadSystemStatus(),
-                loadScannerMetrics(),
-                loadOverview(),
-                loadDetections(),
-                loadLogs()
-            ];
-            const results = await Promise.allSettled(tasks);
-            const failed = results.filter((result) => result.status === 'rejected');
-            if (failed.length) {
-                const authFailure = failed.some((result) => result.reason?.status === 401);
-                if (authFailure) {
-                    toast('Some data requires sign in.', 'error');
-                } else {
-                    toast(failed[0].reason?.message || 'Dashboard refresh failed.', 'error');
-                }
-            }
-            $('refreshButton').disabled = false;
-        }
-
-        async function controlScanner(action) {
-            if (!state.token) {
-                openLogin();
-                return;
-            }
-            const buttons = ['scannerPrimaryButton', 'scannerStopButton', 'scannerRestartButton'].map($);
-            buttons.forEach((button) => {
-                if (button) {
-                    button.disabled = true;
-                }
-            });
-            try {
-                const data = await api('/api/v1/scraper/control', {
-                    method: 'POST',
-                    auth: true,
-                    body: JSON.stringify({ action })
-                });
-                toast(data.message || `Scanner ${action} accepted.`, 'success');
-                await refreshAll();
-            } catch (error) {
-                toast(error.message || 'Scanner control failed.', 'error');
-            } finally {
-                buttons.forEach((button) => {
-                    if (button) {
-                        button.disabled = false;
-                    }
-                });
-            }
-        }
-
-        async function submitScan(event) {
-            event.preventDefault();
-            if (!state.token) {
-                openLogin();
-                return;
-            }
-            const repository = $('repositoryInput').value.trim();
-            if (!repository) {
-                toast('Repository is required.', 'error');
-                return;
-            }
-            $('scanSubmitButton').disabled = true;
-            setText('scanResultChip', 'Submitting');
-            try {
-                const branch = $('branchInput').value.trim();
-                const payload = {
-                    repository,
-                    scan_type: $('scanTypeInput').value,
-                    include_private: false,
-                    ...(branch ? { branch } : {})
-                };
-                const data = await api('/api/v1/scanner/scan', {
-                    method: 'POST',
-                    auth: true,
-                    body: JSON.stringify(payload)
-                });
-                setText('scanResultChip', data.status || 'Submitted');
-                toast(`Scan queued for ${repository}.`, 'success');
-                await refreshAll();
-            } catch (error) {
-                setText('scanResultChip', 'Failed');
-                toast(error.message || 'Failed to launch scan.', 'error');
-            } finally {
-                $('scanSubmitButton').disabled = false;
-            }
-        }
-
-        function openLogin() {
-            $('loginModal').classList.add('open');
-            setTimeout(() => $('usernameInput').focus(), 0);
-        }
-
-        function closeLogin() {
-            $('loginModal').classList.remove('open');
-            $('passwordInput').value = '';
-        }
-
-        async function submitLogin(event) {
-            event.preventDefault();
-            $('loginSubmitButton').disabled = true;
-            try {
-                const data = await api('/api/auth/login', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        username: $('usernameInput').value,
-                        password: $('passwordInput').value
-                    })
-                });
-                state.token = data.token;
-                state.user = data.user;
-                if ($('rememberInput').checked) {
-                    localStorage.setItem('authToken', state.token);
-                    sessionStorage.removeItem('authToken');
-                } else {
-                    sessionStorage.setItem('authToken', state.token);
-                    localStorage.removeItem('authToken');
-                }
-                updateAuthUi();
-                closeLogin();
-                toast('Signed in.', 'success');
-                await refreshAll();
-            } catch (error) {
-                toast(error.message || 'Sign in failed.', 'error');
-            } finally {
-                $('loginSubmitButton').disabled = false;
-            }
-        }
-
-        function logout() {
-            state.token = '';
-            state.user = null;
-            localStorage.removeItem('authToken');
-            sessionStorage.removeItem('authToken');
-            updateAuthUi();
-            refreshAll();
-        }
-
-        function escapeHtml(value) {
-            return String(value ?? '')
-                .replaceAll('&', '&amp;')
-                .replaceAll('<', '&lt;')
-                .replaceAll('>', '&gt;')
-                .replaceAll('"', '&quot;')
-                .replaceAll("'", '&#39;');
-        }
-
-        function bindEvents() {
-            document.querySelectorAll('.rail button').forEach((button) => {
-                button.addEventListener('click', () => showSection(button.dataset.section));
-            });
-            $('refreshButton').addEventListener('click', refreshAll);
-            $('loginButton').addEventListener('click', openLogin);
-            $('logoutButton').addEventListener('click', logout);
-            $('closeLoginButton').addEventListener('click', closeLogin);
-            $('cancelLoginButton').addEventListener('click', closeLogin);
-            $('loginForm').addEventListener('submit', submitLogin);
-            $('scanForm').addEventListener('submit', submitScan);
-            $('applyDetectionFilters').addEventListener('click', loadDetections);
-            $('applyLogFilters').addEventListener('click', loadLogs);
-            $('scannerPrimaryButton').addEventListener('click', () => controlScanner($('scannerPrimaryButton').dataset.action || 'start'));
-            $('scannerStopButton').addEventListener('click', () => controlScanner('stop'));
-            $('scannerRestartButton').addEventListener('click', () => controlScanner('restart'));
-            $('loginModal').addEventListener('click', (event) => {
-                if (event.target === $('loginModal')) {
-                    closeLogin();
-                }
-            });
-        }
-
-        async function boot() {
-            bindEvents();
-            updateAuthUi();
-            await verifyAuth();
-            await refreshAll();
-            state.refreshTimer = setInterval(refreshAll, 30000);
-        }
-
-        boot().catch((error) => {
-            setChip('apiChip', 'API unavailable', 'bad');
-            toast(error.message || 'Dashboard failed to start.', 'error');
-        });
-    </script>
+    <script src="/dashboard-assets/dashboard.js"></script>
 </body>
 </html>

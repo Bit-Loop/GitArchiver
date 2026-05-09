@@ -32,13 +32,13 @@ impl Default for DatabaseConfig {
             password: env::var("DB_PASSWORD")
                 .unwrap_or_else(|_| "github_archiver_password".to_string()),
             min_connections: env::var("DB_MIN_CONNECTIONS")
-                .unwrap_or_else(|_| "5".to_string())
+                .unwrap_or_else(|_| "1".to_string())
                 .parse()
-                .unwrap_or(5),
+                .unwrap_or(1),
             max_connections: env::var("DB_MAX_CONNECTIONS")
-                .unwrap_or_else(|_| "20".to_string())
+                .unwrap_or_else(|_| "8".to_string())
                 .parse()
-                .unwrap_or(20),
+                .unwrap_or(8),
             command_timeout: env::var("DB_COMMAND_TIMEOUT")
                 .unwrap_or_else(|_| "60".to_string())
                 .parse()
@@ -365,13 +365,10 @@ pub struct SecurityConfig {
 
 impl Default for SecurityConfig {
     fn default() -> Self {
-        use uuid::Uuid;
-
         Self {
-            admin_password: env::var("ADMIN_PASSWORD").unwrap_or_else(|_| "admin123".to_string()),
-            secret_key: env::var("SECRET_KEY").unwrap_or_else(|_| Uuid::new_v4().to_string()),
-            jwt_secret: env::var("JWT_SECRET")
-                .unwrap_or_else(|_| "github-archive-scraper-jwt-secret-key".to_string()),
+            admin_password: env::var("ADMIN_PASSWORD").unwrap_or_default(),
+            secret_key: env::var("SECRET_KEY").unwrap_or_default(),
+            jwt_secret: env::var("JWT_SECRET").unwrap_or_default(),
             session_duration_hours: env::var("SESSION_DURATION_HOURS")
                 .unwrap_or_else(|_| "24".to_string())
                 .parse()
@@ -507,6 +504,18 @@ impl Config {
             errors.push("Invalid web port - cannot be 0");
         }
 
+        if let Err(error) = crate::auth::users::UserManager::validate_password_strength(
+            &self.security.admin_password,
+        ) {
+            error!(%error, "ADMIN_PASSWORD failed strength validation");
+            errors.push("ADMIN_PASSWORD must be configured with a strong non-default value");
+        }
+
+        if let Err(error) = crate::auth::jwt::validate_jwt_secret(&self.security.jwt_secret) {
+            error!(%error, "JWT_SECRET failed strength validation");
+            errors.push("JWT_SECRET must be configured with a strong non-default value");
+        }
+
         // Validate download configuration
         if self.download.max_concurrent_downloads == 0 {
             errors.push("Max concurrent downloads must be positive");
@@ -613,7 +622,9 @@ mod tests {
 
     #[test]
     fn test_config_save_load() -> Result<()> {
-        let config = Config::default();
+        let mut config = Config::default();
+        config.security.admin_password = "RootSeed123!".to_string();
+        config.security.jwt_secret = "jwt-test-secret-0123456789abcdef012345".to_string();
         let temp_file = NamedTempFile::new()?;
         let file_path = temp_file.path().to_str().unwrap();
 

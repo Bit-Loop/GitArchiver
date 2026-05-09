@@ -185,7 +185,7 @@ Public Endpoints:
 
 5. **Open the dashboard**
    ```
-   http://localhost:8081/monitoring-dashboard.html
+   http://localhost:8081/dashboard
    ```
 
 ### Development Mode

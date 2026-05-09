@@ -1,0 +1,10 @@
+[advisories]
+ignore = [
+    # RUSTSEC-2023-0071: rsa 0.9.10 Marvin timing side channel.
+    # cargo-audit reports no fixed upgrade. In this project it is pulled
+    # transitively by sqlx-mysql through sqlx and by jsonwebtoken through
+    # octocrab. GitArchiver does not perform RSA private-key operations in
+    # production auth paths; JWT signing uses HS256 with a required local
+    # secret. Revisit when sqlx/octocrab remove the vulnerable dependency.
+    "RUSTSEC-2023-0071",
+]

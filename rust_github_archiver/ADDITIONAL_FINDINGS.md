@@ -11,15 +11,15 @@ During deeper analysis, I discovered **4 critical security and configuration iss
 ### Finding #1: Hardcoded Default Admin Password
 **Severity**: HIGH  
 **Location**: `src/auth/users.rs:30`  
-**Status**: ⚠️ **REQUIRES IMMEDIATE ACTION**
+**Status**: ✅ **FIXED** - startup now requires a strong `ADMIN_PASSWORD`
 
 #### The Issue
 ```rust
 let admin_password = std::env::var("ADMIN_PASSWORD")
-    .unwrap_or_else(|_| "admin123".to_string());
+    .unwrap_or_else(|_| "<unsafe-default-password>".to_string());
 ```
 
-**Problem**: The default password "admin123" is:
+**Problem**: The historical default password was:
 - Publicly visible in source code
 - Commonly used in password attacks
 - Could allow unauthorized admin access if `.env` isn't configured
@@ -37,7 +37,7 @@ openssl rand -base64 32
 # 2. Update .env file
 ADMIN_PASSWORD=<your_strong_random_password>
 
-# 3. NEVER use admin123 in production
+# 3. Never use documented/default passwords in production
 ```
 
 #### Code Fix Recommendation

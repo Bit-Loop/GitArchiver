@@ -467,7 +467,7 @@ curl http://localhost:8081/api/database/stats
 # Login
 curl -X POST http://localhost:8081/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "admin123"}'
+  -d "{\"username\":\"admin\",\"password\":\"${ADMIN_PASSWORD:?set ADMIN_PASSWORD}\"}"
 
 # Response: {"token": "...", "expires_at": "..."}
 
@@ -625,7 +625,7 @@ sleep 5
 # 5. Login
 TOKEN=$(curl -s -X POST http://localhost:8081/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "admin123"}' \
+  -d "{\"username\":\"admin\",\"password\":\"${ADMIN_PASSWORD:?set ADMIN_PASSWORD}\"}" \
   | jq -r '.token')
 
 echo "Token: $TOKEN"

@@ -90,10 +90,10 @@ wscat -c ws://localhost:8081/api/monitoring/ws
 
 ```bash
 # Open dashboard in browser
-xdg-open http://localhost:8081/monitoring-dashboard.html
+xdg-open http://localhost:8081/dashboard
 
 # Or using curl to check it loads
-curl -I http://localhost:8081/monitoring-dashboard.html
+curl -I http://localhost:8081/dashboard
 ```
 
 ---
@@ -228,7 +228,7 @@ import time
 
 def test_dashboard():
     driver = webdriver.Chrome()
-    driver.get("http://localhost:8081/monitoring-dashboard.html")
+    driver.get("http://localhost:8081/dashboard")
     
     # Test 1: Page loads
     assert "Monitoring" in driver.title
@@ -551,7 +551,7 @@ fi
 
 # Check 3: Dashboard loads
 echo -n "3. Dashboard loads... "
-if curl -s -f "$API_URL/monitoring-dashboard.html" > /dev/null; then
+if curl -s -f "$API_URL/dashboard" > /dev/null; then
     echo "✓"
 else
     echo "✗ FAILED"
@@ -656,7 +656,7 @@ jobs:
       - name: Test API endpoints
         run: |
           curl -f http://localhost:8081/api/monitoring/metrics
-          curl -f http://localhost:8081/monitoring-dashboard.html
+          curl -f http://localhost:8081/dashboard
       
       - name: Run integration tests
         run: cargo test --test integration_tests

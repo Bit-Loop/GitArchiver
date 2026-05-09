@@ -138,7 +138,8 @@ async fn test_webhook_manager() {
             Some("secret123".to_string()),
             vec!["secret_detected".to_string()],
         )
-        .await;
+        .await
+        .expect("webhook endpoint");
 
     let id2 = manager
         .add_endpoint(
@@ -146,7 +147,8 @@ async fn test_webhook_manager() {
             None,
             vec!["high_severity".to_string()],
         )
-        .await;
+        .await
+        .expect("webhook endpoint");
 
     let endpoints = manager.get_endpoints().await;
     assert_eq!(endpoints.len(), 2);

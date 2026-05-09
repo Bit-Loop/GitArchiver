@@ -23,7 +23,7 @@ tokio-util = "0.7"
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "gzip", "stream"] }
 axum = { version = "0.7", features = ["ws", "multipart", "query"] }
 tower = { version = "0.5", features = ["util"] }
-tower-http = { version = "0.6", features = ["fs", "cors", "trace", "compression-gzip"] }
+tower-http = { version = "0.6", features = ["fs", "cors", "trace", "compression-gzip", "limit"] }
 async-compression = { version = "0.4", features = ["tokio", "gzip"] }
 
 # Database

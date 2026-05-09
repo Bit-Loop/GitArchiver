@@ -42,7 +42,7 @@ impl Default for SecurityConfig {
             hsts_max_age: 31536000, // 1 year
             hsts_include_subdomains: true,
             csp_enabled: true,
-            csp_policy: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'".to_string(),
+            csp_policy: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'".to_string(),
             cors_origins: vec!["https://github-archiver.example.com".to_string()],
             frame_options_enabled: true,
             frame_options: "DENY".to_string(),
@@ -310,6 +310,10 @@ mod tests {
         assert!(config.hsts_enabled);
         assert_eq!(config.hsts_max_age, 31536000);
         assert!(config.csp_enabled);
+        assert!(config.csp_policy.contains("script-src 'self'"));
+        assert!(!config
+            .csp_policy
+            .contains("script-src 'self' 'unsafe-inline'"));
         assert!(config.frame_options_enabled);
     }
 

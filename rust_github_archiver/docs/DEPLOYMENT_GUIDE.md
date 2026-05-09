@@ -106,11 +106,11 @@ DATABASE_MAX_CONNECTIONS=10
 GITHUB_TOKEN=ghp_REDACTED_EXAMPLE
 
 # JWT Secret (generate with: openssl rand -hex 32)
-JWT_SECRET=your_jwt_secret_here
+JWT_SECRET=<output-of-openssl-rand-hex-32>
 
 # Admin User (for initial setup)
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=change_this_password
+ADMIN_PASSWORD=<strong-random-admin-password>
 
 # Performance
 WORKER_THREADS=4
@@ -449,7 +449,7 @@ kubectl port-forward -n monitoring svc/grafana 3000:3000
 | `RUST_LOG` | Log level | `info` | No |
 | `WORKER_THREADS` | Tokio worker threads | `4` | No |
 | `ADMIN_USERNAME` | Initial admin username | - | No |
-| `ADMIN_PASSWORD` | Initial admin password | - | No |
+| `ADMIN_PASSWORD` | Initial admin password | - | Yes |
 
 ### Configuration File (Optional)
 

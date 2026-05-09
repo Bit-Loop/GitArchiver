@@ -22,6 +22,7 @@ fn critical_flows_fsm_and_orchestration_modules_have_local_test_suites() {
     let modules = [
         "src/api/ai_handlers.rs",
         "src/api/handlers.rs",
+        "src/api/research_handlers.rs",
         "src/api/scanner_service.rs",
         "src/api/status_service.rs",
         "src/auth/jwt.rs",
@@ -153,6 +154,34 @@ fn production_source_has_no_skeleton_markers() {
 }
 
 #[test]
+fn browser_dashboard_avoids_inline_scripts_and_unsafe_dom_sinks() {
+    let dashboard = read(repo_dir().join("dashboard.html"));
+    assert!(
+        !dashboard.contains("<script>"),
+        "dashboard.html must load scripts from dashboard-assets so CSP can reject inline scripts"
+    );
+    assert!(
+        dashboard.contains(r#"<script src="/dashboard-assets/dashboard.js"></script>"#),
+        "dashboard.html must load the production dashboard script from served assets"
+    );
+
+    for file in [
+        "dashboard_assets/dashboard.js",
+        "dashboard_assets/scanner-runtime.js",
+    ] {
+        let source = read(repo_dir().join(file));
+        assert!(
+            !source.contains("innerHTML"),
+            "{file} must build API-derived DOM with text nodes, not innerHTML"
+        );
+        assert!(
+            !source.contains("localStorage.setItem"),
+            "{file} must not persist bearer tokens in localStorage"
+        );
+    }
+}
+
+#[test]
 fn github_actions_runs_full_rust_tauri_ui_and_static_gates() {
     let root_workflow = read(git_root().join(".github/workflows/rust.yml"));
 
@@ -163,6 +192,7 @@ fn github_actions_runs_full_rust_tauri_ui_and_static_gates() {
         "cargo test --test edge_case_fuzz --locked",
         "cargo test --all-targets --all-features --locked",
         "cargo llvm-cov --all-targets --all-features --locked",
+        "cargo audit --deny warnings",
         "npm ci",
         "npm run build",
         "cargo check --locked",

@@ -15,7 +15,7 @@ use crate::api::scraper_control::{
 use crate::api::state::AppState;
 use crate::api::status_service::{build_scraper_status, build_system_status};
 use crate::auth::jwt::verify_token;
-use crate::auth::{create_token, User, UserRole};
+use crate::auth::{create_token_for_user, token_expiration_rfc3339, User, UserRole};
 
 // Re-export scanner handlers
 pub use crate::api::scanner_handlers::*;
@@ -195,7 +195,7 @@ pub async fn login(
             }
 
             // Create JWT token
-            let token = create_token(&user.username).map_err(|_| {
+            let token = create_token_for_user(&user).map_err(|_| {
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Json(json!({
@@ -205,8 +205,7 @@ pub async fn login(
                 )
             })?;
 
-            // Calculate expiration time (24 hours from now)
-            let expires_at = (Utc::now() + chrono::Duration::hours(24)).to_rfc3339();
+            let expires_at = token_expiration_rfc3339();
 
             // Audit log: successful login
             let mut details = std::collections::HashMap::new();
@@ -338,6 +337,7 @@ fn scraper_action_error_message(action: ScraperControlAction, error: &str) -> St
     }
 }
 
+#[cfg(test)]
 fn github_token_preview(token: &str) -> String {
     if token.is_empty() {
         String::new()
@@ -997,6 +997,7 @@ pub async fn database_stats(State(app_state): State<AppState>) -> impl IntoRespo
 #[derive(Deserialize)]
 pub struct ChangePasswordRequest {
     pub username: String,
+    pub current_password: Option<String>,
     pub new_password: String,
 }
 
@@ -1053,6 +1054,51 @@ pub async fn change_password(
         );
     }
 
+    if request.username == current_user.username {
+        let Some(current_password) = request.current_password.as_deref() else {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({
+                    "success": false,
+                    "error": "Current password is required",
+                    "timestamp": Utc::now().to_rfc3339()
+                })),
+            );
+        };
+
+        match user_manager
+            .verify_user_password(&current_user.username, current_password)
+            .await
+        {
+            Ok(true) => {}
+            Ok(false) => {
+                return (
+                    StatusCode::UNAUTHORIZED,
+                    Json(json!({
+                        "success": false,
+                        "error": "Current password is incorrect",
+                        "timestamp": Utc::now().to_rfc3339()
+                    })),
+                );
+            }
+            Err(error) => {
+                tracing::warn!(
+                    username = %current_user.username,
+                    error = %error,
+                    "Failed to verify current password for password change"
+                );
+                return (
+                    StatusCode::UNAUTHORIZED,
+                    Json(json!({
+                        "success": false,
+                        "error": "Current password could not be verified",
+                        "timestamp": Utc::now().to_rfc3339()
+                    })),
+                );
+            }
+        }
+    }
+
     // Verify user exists
     if user_manager.get_user(&request.username).await.is_none() {
         return (
@@ -1065,13 +1111,15 @@ pub async fn change_password(
         );
     }
 
-    // Validate password strength
-    if request.new_password.len() < 8 {
+    // Validate password strength before mutating the account.
+    if let Err(error) =
+        crate::auth::users::UserManager::validate_password_strength(&request.new_password)
+    {
         return (
             StatusCode::BAD_REQUEST,
             Json(json!({
                 "success": false,
-                "error": "Password must be at least 8 characters long",
+                "error": error.to_string(),
                 "timestamp": Utc::now().to_rfc3339()
             })),
         );
@@ -1258,8 +1306,7 @@ pub async fn delete_user(
     }
 }
 
-/// Get application configuration - SECURITY: Never exposes full token
-/// Returns masked preview only; backend uses stored token for API calls
+/// Get application configuration - security-sensitive values are reported only as presence flags.
 pub async fn get_app_config(State(app_state): State<AppState>) -> Json<Value> {
     let github_token = app_state.config.github.token.clone();
     let has_token = !github_token.is_empty();
@@ -1267,12 +1314,10 @@ pub async fn get_app_config(State(app_state): State<AppState>) -> Json<Value> {
     Json(json!({
         "github": {
             "has_token": has_token,
-            "token_preview": github_token_preview(&github_token),
             "rate_limit": if has_token { 5000 } else { 60 }
         },
         "web": {
-            "port": app_state.config.web.port,
-            "host": app_state.config.web.host
+            "port": app_state.config.web.port
         }
     }))
 }
@@ -1291,6 +1336,7 @@ mod tests {
             created_at: Utc::now(),
             last_login: None,
             is_active: true,
+            token_version: 0,
         }
     }
 

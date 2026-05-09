@@ -796,9 +796,19 @@ setup_database() {
     # Check if .env file exists
     if [[ ! -f .env ]]; then
         echo -e "${CYAN}📝 Creating .env file...${NC}"
-        cat > .env << 'EOF'
+        if ! command -v openssl >/dev/null 2>&1; then
+            echo -e "${RED}${BOLD}[✗]${NC} openssl is required to generate JWT and admin secrets"
+            return 1
+        fi
+        local generated_jwt_secret
+        local generated_admin_password
+        generated_jwt_secret="$(openssl rand -hex 32)"
+        generated_admin_password="GitArchiver1!$(openssl rand -hex 12)"
+        cat > .env << EOF
 DATABASE_URL=postgresql://github_archiver:secure_password@localhost/github_archiver
-JWT_SECRET=your-super-secure-jwt-secret-key-change-this-in-production
+JWT_SECRET=$generated_jwt_secret
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=$generated_admin_password
 SERVER_HOST=127.0.0.1
 SERVER_PORT=8081
 EOF

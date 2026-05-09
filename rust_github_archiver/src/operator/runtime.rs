@@ -317,13 +317,13 @@ mod tests {
             Arc::new(TestLauncher),
         );
 
-        let user_manager = crate::auth::UserManager::new();
-        let admin_password =
-            std::env::var("ADMIN_PASSWORD").unwrap_or_else(|_| "admin123".to_string());
+        let admin_password = "RootSeed123!";
+        let user_manager =
+            crate::auth::UserManager::from_admin_password(admin_password).expect("manager");
         let admin = user_manager
-            .authenticate("admin", &admin_password)
+            .authenticate("admin", admin_password)
             .await
-            .expect("default admin login should work");
+            .expect("configured admin login should work");
         assert_eq!(admin.canonical_role(), "admin");
 
         runtime.start().await.expect("runtime should start");

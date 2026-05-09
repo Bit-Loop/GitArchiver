@@ -61,6 +61,10 @@ impl PersistenceService {
         self.database.get_secret_detections(filter).await
     }
 
+    pub async fn count_secret_detections(&self, filter: &SecretDetectionFilter) -> Result<i64> {
+        self.database.count_secret_detections(filter).await
+    }
+
     pub async fn total_event_count(&self) -> Result<i64> {
         self.database.get_total_event_count().await
     }

@@ -45,9 +45,9 @@ impl AppState {
 
         // Configure rate limiting
         let rate_limit_config = RateLimitConfig {
-            max_requests: 1000,              // 1000 requests per window
+            max_requests: 120,
             window: Duration::from_secs(60), // 1 minute window
-            burst_size: 200,                 // Allow burst of 200 extra requests
+            burst_size: 20,
         };
         let rate_limiter = Arc::new(RateLimiter::new(rate_limit_config));
 
@@ -118,7 +118,10 @@ impl AppState {
             scraper_manager,
             scraper_runtime,
             event_monitor: Arc::new(tokio::sync::Mutex::new(None)),
-            user_manager: Arc::new(UserManager::new()),
+            user_manager: Arc::new(
+                UserManager::from_admin_password(&config.security.admin_password)
+                    .expect("validated ADMIN_PASSWORD should create the initial admin user"),
+            ),
             resource_monitor,
             scanning_service,
             database,

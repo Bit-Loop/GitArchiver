@@ -124,7 +124,7 @@ cargo run --bin web_server
 
 3. **Test Dashboard**:
    ```
-   http://localhost:8081/monitoring-dashboard.html
+   http://localhost:8081/dashboard
    ```
 
 ## Performance Notes

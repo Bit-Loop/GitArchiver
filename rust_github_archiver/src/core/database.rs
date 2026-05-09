@@ -4,6 +4,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{postgres::PgPoolOptions, PgPool, Postgres, QueryBuilder, Row};
 use std::collections::HashMap;
+use std::env;
+use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::Arc;
 use tracing::{error, info, warn};
 use uuid::Uuid;
 
@@ -11,6 +14,7 @@ use super::config::Config;
 use crate::secrets::{SecretCategory, SecretDetectionRecord, SecretScanRecord, SecretSeverity};
 
 const ZERO_SHA: &str = "0000000000000000000000000000000000000000";
+const SCHEMA_INIT_ADVISORY_LOCK_ID: i64 = 0x4741_5243_4845_4d41;
 
 /// Canonical database runtime health snapshot shared by API, scraper, and monitoring code.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -308,6 +312,66 @@ pub struct OrgData {
 pub struct Database {
     pool: PgPool,
     config: Config,
+    _pool_reservation: Arc<DbPoolReservation>,
+}
+
+static DB_POOL_CONNECTIONS_RESERVED: AtomicU32 = AtomicU32::new(0);
+
+struct DbPoolReservation {
+    permits: u32,
+}
+
+impl Drop for DbPoolReservation {
+    fn drop(&mut self) {
+        DB_POOL_CONNECTIONS_RESERVED.fetch_sub(self.permits, Ordering::SeqCst);
+    }
+}
+
+fn configured_global_pool_budget() -> u32 {
+    env::var("DB_GLOBAL_POOL_BUDGET")
+        .ok()
+        .and_then(|value| value.parse::<u32>().ok())
+        .filter(|value| *value > 0)
+        .unwrap_or(12)
+}
+
+async fn reserve_db_pool_connections(requested: u32) -> Arc<DbPoolReservation> {
+    let budget = configured_global_pool_budget();
+    let requested = requested.clamp(1, budget);
+
+    loop {
+        let current = DB_POOL_CONNECTIONS_RESERVED.load(Ordering::SeqCst);
+        let available = budget.saturating_sub(current);
+        if available > 0 {
+            let granted = requested.min(available);
+            if DB_POOL_CONNECTIONS_RESERVED
+                .compare_exchange(
+                    current,
+                    current + granted,
+                    Ordering::SeqCst,
+                    Ordering::SeqCst,
+                )
+                .is_ok()
+            {
+                if granted < requested {
+                    warn!(
+                        requested_connections = requested,
+                        granted_connections = granted,
+                        global_budget = budget,
+                        "DB pool reservation was reduced to stay within the global budget"
+                    );
+                }
+                return Arc::new(DbPoolReservation { permits: granted });
+            }
+        } else {
+            warn!(
+                requested_connections = requested,
+                global_budget = budget,
+                "Waiting for global DB pool budget before opening another pool"
+            );
+            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+        }
+    }
 }
 
 impl Database {
@@ -315,11 +379,14 @@ impl Database {
     pub async fn new(config: &Config) -> Result<Self> {
         let connection_string = &config.database.connection_string();
         let max_attempts = 3;
+        let pool_reservation = reserve_db_pool_connections(config.database.max_connections).await;
+        let reserved_connections = pool_reservation.permits;
+        let min_connections = config.database.min_connections.min(reserved_connections);
 
         for attempt in 1..=max_attempts {
             match PgPoolOptions::new()
-                .min_connections(config.database.min_connections)
-                .max_connections(config.database.max_connections)
+                .min_connections(min_connections)
+                .max_connections(reserved_connections)
                 .acquire_timeout(std::time::Duration::from_secs(
                     config.database.command_timeout,
                 ))
@@ -332,6 +399,7 @@ impl Database {
                     let db = Database {
                         pool,
                         config: config.clone(),
+                        _pool_reservation: pool_reservation.clone(),
                     };
 
                     // Verify connection and initialize schema
@@ -383,6 +451,39 @@ impl Database {
 
     /// Initialize database schema if needed
     async fn initialize_schema(&self) -> Result<()> {
+        let mut connection = self
+            .pool
+            .acquire()
+            .await
+            .context("Failed to acquire connection for schema initialization")?;
+        sqlx::query("SELECT pg_advisory_lock($1)")
+            .bind(SCHEMA_INIT_ADVISORY_LOCK_ID)
+            .execute(&mut *connection)
+            .await
+            .context("Failed to acquire schema initialization advisory lock")?;
+
+        let result = self
+            .initialize_schema_with_connection(&mut connection)
+            .await;
+
+        if let Err(error) = sqlx::query("SELECT pg_advisory_unlock($1)")
+            .bind(SCHEMA_INIT_ADVISORY_LOCK_ID)
+            .execute(&mut *connection)
+            .await
+        {
+            warn!(
+                "Failed to release schema initialization advisory lock cleanly: {}",
+                error
+            );
+        }
+
+        result
+    }
+
+    async fn initialize_schema_with_connection(
+        &self,
+        connection: &mut sqlx::pool::PoolConnection<Postgres>,
+    ) -> Result<()> {
         let schema_commands = self.get_schema_commands();
         let total_commands = schema_commands.len();
         info!(
@@ -414,7 +515,7 @@ impl Database {
                 table_cmds.len(),
                 command.chars().take(100).collect::<String>()
             );
-            if let Err(e) = sqlx::query(command).execute(&self.pool).await {
+            if let Err(e) = sqlx::query(command).execute(&mut **connection).await {
                 error!("Failed to execute schema command: {}", e);
                 error!("Command was: {}", command);
                 // Bubble up critical failures (tables/extensions) immediately
@@ -440,7 +541,7 @@ impl Database {
                 index_cmds.len(),
                 command.chars().take(100).collect::<String>()
             );
-            if let Err(e) = sqlx::query(command).execute(&self.pool).await {
+            if let Err(e) = sqlx::query(command).execute(&mut **connection).await {
                 if e.to_string().contains("does not exist") {
                     warn!(
                         "Skipping index {}/{}: relation missing (will retry on next startup)",
@@ -469,7 +570,7 @@ impl Database {
             if fixup.trim().is_empty() {
                 continue;
             }
-            if let Err(e) = sqlx::query(fixup).execute(&self.pool).await {
+            if let Err(e) = sqlx::query(fixup).execute(&mut **connection).await {
                 let msg = e.to_string();
                 if msg.contains("does not exist") || msg.contains("duplicate column name") {
                     warn!(
@@ -3226,6 +3327,33 @@ impl Database {
                 metadata JSONB DEFAULT '{}'::jsonb
             );
 
+            -- Flat local bug-bounty/security-research records built from scraper/API evidence.
+            CREATE TABLE IF NOT EXISTS research_findings (
+                id UUID PRIMARY KEY,
+                title TEXT NOT NULL,
+                status VARCHAR(40) NOT NULL DEFAULT 'draft',
+                source_type VARCHAR(40) NOT NULL,
+                source_detection_id UUID REFERENCES secret_detections(detection_id) ON DELETE SET NULL,
+                source_event_id BIGINT REFERENCES github_events(event_id) ON DELETE SET NULL,
+                program_name TEXT,
+                scope_asset TEXT,
+                scope_status VARCHAR(40) NOT NULL DEFAULT 'unknown',
+                playbook VARCHAR(80),
+                severity VARCHAR(50),
+                repository TEXT,
+                raw_evidence JSONB NOT NULL DEFAULT '{}'::jsonb,
+                derived_metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+                notes TEXT,
+                readiness_score INTEGER NOT NULL DEFAULT 0,
+                readiness_blockers JSONB NOT NULL DEFAULT '[]'::jsonb,
+                ai_outputs JSONB NOT NULL DEFAULT '[]'::jsonb,
+                export_history JSONB NOT NULL DEFAULT '[]'::jsonb,
+                created_by VARCHAR(255) NOT NULL,
+                updated_by VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+                updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+            );
+
             -- Performance indexes
             CREATE INDEX IF NOT EXISTS idx_github_events_created_at ON github_events (event_created_at);
             CREATE INDEX IF NOT EXISTS idx_github_events_type ON github_events (event_type);
@@ -3269,6 +3397,14 @@ impl Database {
                 ON ai_triage_results (created_at DESC);
             CREATE INDEX IF NOT EXISTS idx_maintenance_repair_runs_type_time
                 ON maintenance_repair_runs (repair_type, executed_at DESC);
+            CREATE INDEX IF NOT EXISTS idx_research_findings_updated
+                ON research_findings (updated_at DESC);
+            CREATE INDEX IF NOT EXISTS idx_research_findings_source_detection
+                ON research_findings (source_detection_id);
+            CREATE INDEX IF NOT EXISTS idx_research_findings_source_event
+                ON research_findings (source_event_id);
+            CREATE INDEX IF NOT EXISTS idx_research_findings_repository
+                ON research_findings (repository);
         "#.to_string()
     }
 
@@ -4022,10 +4158,12 @@ mod tests {
         for _ in 0..5 {
             let db_clone = db.pool.clone();
             let config_clone = db.config.clone();
+            let pool_reservation = db._pool_reservation.clone();
             let handle = tokio::spawn(async move {
                 let db_instance = Database {
                     pool: db_clone,
                     config: config_clone,
+                    _pool_reservation: pool_reservation,
                 };
                 db_instance.check_health().await
             });

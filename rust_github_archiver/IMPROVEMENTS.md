@@ -178,8 +178,8 @@ DB_NAME=github_archiver
 DB_USER=github_archiver
 DB_PASSWORD=github_archiver_password
 GITHUB_TOKEN=ghp_REDACTED_EXAMPLE
-JWT_SECRET=generate_with_openssl_rand_hex_32
-ADMIN_PASSWORD=change_on_first_login
+JWT_SECRET=<output-of-openssl-rand-hex-32>
+ADMIN_PASSWORD=<strong-random-admin-password>
 EOF
 
 # 2. Run server and verify

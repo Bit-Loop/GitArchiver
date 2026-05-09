@@ -47,6 +47,8 @@ secrets.txt
 
 # API keys
 api_keys.txt
+api_secrets.json
+.gitarchiver/
 *.key
 *.pem
 
